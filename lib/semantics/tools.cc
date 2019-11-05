@@ -503,6 +503,13 @@ bool IsAssumedLengthCharacterFunction(const Symbol &symbol) {
   return symbol.has<SubprogramDetails>() && IsAssumedLengthCharacter(symbol);
 }
 
+bool IsPolymorphic(const Symbol &symbol) {
+  if (const DeclTypeSpec * type{symbol.GetType()}) {
+    return type->IsPolymorphic();
+  }
+  return false;
+}
+
 bool IsExternalInPureContext(const Symbol &symbol, const Scope &scope) {
   if (const auto *pureProc{semantics::FindPureProcedureContaining(&scope)}) {
     if (const Symbol * root{GetAssociationRoot(symbol)}) {
