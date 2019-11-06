@@ -133,19 +133,24 @@ void IONAME(SetSign)(Cookie, const char *, std::size_t);
 // Any item can be transferred by means of a descriptor; unformatted
 // transfers to/from contiguous blocks can avoid the descriptor; and there
 // are specializations for the common scalar types.
-// Functions with Boolean results return false when the I/O statement
-// has encountered an error or end-of-file/record condition; the others
-// will return a zero value.
+// These functions return false when the I/O statement has encountered an error
+// or end-of-file/record condition.  Once the statement has encountered
+// an error, following items will be ignored; but compiled code should
+// check for errors and avoid the following items when a READ statement
+// might have data dependences between items, as in
+//   READ(*,ERR=666) N, (A(J),J=1,N)
+// or when input/output items might raise a spurious fault, as in
+//   WRITE(*,ERR=666) X, CRASHIFCALLEDANDERRORPRESENT()
 bool IONAME(OutputDescriptor)(Cookie, const Descriptor &);
 bool IONAME(InputDescriptor)(Cookie, const Descriptor &);
 bool IONAME(OutputUnformattedBlock)(Cookie, const char *, std::size_t);
 bool IONAME(InputUnformattedBlock)(Cookie, char *, std::size_t);
 bool IONAME(OutputInteger64)(Cookie, std::int64_t);
-std::int64_t IONAME(InputInteger64)(Cookie, int kind = 8);
+bool IONAME(InputInteger64)(Cookie, std::int64_t &, int kind = 8);
 bool IONAME(OutputReal32)(Cookie, float);
-float IONAME(InputReal32)(Cookie);
+bool IONAME(InputReal32)(Cookie, float &);
 bool IONAME(OutputReal64)(Cookie, double);
-double IONAME(InputReal64)(Cookie);
+bool IONAME(InputReal64)(Cookie, double &);
 bool IONAME(OutputComplex32)(Cookie, float, float);
 bool IONAME(OutputComplex64)(Cookie, double, double);
 bool IONAME(OutputAscii)(Cookie, const char *, std::size_t);
@@ -153,23 +158,46 @@ bool IONAME(InputAscii)(Cookie, char *, std::size_t);
 bool IONAME(OutputLogical)(Cookie, bool);
 bool IONAME(InputLogical)(Cookie);
 
-// Result extraction; these can be called at any time during an
-// I/O data transfer statement to check for errors, or after all
-// of the data transfers are complete to acquire the final status.
-void IONAME(GetIoMsg)(Cookie, char *, std::size_t);  // IOMSG=
-void IONAME(GetStatus)(Cookie, char *, std::size_t);  // STATUS=
-int IONAME(GetIostat)(Cookie);  // IOSTAT=
 std::size_t IONAME(GetSize)(Cookie);  // SIZE=
-bool IONAME(IsEnd)(Cookie);
-bool IONAME(IsEor)(Cookie);
-bool IONAME(IsErr)(Cookie);
 
-// The cookie value must not be used after calling this function.
-// If an error has occurred and not been noticed by an inquiry
-// function like GetIOSTAT() or IsERR(), this function will
-// terminate the image with a message.
+// GetIoMsg() does not modify its argument unless an error or
+// end-of-record/file condition is present.
+void IONAME(GetIoMsg)(Cookie, char *, std::size_t);  // IOMSG=
+
+// One of these two functions must be called to end an I/O data
+// transfer statement, and the cookie value must not be used
+// afterwards.
+// The first returns the value for the IOSTAT= specifier, which
+// can also be used to implement ERR=, END=, and/or EOR=.
+// The first (EndIoStatementWithErr) will not terminate the image
+// when an error is present; use it for statements with ERR=, EOF=,
+// and/or EOR= specifiers.
+// The second (EndIoStatement) will terminate the image, with a message,
+// if an error has arisen.
+int IONAME(EndIoStatementWithErr)(Cookie);
 void IONAME(EndIoStatement)(
     Cookie, const char *sourceFileName = nullptr, int lineNumber = 0);
+
+// For use after EndIoStatementWithErr() when the statement has no
+// IOSTAT= specifier and the error/end condition doesn't have the
+// appropriate ERR=, END=, or EOR= label.
+void IONAME(TerminateImage)(
+    int iostat, const char *sourceFileName = nullptr, int lineNumber = 0);
+
+// The value of IOSTAT= is zero when no error, end-of-record,
+// or end-of-file condition has arisen; errors are positive values.
+// (See 12.11.5 in Fortran 2018 for the complete requirements; some
+// of these constants must match the values of their corresponding
+// named constants in predefined modules.)
+enum Iostat {
+  // Other errors have values >1
+  IostatInquireInternalUnit = 1,
+  IostatOk = 0,
+  IostatEnd = -1,  // end-of-file & no error
+  IostatEor = -2,  // end-of-record & no error or EOF
+  IostatFlush = -3,  // attempt to FLUSH an unflushable unit
 };
+
+};  // extern "C"
 }
 #endif
