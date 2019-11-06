@@ -26,17 +26,17 @@ class Descriptor;
 class NamelistGroup;
 };
 
-namespace Fortran::runtime::IO {
+namespace Fortran::runtime::io {
 
-class IOStatementState;
-using Cookie = IOStatementState *;
+class IoStatementState;
+using Cookie = IoStatementState *;
 using ExternalUnit = int;
 using AsynchronousId = int;
 static constexpr ExternalUnit DefaultUnit{-1};  // READ(*), WRITE(*), PRINT
 
 extern "C" {
 
-#define IONAME(name) RTNAME(IO_##name)
+#define IONAME(name) RTNAME(io_##name)
 
 // These functions initiate data transfer statements (READ, WRITE, PRINT).
 // Example: PRINT *, 666 is implemented as the series of calls:
@@ -50,7 +50,7 @@ extern "C" {
 // the internal transfer; use of these blocks can reduce the need for dynamic
 // memory allocation &/or thread-local storage.  The block must be sufficiently
 // aligned to hold a pointer.
-constexpr std::size_t RecommendedInternalIOScratchAreaBytes(
+constexpr std::size_t RecommendedInternalIoScratchAreaBytes(
     int maxFormatParenthesesNestingDepth) {
   return 32 + 8 * maxFormatParenthesesNestingDepth;
 }
@@ -104,11 +104,11 @@ Cookie IONAME(BeginNamelistInput)(ExternalUnit, const NamelistGroup &);
 
 // Asynchronous I/O is supported (at most) for unformatted direct access
 // block transfers.
-AsynchronousID IONAME(BeginAsynchronousOutput)(
+AsynchronousId IONAME(BeginAsynchronousOutput)(
     ExternalUnit, std::int64_t REC, const char *, std::size_t);
-AsynchronousID IONAME(BeginAsynchronousInput)(
+AsynchronousId IONAME(BeginAsynchronousInput)(
     ExternalUnit, std::int64_t REC, char *, std::size_t);
-Cookie IONAME(WaitForAsynchronousIO)(ExternalUnit, AsynchronousID);  // WAIT
+Cookie IONAME(WaitForAsynchronousIo)(ExternalUnit, AsynchronousId);  // WAIT
 
 // Other I/O statements
 // TODO: OPEN & INQUIRE
@@ -119,15 +119,15 @@ Cookie IONAME(BeginEndfile)(ExternalUnit);
 Cookie IONAME(BeginRewind)(ExternalUnit);
 
 // Control list options
-void IONAME(SetADVANCE)(Cookie, const char *, std::size_t);
-void IONAME(SetBLANK)(Cookie, const char *, std::size_t);
-void IONAME(SetDECIMAL)(Cookie, const char *, std::size_t);
-void IONAME(SetDELIM)(Cookie, const char *, std::size_t);
-void IONAME(SetPAD)(Cookie, const char *, std::size_t);
-void IONAME(SetPOS)(Cookie, std::int64_t);
-void IONAME(SetREC)(Cookie, std::int64_t);
-void IONAME(SetROUND)(Cookie, const char *, std::size_t);
-void IONAME(SetSIGN)(Cookie, const char *, std::size_t);
+void IONAME(SetAdvance)(Cookie, const char *, std::size_t);
+void IONAME(SetBlank)(Cookie, const char *, std::size_t);
+void IONAME(SetDecimal)(Cookie, const char *, std::size_t);
+void IONAME(SetDelim)(Cookie, const char *, std::size_t);
+void IONAME(SetPad)(Cookie, const char *, std::size_t);
+void IONAME(SetPos)(Cookie, std::int64_t);
+void IONAME(SetRec)(Cookie, std::int64_t);
+void IONAME(SetRound)(Cookie, const char *, std::size_t);
+void IONAME(SetSign)(Cookie, const char *, std::size_t);
 
 // Data item transfer for modes other than namelist.
 // Any item can be transferred by means of a descriptor; unformatted
@@ -148,27 +148,27 @@ bool IONAME(OutputReal64)(Cookie, double);
 double IONAME(InputReal64)(Cookie);
 bool IONAME(OutputComplex32)(Cookie, float, float);
 bool IONAME(OutputComplex64)(Cookie, double, double);
-bool IONAME(OutputASCII)(Cookie, const char *, std::size_t);
-bool IONAME(InputASCII)(Cookie, char *, std::size_t);
+bool IONAME(OutputAscii)(Cookie, const char *, std::size_t);
+bool IONAME(InputAscii)(Cookie, char *, std::size_t);
 bool IONAME(OutputLogical)(Cookie, bool);
 bool IONAME(InputLogical)(Cookie);
 
 // Result extraction; these can be called at any time during an
 // I/O data transfer statement to check for errors, or after all
 // of the data transfers are complete to acquire the final status.
-void IONAME(GetIOMSG)(Cookie, char *, std::size_t);  // IOMSG=
-void IONAME(GetSTATUS)(Cookie, char *, std::size_t);  // STATUS=
-int IONAME(GetIOSTAT)(Cookie);  // IOSTAT=
-std::size_t IONAME(GetSIZE)(Cookie);  // SIZE=
-bool IONAME(IsEND)(Cookie);
-bool IONAME(IsEOR)(Cookie);
-bool IONAME(IsERR)(Cookie);
+void IONAME(GetIoMsg)(Cookie, char *, std::size_t);  // IOMSG=
+void IONAME(GetStatus)(Cookie, char *, std::size_t);  // STATUS=
+int IONAME(GetIostat)(Cookie);  // IOSTAT=
+std::size_t IONAME(GetSize)(Cookie);  // SIZE=
+bool IONAME(IsEnd)(Cookie);
+bool IONAME(IsEor)(Cookie);
+bool IONAME(IsErr)(Cookie);
 
 // The cookie value must not be used after calling this function.
 // If an error has occurred and not been noticed by an inquiry
 // function like GetIOSTAT() or IsERR(), this function will
 // terminate the image with a message.
-void IONAME(EndIOStatement)(
+void IONAME(EndIoStatement)(
     Cookie, const char *sourceFileName = nullptr, int lineNumber = 0);
 };
 }
