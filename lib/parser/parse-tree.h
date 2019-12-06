@@ -3780,5 +3780,94 @@ struct OpenMPConstruct {
       OpenMPCriticalConstruct>
       u;
 };
+
+// Parse tree nodes for OpenACC 3.0 directives and clauses
+
+struct AccObject {
+    UNION_CLASS_BOILERPLATE(AccObject);
+    std::variant<Designator, /*common block*/ Name> u;
+};
+
+WRAPPER_CLASS(AccObjectList, std::list<AccObject>);
+
+// OpenACC directive beginning or ending a block
+struct AccBlockDirective {
+  ENUM_CLASS(Directive, Data, Kernels, Parallel, Serial);
+  WRAPPER_CLASS_BOILERPLATE(AccBlockDirective, Directive);
+  CharBlock source;
+};
+
+struct AccStandaloneDirective {
+    ENUM_CLASS(Directive, Loop, Wait);
+    WRAPPER_CLASS_BOILERPLATE(AccStandaloneDirective, Directive);
+    CharBlock source;
+};
+
+
+// OpenACC Clauses
+struct AccClause {
+    UNION_CLASS_BOILERPLATE(AccClause);
+    EMPTY_CLASS(Auto); // 2.9.6
+    EMPTY_CLASS(Gang); // 2.9.2
+    EMPTY_CLASS(Seq); // 2.9.5
+    EMPTY_CLASS(Vector); // 2.9.4
+    EMPTY_CLASS(Worker); // 2.9.3
+    WRAPPER_CLASS(Async, ScalarIntConstantExpr); // 2.16.1
+    WRAPPER_CLASS(Attach, AccObjectList); // 2.7.11
+    WRAPPER_CLASS(Collapse, ScalarIntConstantExpr); // 2.9.1
+    WRAPPER_CLASS(Copy, AccObjectList); // 2.7.5
+    WRAPPER_CLASS(Copyin, AccObjectList); // 2.7.6
+    WRAPPER_CLASS(Copyout, AccObjectList); // 2.7.7
+    WRAPPER_CLASS(Create, AccObjectList); // 2.7.8
+    WRAPPER_CLASS(Delete, AccObjectList); // 2.7.10
+    WRAPPER_CLASS(Dettach, AccObjectList); // 2.7.12
+    WRAPPER_CLASS(DeviceNum, ScalarIntConstantExpr); //
+    WRAPPER_CLASS(FirstPrivate, AccObjectList); // 2.5.12
+    WRAPPER_CLASS(NoCreate, AccObjectList); // 2.7.9
+    WRAPPER_CLASS(NumGangs, ScalarIntConstantExpr); // 2.5.8
+    WRAPPER_CLASS(NumWorkers, ScalarIntConstantExpr); // 2.5.9
+    WRAPPER_CLASS(Private, AccObjectList); // 2.5.11
+    WRAPPER_CLASS(VectorLength, ScalarIntConstantExpr); // 2.5.10
+    CharBlock source;
+    std::variant<Auto, Gang, Seq, Vector, Worker, Async, Attach, Collapse, Copy,
+                 Copyin, Copyout, Create, Delete, Dettach, DeviceNum,
+                 FirstPrivate, NoCreate, NumGangs, NumWorkers, Private,
+                 VectorLength> u;
+};
+
+struct AccClauseList {
+    WRAPPER_CLASS_BOILERPLATE(AccClauseList, std::list<AccClause>);
+    CharBlock source;
+};
+
+struct AccBeginBlockDirective {
+    TUPLE_CLASS_BOILERPLATE(AccBeginBlockDirective);
+    std::tuple<AccBlockDirective, AccClauseList> t;
+};
+
+struct AccEndBlockDirective {
+    TUPLE_CLASS_BOILERPLATE(AccEndBlockDirective);
+    std::tuple<AccBlockDirective, AccClauseList> t;
+};
+
+struct OpenACCBlockConstruct {
+    TUPLE_CLASS_BOILERPLATE(OpenACCBlockConstruct);
+    std::tuple<AccBeginBlockDirective, Block, AccEndBlockDirective> t;
+};
+
+
+struct OpenACCStandaloneConstruct {
+    TUPLE_CLASS_BOILERPLATE(OpenACCStandaloneConstruct);
+    CharBlock source;
+    std::tuple<AccStandaloneDirective, AccClauseList> t;
+};
+
+struct OpenACCConstruct {
+    UNION_CLASS_BOILERPLATE(OpenACCConstruct);
+    std::variant<OpenACCBlockConstruct, OpenACCStandaloneConstruct> u;
+};
+
+
+
 }
 #endif  // FORTRAN_PARSER_PARSE_TREE_H_

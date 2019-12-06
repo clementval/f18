@@ -78,6 +78,9 @@ const SourceFile *Parsing::Prescan(const std::string &path, Options options) {
     prescanner.AddCompilerDirectiveSentinel("$omp");
     prescanner.AddCompilerDirectiveSentinel("$");  // OMP conditional line
   }
+  if (options.features.IsEnabled(LanguageFeature::OpenACC)) {
+    prescanner.AddCompilerDirectiveSentinel("$acc");
+  }
   ProvenanceRange range{allSources.AddIncludedFile(
       *sourceFile, ProvenanceRange{}, options.isModuleFile)};
   prescanner.Prescan(range);
