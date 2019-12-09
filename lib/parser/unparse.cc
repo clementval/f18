@@ -1751,6 +1751,88 @@ public:
     }
     Walk(std::get<Name>(x.t));
   }
+
+  // OpenACC Directives & Clauses
+  void Unparse(const AccBlockDirective &x) {
+    switch (x.v) {
+      case AccBlockDirective::Directive::Data: Word("DATA"); break;
+      case AccBlockDirective::Directive::Kernels: Word("KERNELS"); break;
+      case AccBlockDirective::Directive::Parallel: Word("PARALLEL "); break;
+      case AccBlockDirective::Directive::Serial: Word("SERIAL "); break;
+    }
+  }
+  void Before(const AccClause::Auto &) { Word("AUTO"); }
+  void Before(const AccClause::Gang &) { Word("GANG"); }
+  void Before(const AccClause::Seq &) { Word("SEQ"); }
+  void Before(const AccClause::Vector &) { Word("VECTOR"); }
+  void Before(const AccClause::Worker &) { Word("WORKER"); }
+  void Unparse(const AccClause::Collapse &x) {
+    Word("COLLAPSE(");
+    Walk(x.v);
+    Put(")");
+  }
+  void Unparse(const AccClause::Async &x) {
+    Word("ASYNC(");
+    Walk(x.v);
+    Put(")");
+  }
+  void Unparse(const AccClause::Copy &x) {
+    Word("COPY(");
+    Walk(x.v);
+    Put(") ");
+  }
+  void Unparse(const AccClause::Copyin &x) {
+    Word("COPYIN(");
+    Walk(x.v);
+    Put(") ");
+  }
+  void Unparse(const AccClause::Copyout &x) {
+    Word("COPYOUT(");
+    Walk(x.v);
+    Put(") ");
+  }
+  void Unparse(const AccClauseList &x) { Walk(" ", x.v, " "); }
+  void Unparse(const OpenACCBlockConstruct &x) {
+    BeginOpenACC();
+    Word("!$ACC ");
+    Walk(std::get<AccBeginBlockDirective>(x.t));
+    Put("\n");
+    EndOpenACC();
+    Walk(std::get<Block>(x.t), "");
+    BeginOpenACC();
+    Word("!$ACC END ");
+    Walk(std::get<AccEndBlockDirective>(x.t));
+    Put("\n");
+    EndOpenACC();
+  }
+  void Unparse(const OpenACCStandaloneConstruct &x) {
+    BeginOpenACC();
+    Word("!$ACC ");
+    Walk(std::get<AccStandaloneDirective>(x.t));
+    Walk(std::get<AccClauseList>(x.t));
+    Put("\n");
+    EndOpenACC();
+  }
+  void Unparse(const AccStandaloneDirective &x) {
+    switch (x.v) {
+    case AccStandaloneDirective::Directive::Loop:
+      Word("LOOP ");
+      break;
+    case AccStandaloneDirective::Directive::Wait:
+      Word("WAIT ");
+      break;
+    }
+  }
+  void Unparse(const AccObject &x) {
+    std::visit(
+        common::visitors{
+            [&](const Designator &y) { Walk(y); },
+            [&](const Name &y) { Put("/"), Walk(y), Put("/"); },
+        },
+        x.u);
+  }
+  void Unparse(const AccObjectList &x) { Walk(x.v, ","); }
+
   // OpenMP Clauses & Directives
   void Unparse(const OmpObject &x) {
     std::visit(
@@ -2439,6 +2521,9 @@ private:
   void BeginOpenMP() { openmpDirective_ = true; }
   void EndOpenMP() { openmpDirective_ = false; }
 
+  void BeginOpenACC() { openaccDirective_ = true; }
+  void EndOpenACC() { openaccDirective_ = false; }
+
   // Call back to the traversal framework.
   template<typename T> void Walk(const T &x) {
     Fortran::parser::Walk(x, *this);
@@ -2507,6 +2592,7 @@ private:
   std::set<CharBlock> structureComponents_;
   Encoding encoding_{Encoding::UTF_8};
   bool capitalizeKeywords_{true};
+  bool openaccDirective_{false};
   bool openmpDirective_{false};
   bool backslashEscapes_{false};
   preStatementType *preStatement_{nullptr};
@@ -2515,7 +2601,7 @@ private:
 
 void UnparseVisitor::Put(char ch) {
   int sav = indent_;
-  if (openmpDirective_) {
+  if (openmpDirective_ || openaccDirective_) {
     indent_ = 0;
   }
   if (column_ <= 1) {
@@ -2536,13 +2622,16 @@ void UnparseVisitor::Put(char ch) {
     if (openmpDirective_) {
       out_ << "!$OMP&";
       column_ = 8;
+    } else if (openaccDirective_) {
+      out_ << "!$ACC&";
+      column_ = 8;
     } else {
       out_ << '&';
       column_ = indent_ + 3;
     }
   }
   out_ << ch;
-  if (openmpDirective_) {
+  if (openmpDirective_ || openaccDirective_) {
     indent_ = sav;
   }
 }

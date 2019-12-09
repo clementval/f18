@@ -54,7 +54,11 @@ TYPE_PARSER(
             parenthesized(scalarIntConstantExpr))) ||
     "COLLAPSE" >> construct<AccClause>(construct<AccClause::Collapse>(
             parenthesized(scalarIntConstantExpr))) ||
+    "COPY" >> construct<AccClause>(construct<AccClause::Copy>(
+            parenthesized(Parser<AccObjectList>{}))) ||
     "COPYIN" >> construct<AccClause>(construct<AccClause::Copyin>(
+            parenthesized(Parser<AccObjectList>{}))) ||
+    "COPYOUT" >> construct<AccClause>(construct<AccClause::Copyout>(
             parenthesized(Parser<AccObjectList>{}))) ||
     "DEVICENUM" >> construct<AccClause>(construct<AccClause::DeviceNum>(
             parenthesized(scalarIntConstantExpr))) ||
