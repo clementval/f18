@@ -57,7 +57,7 @@ namespace Fortran::parser {
 // are allowed, and so we have a variant production for declaration-construct
 // that implements those constraints.
 constexpr auto execPartLookAhead{
-    first(actionStmt >> ok, ompEndLoopDirective >> ok, openmpConstruct >> ok, openaccConstruct >> ok, 
+    first(actionStmt >> ok, ompEndLoopDirective >> ok, openmpConstruct >> ok, openaccConstruct >> ok,
         "ASSOCIATE ("_tok, "BLOCK"_tok, "SELECT"_tok, "CHANGE TEAM"_sptok,
         "CRITICAL"_tok, "DO"_tok, "IF ("_tok, "WHERE ("_tok, "FORALL ("_tok)};
 constexpr auto declErrorRecovery{

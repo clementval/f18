@@ -16,6 +16,7 @@
 #include "grammar.h"
 #include "instrumented-parser.h"
 #include "message.h"
+#include "openacc-grammar.h"
 #include "openmp-grammar.h"
 #include "preprocessor.h"
 #include "prescan.h"
