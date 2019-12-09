@@ -260,6 +260,7 @@ struct ArithmeticIfStmt;
 struct AssignStmt;
 struct AssignedGotoStmt;
 struct PauseStmt;
+struct OpenACCConstruct;
 struct OpenMPConstruct;
 struct OpenMPDeclarativeConstruct;
 struct OmpEndLoopDirective;
@@ -513,6 +514,7 @@ struct ExecutableConstruct {
       common::Indirection<SelectTypeConstruct>,
       common::Indirection<WhereConstruct>, common::Indirection<ForallConstruct>,
       common::Indirection<CompilerDirective>,
+      common::Indirection<OpenACCConstruct>,
       common::Indirection<OpenMPConstruct>,
       common::Indirection<OmpEndLoopDirective>>
       u;

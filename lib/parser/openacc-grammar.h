@@ -67,6 +67,15 @@ TYPE_PARSER(construct<OpenACCBlockConstruct>(
     Parser<AccBeginBlockDirective>{} / endAccLine, block,
     Parser<AccEndBlockDirective>{} / endAccLine))
 
+TYPE_PARSER(
+     sourced(construct<OpenACCStandaloneConstruct>(
+             Parser<OpenACCStandaloneConstruct>{})) / endOfLine)
+
+
+TYPE_CONTEXT_PARSER("OpenACC construct"_en_US,
+    startAccLine >>
+        first(construct<OpenACCConstruct>(Parser<OpenACCBlockConstruct>{}),
+              construct<OpenACCConstruct>(Parser<OpenACCStandaloneConstruct>{})))
 
 
 // END ACC Block directives
