@@ -58,6 +58,10 @@ TYPE_PARSER(construct<AccObject>(designator) || construct<AccObject>("/" >> name
 TYPE_PARSER(construct<AccObjectList>(nonemptyList(Parser<AccObject>{})))
 
 
+TYPE_PARSER(construct<AccStandaloneDirective>(
+        first("LOOP" >> pure(AccStandaloneDirective::Directive::Loop),
+              "WAIT" >> pure(AccStandaloneDirective::Directive::Wait))))
+
 // [Clause, [Clause], ...]
 TYPE_PARSER(sourced(construct<AccClauseList>(
     many(maybe(","_tok) >> sourced(Parser<AccClause>{})))))
@@ -68,9 +72,8 @@ TYPE_PARSER(construct<OpenACCBlockConstruct>(
     Parser<AccEndBlockDirective>{} / endAccLine))
 
 TYPE_PARSER(
-     sourced(construct<OpenACCStandaloneConstruct>(
-             Parser<OpenACCStandaloneConstruct>{})) / endOfLine)
-
+        construct<OpenACCStandaloneConstruct>(
+            sourced(Parser<AccStandaloneDirective>{}), Parser<AccClauseList>{}))
 
 TYPE_CONTEXT_PARSER("OpenACC construct"_en_US,
     startAccLine >>
