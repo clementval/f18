@@ -17,6 +17,7 @@ add_library(FortranSemantics
   attr.cc
   canonicalize-do.cc
   canonicalize-omp.cc
+  check-acc-structure.cc
   check-allocate.cc
   check-arithmeticif.cc
   check-call.cc

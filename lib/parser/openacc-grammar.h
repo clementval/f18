@@ -52,6 +52,8 @@ TYPE_PARSER(
     "AUTO" >> construct<AccClause>(construct<AccClause::Auto>()) ||
     "ASYNC" >> construct<AccClause>(construct<AccClause::Async>(
             parenthesized(scalarIntConstantExpr))) ||
+    "ATTACH" >> construct<AccClause>(construct<AccClause::Attach>(
+        parenthesized(Parser<AccObjectList>{}))) ||
     "COLLAPSE" >> construct<AccClause>(construct<AccClause::Collapse>(
             parenthesized(scalarIntConstantExpr))) ||
     "COPY" >> construct<AccClause>(construct<AccClause::Copy>(
@@ -60,20 +62,34 @@ TYPE_PARSER(
             parenthesized(Parser<AccObjectList>{}))) ||
     "COPYOUT" >> construct<AccClause>(construct<AccClause::Copyout>(
             parenthesized(Parser<AccObjectList>{}))) ||
+    "CREATE" >> construct<AccClause>(construct<AccClause::Create>(
+        parenthesized(Parser<AccObjectList>{}))) ||
+    "DEFAULT" >> construct<AccClause>(construct<AccClause::Default>()) || // TODO none or present
+    "DETACH" >> construct<AccClause>(construct<AccClause::Detach>(
+        parenthesized(Parser<AccObjectList>{}))) ||
+    "DEVICEPTR" >> construct<AccClause>(construct<AccClause::DevicePtr>(
+            parenthesized(Parser<AccObjectList>{}))) ||
     "DEVICENUM" >> construct<AccClause>(construct<AccClause::DeviceNum>(
             parenthesized(scalarIntConstantExpr))) ||
     "GANG" >> construct<AccClause>(construct<AccClause::Gang>()) ||
+    "INDEPENDENT" >> construct<AccClause>(
+            construct<AccClause::Independent>()) ||
+    "NO_CREATE" >> construct<AccClause>(construct<AccClause::NoCreate>(
+            parenthesized(Parser<AccObjectList>{}))) ||
     "NUM_GANGS" >> construct<AccClause>(construct<AccClause::NumGangs>(
             parenthesized(scalarIntConstantExpr))) ||
     "NUM_WORKERS" >> construct<AccClause>(construct<AccClause::NumWorkers>(
             parenthesized(scalarIntConstantExpr))) ||
+    "PRESENT" >> construct<AccClause>(construct<AccClause::Create>(
+        parenthesized(Parser<AccObjectList>{}))) ||
     "VECTOR_LENGTH" >> construct<AccClause>(construct<AccClause::VectorLength>(
             parenthesized(scalarIntConstantExpr))) ||
     "SEQ" >> construct<AccClause>(construct<AccClause::Seq>()) ||
     "VECTOR" >> construct<AccClause>(construct<AccClause::Vector>()) ||
     "WORKER" >> construct<AccClause>(construct<AccClause::Worker>()))
 
-TYPE_PARSER(construct<AccObject>(designator) || construct<AccObject>("/" >> name / "/"))
+TYPE_PARSER(construct<AccObject>(designator)
+        || construct<AccObject>("/" >> name / "/"))
 TYPE_PARSER(construct<AccObjectList>(nonemptyList(Parser<AccObject>{})))
 
 

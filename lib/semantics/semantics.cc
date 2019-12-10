@@ -25,6 +25,7 @@
 #include "check-if-stmt.h"
 #include "check-io.h"
 #include "check-nullify.h"
+#include "check-acc-structure.h"
 #include "check-omp-structure.h"
 #include "check-purity.h"
 #include "check-return.h"
@@ -115,8 +116,8 @@ private:
 };
 
 using StatementSemanticsPass1 = ExprChecker;
-using StatementSemanticsPass2 = SemanticsVisitor<AllocateChecker,
-    ArithmeticIfStmtChecker, AssignmentChecker, CoarrayChecker,
+using StatementSemanticsPass2 = SemanticsVisitor<AccStructureChecker,
+    AllocateChecker, ArithmeticIfStmtChecker, AssignmentChecker, CoarrayChecker,
     DeallocateChecker, DoChecker, IfStmtChecker, IoChecker, NullifyChecker,
     OmpStructureChecker, PurityChecker, ReturnStmtChecker, StopChecker>;
 
