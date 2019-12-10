@@ -1763,6 +1763,7 @@ public:
   }
   void Before(const AccClause::Auto &) { Word("AUTO"); }
   void Before(const AccClause::Gang &) { Word("GANG"); }
+  void Before(const AccClause::Independent &) { Word("INDEPENDENT"); }
   void Before(const AccClause::Seq &) { Word("SEQ"); }
   void Before(const AccClause::Vector &) { Word("VECTOR"); }
   void Before(const AccClause::Worker &) { Word("WORKER"); }
@@ -1776,6 +1777,16 @@ public:
     Walk(x.v);
     Put(")");
   }
+  void Unparse(const AccClause::Attach &x) {
+    Word("ATTACH(");
+    Walk(x.v);
+    Put(") ");
+  }
+  void Unparse(const AccClause::Detach &x) {
+    Word("DETACH(");
+    Walk(x.v);
+    Put(") ");
+  }
   void Unparse(const AccClause::Copy &x) {
     Word("COPY(");
     Walk(x.v);
@@ -1788,6 +1799,16 @@ public:
   }
   void Unparse(const AccClause::Copyout &x) {
     Word("COPYOUT(");
+    Walk(x.v);
+    Put(") ");
+  }
+  void Unparse(const AccClause::Create &x) {
+    Word("CREATE(");
+    Walk(x.v);
+    Put(") ");
+  }
+  void Unparse(const AccClause::NoCreate &x) {
+    Word("NO_CREATE(");
     Walk(x.v);
     Put(") ");
   }
