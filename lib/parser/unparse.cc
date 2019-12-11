@@ -1757,8 +1757,8 @@ public:
     switch (x.v) {
       case AccBlockDirective::Directive::Data: Word("DATA"); break;
       case AccBlockDirective::Directive::Kernels: Word("KERNELS"); break;
-      case AccBlockDirective::Directive::Parallel: Word("PARALLEL "); break;
-      case AccBlockDirective::Directive::Serial: Word("SERIAL "); break;
+      case AccBlockDirective::Directive::Parallel: Word("PARALLEL"); break;
+      case AccBlockDirective::Directive::Serial: Word("SERIAL"); break;
     }
   }
   void Before(const AccClause::Auto &) { Word("AUTO"); }

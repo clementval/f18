@@ -21,6 +21,12 @@
   CheckAllowed(AccClause::Y); \
 }
 
+#define CHECK_REQ_SCALAR_INT_CONSTANT_CLAUSE(X, Y) \
+void AccStructureChecker::Enter(const parser::AccClause::X &c) { \
+  CheckAllowed(AccClause::Y); \
+  RequiresConstantPositiveParameter(AccClause::Y, c.v); \
+}
+
 namespace Fortran::semantics {
 
 void AccStructureChecker::Enter(const parser::OpenACCConstruct &) {
@@ -119,12 +125,26 @@ void AccStructureChecker::Leave(const parser::OpenACCStandaloneConstruct &) {
 }
 
 // Clause checkers
+CHECK_REQ_SCALAR_INT_CONSTANT_CLAUSE(Collapse, COLLAPSE)
+CHECK_REQ_SCALAR_INT_CONSTANT_CLAUSE(NumGangs, NUM_GANGS)
+CHECK_REQ_SCALAR_INT_CONSTANT_CLAUSE(NumWorkers, NUM_WORKERS)
+CHECK_REQ_SCALAR_INT_CONSTANT_CLAUSE(VectorLength, VECTOR_LENGTH)
 
-void AccStructureChecker::Enter(const parser::AccClause::Collapse &c) {
-  CheckAllowed(AccClause::COLLAPSE);
-  // collapse clause must have a parameter
-  RequiresConstantPositiveParameter(AccClause::COLLAPSE, c.v);
-}
+CHECK_SIMPLE_CLAUSE(Auto, AUTO)
+CHECK_SIMPLE_CLAUSE(Attach, ATTACH)
+CHECK_SIMPLE_CLAUSE(Create, CREATE)
+CHECK_SIMPLE_CLAUSE(Default, DEFAULT)
+CHECK_SIMPLE_CLAUSE(Delete, DELETE)
+CHECK_SIMPLE_CLAUSE(Detach, DETACH)
+CHECK_SIMPLE_CLAUSE(Finalize, FINALIZE)
+CHECK_SIMPLE_CLAUSE(FirstPrivate, FIRSTPRIVATE)
+CHECK_SIMPLE_CLAUSE(Gang, GANG)
+CHECK_SIMPLE_CLAUSE(Independent, INDEPENDENT)
+CHECK_SIMPLE_CLAUSE(NoCreate, NO_CREATE)
+CHECK_SIMPLE_CLAUSE(Self, SELF)
+CHECK_SIMPLE_CLAUSE(Seq, SEQ)
+CHECK_SIMPLE_CLAUSE(Vector, VECTOR)
+CHECK_SIMPLE_CLAUSE(Worker, WORKER)
 
 void AccStructureChecker::Enter(const parser::AccClause::Async &c) {
   CheckAllowed(AccClause::ASYNC);
@@ -151,16 +171,6 @@ void AccStructureChecker::Enter(const parser::AccClause::DeviceNum &) {
   // TODO specific check for values
 }
 
-void AccStructureChecker::Enter(const parser::AccClause::NumGangs &) {
-  CheckAllowed(AccClause::NUM_GANGS);
-  // TODO specific check for values
-}
-
-void AccStructureChecker::Enter(const parser::AccClause::NumWorkers &) {
-  CheckAllowed(AccClause::NUM_WORKERS);
-  // TODO specific check for values
-}
-
 void AccStructureChecker::Enter(const parser::AccClause::Present &) {
   CheckAllowed(AccClause::PRESENT);
 }
@@ -170,31 +180,10 @@ void AccStructureChecker::Enter(const parser::AccClause::Private &) {
   // TODO specific check for values
 }
 
-void AccStructureChecker::Enter(const parser::AccClause::VectorLength &) {
-  CheckAllowed(AccClause::VECTOR_LENGTH);
-  // TODO specific check for values
-}
-
 void AccStructureChecker::Enter(const parser::AccClause::Wait &) {
   CheckAllowed(AccClause::WAIT);
   // TODO check arguments
 }
-
-CHECK_SIMPLE_CLAUSE(Auto, AUTO)
-CHECK_SIMPLE_CLAUSE(Attach, ATTACH)
-CHECK_SIMPLE_CLAUSE(Create, CREATE)
-CHECK_SIMPLE_CLAUSE(Default, DEFAULT)
-CHECK_SIMPLE_CLAUSE(Delete, DELETE)
-CHECK_SIMPLE_CLAUSE(Detach, DETACH)
-CHECK_SIMPLE_CLAUSE(Finalize, FINALIZE)
-CHECK_SIMPLE_CLAUSE(FirstPrivate, FIRSTPRIVATE)
-CHECK_SIMPLE_CLAUSE(Gang, GANG)
-CHECK_SIMPLE_CLAUSE(Independent, INDEPENDENT)
-CHECK_SIMPLE_CLAUSE(NoCreate, NO_CREATE)
-CHECK_SIMPLE_CLAUSE(Self, SELF)
-CHECK_SIMPLE_CLAUSE(Seq, SEQ)
-CHECK_SIMPLE_CLAUSE(Vector, VECTOR)
-CHECK_SIMPLE_CLAUSE(Worker, WORKER)
 
 void AccStructureChecker::CheckAllowed(AccClause type) {
   if (!GetContext().allowedClauses.test(type) &&
