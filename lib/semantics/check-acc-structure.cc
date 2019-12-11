@@ -37,8 +37,15 @@ void AccStructureChecker::Enter(const parser::OpenACCBlockConstruct &x) {
   switch (beginDir.v) {
     case parser::AccBlockDirective::Directive::Parallel: {
       PushContext(beginDir.source, AccDirective::PARALLEL);
-//      SetContextAllowed({}});
-//      SetContextAllowedOnce({});
+      SetContextAllowed({AccClause::COPY, AccClause::COPYIN, AccClause::COPYOUT,
+                         AccClause::CREATE, AccClause::NO_CREATE,
+                         AccClause::PRESENT, AccClause::DEVICEPTR,
+                         AccClause::ATTACH, AccClause::PRIVATE,
+                         AccClause::FIRSTPRIVATE, AccClause::WAIT});
+      SetContextAllowedOnce({AccClause::ASYNC, AccClause::DEFAULT,
+                             AccClause::NUM_GANGS, AccClause::NUM_WORKERS,
+                             AccClause::SELF, AccClause::VECTOR_LENGTH});
+      // TODO add REDUCTION, IF, DEVICE_TYPE,
     } break;
     case parser::AccBlockDirective::Directive::Data: {
       PushContext(beginDir.source, AccDirective::DATA);
@@ -179,6 +186,7 @@ CHECK_SIMPLE_CLAUSE(FirstPrivate, FIRSTPRIVATE)
 CHECK_SIMPLE_CLAUSE(Gang, GANG)
 CHECK_SIMPLE_CLAUSE(Independent, INDEPENDENT)
 CHECK_SIMPLE_CLAUSE(NoCreate, NO_CREATE)
+CHECK_SIMPLE_CLAUSE(Self, SELF)
 CHECK_SIMPLE_CLAUSE(Seq, SEQ)
 CHECK_SIMPLE_CLAUSE(Vector, VECTOR)
 CHECK_SIMPLE_CLAUSE(Worker, WORKER)

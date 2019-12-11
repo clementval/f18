@@ -34,7 +34,7 @@ using AccDirectiveSet = common::EnumSet<AccDirective, AccDirective_enumSize>;
 ENUM_CLASS(AccClause, AUTO, ASYNC, ATTACH, COLLAPSE, COPY, COPYIN, COPYOUT,
     DEFAULT, DELETE, CREATE, DETACH, DEVICENUM, DEVICEPTR, FINALIZE,
     FIRSTPRIVATE, GANG, INDEPENDENT, NO_CREATE, NUM_GANGS, NUM_WORKERS,
-    PRESENT, PRIVATE, VECTOR_LENGTH, SEQ, VECTOR, WAIT, WORKER)
+    PRESENT, PRIVATE, VECTOR_LENGTH, SELF, SEQ, VECTOR, WAIT, WORKER)
 
 using AccClauseSet = common::EnumSet<AccClause, AccClause_enumSize>;
 
@@ -73,7 +73,8 @@ public:
   void Enter(const parser::AccClause::Present &);
   void Enter(const parser::AccClause::Private &);
   void Enter(const parser::AccClause::VectorLength &);
-  void Enter(const parser::AccClause::Independent &);
+  void Enter(const parser::AccClause::Independent&);
+  void Enter(const parser::AccClause::Self &);
   void Enter(const parser::AccClause::Seq &);
   void Enter(const parser::AccClause::Vector &);
   void Enter(const parser::AccClause::Worker &);

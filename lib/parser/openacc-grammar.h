@@ -51,7 +51,7 @@ TYPE_PARSER(construct<AccBeginBlockDirective>(
 TYPE_PARSER(
     "AUTO" >> construct<AccClause>(construct<AccClause::Auto>()) ||
     "ASYNC" >> construct<AccClause>(construct<AccClause::Async>(
-            parenthesized(scalarIntConstantExpr))) ||
+            parenthesized(scalarIntConstantExpr))) || // TODO optional int-expr
     "ATTACH" >> construct<AccClause>(construct<AccClause::Attach>(
         parenthesized(Parser<AccObjectList>{}))) ||
     "COLLAPSE" >> construct<AccClause>(construct<AccClause::Collapse>(
@@ -89,8 +89,12 @@ TYPE_PARSER(
         parenthesized(Parser<AccObjectList>{}))) ||
     "VECTOR_LENGTH" >> construct<AccClause>(construct<AccClause::VectorLength>(
             parenthesized(scalarIntConstantExpr))) ||
+    "SELF" >> construct<AccClause>(construct<AccClause::Self>(
+        maybe(parenthesized(scalarLogicalExpr)))) ||
     "SEQ" >> construct<AccClause>(construct<AccClause::Seq>()) ||
     "VECTOR" >> construct<AccClause>(construct<AccClause::Vector>()) ||
+    "WAIT" >> construct<AccClause>(construct<AccClause::Wait>(
+        maybe(parenthesized(scalarIntExpr)))) || // TODO optional int-expr-list
     "WORKER" >> construct<AccClause>(construct<AccClause::Worker>()))
 
 TYPE_PARSER(construct<AccObject>(designator)
