@@ -4390,20 +4390,20 @@ struct AccClause {
   WRAPPER_CLASS(NumWorkers, ScalarIntConstantExpr); // 2.5.9
   WRAPPER_CLASS(Present, AccObjectList); // 2.7.4
   WRAPPER_CLASS(Private, AccObjectList); // 2.5.11
+  WRAPPER_CLASS(Self, std::optional<ScalarLogicalExpr>); // 2.5.5
   WRAPPER_CLASS(VectorLength, ScalarIntConstantExpr); // 2.5.10
+  WRAPPER_CLASS(Wait, std::optional<ScalarIntExpr>); // 2.16.2 // TODO wait-agrument optional
   CharBlock source;
   std::variant<Auto, Finalize, Gang, Independent, Seq, Vector, Worker, Async,
       Attach, Collapse, Copy, Copyin, Copyout, Create, Default, Delete, Detach,
       DeviceNum, DevicePtr, FirstPrivate, NoCreate, NumGangs, NumWorkers,
-      Present, Private, VectorLength> u;
+      Present, Private, Self, VectorLength, Wait> u;
 };
 
 struct AccClauseList {
   WRAPPER_CLASS_BOILERPLATE(AccClauseList, std::list<AccClause>);
   CharBlock source;
 };
-
-
 
 struct AccBeginBlockDirective {
   TUPLE_CLASS_BOILERPLATE(AccBeginBlockDirective);
@@ -4422,7 +4422,6 @@ struct OpenACCBlockConstruct {
 
   std::tuple<AccBeginBlockDirective, Block, AccEndBlockDirective> t;
 };
-
 
 struct OpenACCStandaloneConstruct {
   TUPLE_CLASS_BOILERPLATE(OpenACCStandaloneConstruct);
