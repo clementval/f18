@@ -81,6 +81,7 @@ public:
   void Enter(const parser::AccClause::Independent&);
   void Enter(const parser::AccClause::Self &);
   void Enter(const parser::AccClause::Seq &);
+  void Enter(const parser::AccClause::UseDevice &);
   void Enter(const parser::AccClause::Vector &);
   void Enter(const parser::AccClause::Worker &);
   void Enter(const parser::AccClause::Wait &);

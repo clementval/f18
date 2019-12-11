@@ -1775,7 +1775,7 @@ public:
     Put(")");
   }
   void Unparse(const AccClause::Async &x) {
-    Word("ASYNC("); 
+    Word("ASYNC(");
     Walk(x.v);
     Put(")");
   }
