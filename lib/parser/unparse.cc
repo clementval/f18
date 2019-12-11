@@ -1782,11 +1782,6 @@ public:
     Walk(x.v);
     Put(")");
   }
-  void Unparse(const AccClause::Detach &x) {
-    Word("DETACH(");
-    Walk(x.v);
-    Put(")");
-  }
   void Unparse(const AccClause::Copy &x) {
     Word("COPY(");
     Walk(x.v);
@@ -1809,6 +1804,27 @@ public:
   }
   void Unparse(const AccClause::Delete &x) {
     Word("DELETE(");
+    Walk(x.v);
+    Put(")");
+  }
+  void Unparse(const AccClause::Default &x) {
+    Word("DEFAULT(");
+    Walk(x.v);
+    Put(")");
+  }
+  void Unparse(const AccDefaultClause &x) {
+    switch(x.v) {
+      case AccDefaultClause::Arg::None: Put("NONE"); break;
+      case AccDefaultClause::Arg::Present: Put("PRESENT"); break;
+    }
+  }
+  void Unparse(const AccClause::Detach &x) {
+    Word("DETACH(");
+    Walk(x.v);
+    Put(")");
+  }
+  void Unparse(const AccClause::If &x) {
+    Word("IF(");
     Walk(x.v);
     Put(")");
   }

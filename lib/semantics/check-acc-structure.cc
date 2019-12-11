@@ -17,7 +17,8 @@
 #include "../parser/parse-tree.h"
 #include <unordered_map>
 
-#define CHECK_SIMPLE_CLAUSE(X, Y) void AccStructureChecker::Enter(const parser::AccClause::X &) { \
+#define CHECK_SIMPLE_CLAUSE(X, Y) \
+void AccStructureChecker::Enter(const parser::AccClause::X &) { \
   CheckAllowed(AccClause::Y); \
 }
 

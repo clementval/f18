@@ -64,7 +64,9 @@ TYPE_PARSER(
             parenthesized(Parser<AccObjectList>{}))) ||
     "CREATE" >> construct<AccClause>(construct<AccClause::Create>(
         parenthesized(Parser<AccObjectList>{}))) ||
-    "DEFAULT" >> construct<AccClause>(construct<AccClause::Default>()) || // TODO none or present
+    "DEFAULT" >> construct<AccClause>(construct<AccClause::Default>(first(
+        "NONE" >> pure(AccDefaultClause::Arg::None),
+        "PRESENT" >> pure(AccDefaultClause::Arg::Present)))) ||
     "DELETE" >> construct<AccClause>(construct<AccClause::Delete>(
         parenthesized(Parser<AccObjectList>{}))) ||
     "DETACH" >> construct<AccClause>(construct<AccClause::Detach>(
@@ -77,6 +79,8 @@ TYPE_PARSER(
     "FIRSTPRIVATE" >> construct<AccClause>(construct<AccClause::FirstPrivate>(
         parenthesized(Parser<AccObjectList>{}))) ||
     "GANG" >> construct<AccClause>(construct<AccClause::Gang>()) ||
+    "IF" >> construct<AccClause>(
+        construct<AccClause::If>(parenthesized(scalarLogicalExpr))) ||
     "INDEPENDENT" >> construct<AccClause>(
             construct<AccClause::Independent>()) ||
     "NO_CREATE" >> construct<AccClause>(construct<AccClause::NoCreate>(
