@@ -65,12 +65,17 @@ TYPE_PARSER(
     "CREATE" >> construct<AccClause>(construct<AccClause::Create>(
         parenthesized(Parser<AccObjectList>{}))) ||
     "DEFAULT" >> construct<AccClause>(construct<AccClause::Default>()) || // TODO none or present
+    "DELETE" >> construct<AccClause>(construct<AccClause::Delete>(
+        parenthesized(Parser<AccObjectList>{}))) ||
     "DETACH" >> construct<AccClause>(construct<AccClause::Detach>(
         parenthesized(Parser<AccObjectList>{}))) ||
     "DEVICEPTR" >> construct<AccClause>(construct<AccClause::DevicePtr>(
             parenthesized(Parser<AccObjectList>{}))) ||
     "DEVICENUM" >> construct<AccClause>(construct<AccClause::DeviceNum>(
             parenthesized(scalarIntConstantExpr))) ||
+    "FINALIZE" >> construct<AccClause>(construct<AccClause::Finalize>()) ||
+    "FIRSTPRIVATE" >> construct<AccClause>(construct<AccClause::FirstPrivate>(
+        parenthesized(Parser<AccObjectList>{}))) ||
     "GANG" >> construct<AccClause>(construct<AccClause::Gang>()) ||
     "INDEPENDENT" >> construct<AccClause>(
             construct<AccClause::Independent>()) ||
@@ -95,7 +100,9 @@ TYPE_PARSER(construct<AccObjectList>(nonemptyList(Parser<AccObject>{})))
 
 TYPE_PARSER(construct<AccStandaloneDirective>(
         first("LOOP" >> pure(AccStandaloneDirective::Directive::Loop),
-              "WAIT" >> pure(AccStandaloneDirective::Directive::Wait))))
+              "WAIT" >> pure(AccStandaloneDirective::Directive::Wait),
+              "ENTER DATA" >> pure(AccStandaloneDirective::Directive::EnterData),
+              "EXIT DATA" >> pure(AccStandaloneDirective::Directive::ExitData))))
 
 // [Clause, [Clause], ...]
 TYPE_PARSER(sourced(construct<AccClauseList>(

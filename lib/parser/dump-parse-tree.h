@@ -544,6 +544,7 @@ public:
   NODE(parser::AccClause, Detach)
   NODE(parser::AccClause, DeviceNum)
   NODE(parser::AccClause, DevicePtr)
+  NODE(parser::AccClause, Finalize)
   NODE(parser::AccClause, FirstPrivate)
   NODE(parser::AccClause, NoCreate)
   NODE(parser::AccClause, NumGangs)

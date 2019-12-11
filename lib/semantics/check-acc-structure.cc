@@ -87,6 +87,23 @@ void AccStructureChecker::Enter(const parser::OpenACCStandaloneConstruct &x) {
       PushContext(dir.source, AccDirective::WAIT);
       SetContextAllowedOnce({AccClause::ASYNC});
     } break;
+    case parser::AccStandaloneDirective::Directive::EnterData: {
+      PushContext(dir.source, AccDirective::ENTER_DATA);
+      SetContextAllowed({AccClause::ATTACH, AccClause::CREATE,
+                         AccClause::COPYIN});
+      SetContextAllowedOnce({AccClause::ASYNC, AccClause::WAIT});
+      // TODO add if clause
+      // TODO required one of COPYIN CREATE ATTACH
+    } break;
+    case parser::AccStandaloneDirective::Directive::ExitData: {
+      PushContext(dir.source, AccDirective::EXIT_DATA);
+      SetContextAllowed({AccClause::COPYOUT, AccClause::DELETE,
+          AccClause::DETACH});
+      SetContextAllowedOnce({AccClause::ASYNC, AccClause::WAIT,
+                             AccClause::FINALIZE});
+      // TODO add if clause
+      // TODO required one of COPYOUT DELETE DETACH
+    } break;
   }
 }
 
@@ -155,7 +172,10 @@ CHECK_SIMPLE_CLAUSE(Auto, AUTO)
 CHECK_SIMPLE_CLAUSE(Attach, ATTACH)
 CHECK_SIMPLE_CLAUSE(Create, CREATE)
 CHECK_SIMPLE_CLAUSE(Default, DEFAULT)
+CHECK_SIMPLE_CLAUSE(Delete, DELETE)
 CHECK_SIMPLE_CLAUSE(Detach, DETACH)
+CHECK_SIMPLE_CLAUSE(Finalize, FINALIZE)
+CHECK_SIMPLE_CLAUSE(FirstPrivate, FIRSTPRIVATE)
 CHECK_SIMPLE_CLAUSE(Gang, GANG)
 CHECK_SIMPLE_CLAUSE(Independent, INDEPENDENT)
 CHECK_SIMPLE_CLAUSE(NoCreate, NO_CREATE)
@@ -195,11 +215,11 @@ void AccStructureChecker::CheckAllowed(AccClause type) {
     });
     for (const auto &e : others) {
       context_.Say(GetContext().clauseSource,
-                   "%s and %s are mutually exclusive and may not appear on the "
-                   "same %s directive"_err_en_US,
-                   EnumToString(type), EnumToString(e),
-                   parser::ToUpperCaseLetters(
-                       GetContext().directiveSource.ToString()));
+          "%s and %s are mutually exclusive and may not appear on the "
+          "same %s directive"_err_en_US,
+          EnumToString(type), EnumToString(e),
+          parser::ToUpperCaseLetters(
+          GetContext().directiveSource.ToString()));
     }
     if (!others.empty()) {
       return;

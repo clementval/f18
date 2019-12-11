@@ -4355,7 +4355,7 @@ struct AccBlockDirective {
 };
 
 struct AccStandaloneDirective {
-  ENUM_CLASS(Directive, Loop, Wait);
+  ENUM_CLASS(Directive, EnterData, ExitData, Loop, Wait);
   WRAPPER_CLASS_BOILERPLATE(AccStandaloneDirective, Directive);
   CharBlock source;
 };
@@ -4366,6 +4366,7 @@ struct AccClause {
   UNION_CLASS_BOILERPLATE(AccClause);
 
   EMPTY_CLASS(Auto); // 2.9.6
+  EMPTY_CLASS(Finalize); // 2.6.6
   EMPTY_CLASS(Gang); // 2.9.2
   EMPTY_CLASS(Independent); // 2.9.9
   EMPTY_CLASS(Seq); // 2.9.5
@@ -4378,21 +4379,21 @@ struct AccClause {
   WRAPPER_CLASS(Copyin, AccObjectList); // 2.7.6
   WRAPPER_CLASS(Copyout, AccObjectList); // 2.7.7
   WRAPPER_CLASS(Create, AccObjectList); // 2.7.8
-  EMPTY_CLASS(Default); // TODO
+  EMPTY_CLASS(Default); // 2.5.14 // TODO none / present
   WRAPPER_CLASS(Delete, AccObjectList); // 2.7.10
   WRAPPER_CLASS(Detach, AccObjectList); // 2.7.12
-  WRAPPER_CLASS(DeviceNum, ScalarIntConstantExpr); //
-  WRAPPER_CLASS(DevicePtr, AccObjectList); // TODO
+  WRAPPER_CLASS(DeviceNum, ScalarIntConstantExpr); // TODO
+  WRAPPER_CLASS(DevicePtr, AccObjectList); // 2.7.3
   WRAPPER_CLASS(FirstPrivate, AccObjectList); // 2.5.12
   WRAPPER_CLASS(NoCreate, AccObjectList); // 2.7.9
   WRAPPER_CLASS(NumGangs, ScalarIntConstantExpr); // 2.5.8
   WRAPPER_CLASS(NumWorkers, ScalarIntConstantExpr); // 2.5.9
-  WRAPPER_CLASS(Present, AccObjectList); // TODO
+  WRAPPER_CLASS(Present, AccObjectList); // 2.7.4
   WRAPPER_CLASS(Private, AccObjectList); // 2.5.11
   WRAPPER_CLASS(VectorLength, ScalarIntConstantExpr); // 2.5.10
   CharBlock source;
-  std::variant<Auto, Gang, Independent, Seq, Vector, Worker, Async, Attach,
-      Collapse, Copy, Copyin, Copyout, Create, Default, Delete, Detach,
+  std::variant<Auto, Finalize, Gang, Independent, Seq, Vector, Worker, Async,
+      Attach, Collapse, Copy, Copyin, Copyout, Create, Default, Delete, Detach,
       DeviceNum, DevicePtr, FirstPrivate, NoCreate, NumGangs, NumWorkers,
       Present, Private, VectorLength> u;
 };

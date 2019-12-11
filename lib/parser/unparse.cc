@@ -1780,37 +1780,42 @@ public:
   void Unparse(const AccClause::Attach &x) {
     Word("ATTACH(");
     Walk(x.v);
-    Put(") ");
+    Put(")");
   }
   void Unparse(const AccClause::Detach &x) {
     Word("DETACH(");
     Walk(x.v);
-    Put(") ");
+    Put(")");
   }
   void Unparse(const AccClause::Copy &x) {
     Word("COPY(");
     Walk(x.v);
-    Put(") ");
+    Put(")");
   }
   void Unparse(const AccClause::Copyin &x) {
     Word("COPYIN(");
     Walk(x.v);
-    Put(") ");
+    Put(")");
   }
   void Unparse(const AccClause::Copyout &x) {
     Word("COPYOUT(");
     Walk(x.v);
-    Put(") ");
+    Put(")");
   }
   void Unparse(const AccClause::Create &x) {
     Word("CREATE(");
     Walk(x.v);
-    Put(") ");
+    Put(")");
+  }
+  void Unparse(const AccClause::Delete &x) {
+    Word("DELETE(");
+    Walk(x.v);
+    Put(")");
   }
   void Unparse(const AccClause::NoCreate &x) {
     Word("NO_CREATE(");
     Walk(x.v);
-    Put(") ");
+    Put(")");
   }
   void Unparse(const AccClauseList &x) { Walk(" ", x.v, " "); }
   void Unparse(const OpenACCBlockConstruct &x) {
@@ -1836,12 +1841,12 @@ public:
   }
   void Unparse(const AccStandaloneDirective &x) {
     switch (x.v) {
-    case AccStandaloneDirective::Directive::Loop:
-      Word("LOOP ");
-      break;
-    case AccStandaloneDirective::Directive::Wait:
-      Word("WAIT ");
-      break;
+    case AccStandaloneDirective::Directive::EnterData:
+      Word("ENTER DATA"); break;
+    case AccStandaloneDirective::Directive::ExitData:
+      Word("EXIT DATA"); break;
+    case AccStandaloneDirective::Directive::Loop: Word("LOOP"); break;
+    case AccStandaloneDirective::Directive::Wait: Word("WAIT"); break;
     }
   }
   void Unparse(const AccObject &x) {
@@ -1849,8 +1854,7 @@ public:
         common::visitors{
             [&](const Designator &y) { Walk(y); },
             [&](const Name &y) { Put("/"), Walk(y), Put("/"); },
-        },
-        x.u);
+        }, x.u);
   }
   void Unparse(const AccObjectList &x) { Walk(x.v, ","); }
 
