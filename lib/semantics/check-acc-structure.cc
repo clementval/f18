@@ -50,9 +50,10 @@ void AccStructureChecker::Enter(const parser::OpenACCBlockConstruct &x) {
                          AccClause::ATTACH, AccClause::PRIVATE,
                          AccClause::FIRSTPRIVATE, AccClause::WAIT});
       SetContextAllowedOnce({AccClause::ASYNC, AccClause::DEFAULT,
-                             AccClause::NUM_GANGS, AccClause::NUM_WORKERS,
-                             AccClause::SELF, AccClause::VECTOR_LENGTH});
-      // TODO add REDUCTION, IF, DEVICE_TYPE,
+                             AccClause::IF, AccClause::NUM_GANGS,
+                             AccClause::NUM_WORKERS, AccClause::SELF,
+                             AccClause::VECTOR_LENGTH});
+      // TODO add REDUCTION, DEVICE_TYPE,
     } break;
     case parser::AccBlockDirective::Directive::Data: {
       PushContext(beginDir.source, AccDirective::DATA);
@@ -63,11 +64,31 @@ void AccStructureChecker::Enter(const parser::OpenACCBlockConstruct &x) {
     } break;
     case parser::AccBlockDirective::Directive::Kernels: {
       PushContext(beginDir.source, AccDirective::KERNELS);
-      // TODO set allowed
+      SetContextAllowed({AccClause::COPY, AccClause::COPYIN, AccClause::COPYOUT,
+                         AccClause::CREATE, AccClause::NO_CREATE,
+                         AccClause::PRESENT, AccClause::DEVICEPTR,
+                         AccClause::ATTACH});
+      SetContextAllowedOnce({AccClause::ASYNC, AccClause::DEFAULT,
+                             AccClause::IF, AccClause::NUM_GANGS,
+                             AccClause::NUM_WORKERS, AccClause::SELF,
+                             AccClause::VECTOR_LENGTH});
+      // TODO add DEVICE_TYPE
     } break;
     case parser::AccBlockDirective::Directive::Serial: {
       PushContext(beginDir.source, AccDirective::SERIAL);
-      // TODO set allowed
+      SetContextAllowed({AccClause::COPY, AccClause::COPYIN, AccClause::COPYOUT,
+                         AccClause::CREATE, AccClause::NO_CREATE,
+                         AccClause::PRESENT, AccClause::DEVICEPTR,
+                         AccClause::PRIVATE, AccClause::FIRSTPRIVATE,
+                         AccClause::ATTACH, AccClause::WAIT});
+      SetContextAllowedOnce({AccClause::ASYNC, AccClause::DEFAULT,
+                             AccClause::IF, AccClause::SELF});
+      // TODO add REDUCTION, DEVICE_TYPE
+    } break;
+    case parser::AccBlockDirective::Directive::HostData: {
+      PushContext(beginDir.source, AccDirective::HOST_DATA);
+      SetContextRequired({AccClause::USE_DEVICE});
+      SetContextAllowedOnce({AccClause::IF, AccClause::IF_PRESENT});
     } break;
     default:
       // TODO others
@@ -140,10 +161,13 @@ CHECK_SIMPLE_CLAUSE(Detach, DETACH)
 CHECK_SIMPLE_CLAUSE(Finalize, FINALIZE)
 CHECK_SIMPLE_CLAUSE(FirstPrivate, FIRSTPRIVATE)
 CHECK_SIMPLE_CLAUSE(Gang, GANG)
+CHECK_SIMPLE_CLAUSE(If, IF)
+CHECK_SIMPLE_CLAUSE(IfPresent, IF_PRESENT)
 CHECK_SIMPLE_CLAUSE(Independent, INDEPENDENT)
 CHECK_SIMPLE_CLAUSE(NoCreate, NO_CREATE)
 CHECK_SIMPLE_CLAUSE(Self, SELF)
 CHECK_SIMPLE_CLAUSE(Seq, SEQ)
+CHECK_SIMPLE_CLAUSE(UseDevice, USE_DEVICE)
 CHECK_SIMPLE_CLAUSE(Vector, VECTOR)
 CHECK_SIMPLE_CLAUSE(Worker, WORKER)
 

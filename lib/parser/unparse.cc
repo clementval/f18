@@ -1756,6 +1756,7 @@ public:
   void Unparse(const AccBlockDirective &x) {
     switch (x.v) {
       case AccBlockDirective::Directive::Data: Word("DATA"); break;
+      case AccBlockDirective::Directive::HostData: Word("HOST_DATA"); break;
       case AccBlockDirective::Directive::Kernels: Word("KERNELS"); break;
       case AccBlockDirective::Directive::Parallel: Word("PARALLEL"); break;
       case AccBlockDirective::Directive::Serial: Word("SERIAL"); break;
@@ -1764,6 +1765,7 @@ public:
   void Before(const AccClause::Auto &) { Word("AUTO"); }
   void Before(const AccClause::Gang &) { Word("GANG"); }
   void Before(const AccClause::Independent &) { Word("INDEPENDENT"); }
+  void Before(const AccClause::IfPresent &) { Word("IF_PRESENT"); }
   void Before(const AccClause::Seq &) { Word("SEQ"); }
   void Before(const AccClause::Vector &) { Word("VECTOR"); }
   void Before(const AccClause::Worker &) { Word("WORKER"); }
@@ -1773,7 +1775,7 @@ public:
     Put(")");
   }
   void Unparse(const AccClause::Async &x) {
-    Word("ASYNC(");
+    Word("ASYNC("); 
     Walk(x.v);
     Put(")");
   }
@@ -1830,6 +1832,11 @@ public:
   }
   void Unparse(const AccClause::NoCreate &x) {
     Word("NO_CREATE(");
+    Walk(x.v);
+    Put(")");
+  }
+  void Unparse(const AccClause::UseDevice &x) {
+    Word("USE_DEVICE(");
     Walk(x.v);
     Put(")");
   }

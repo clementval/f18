@@ -41,6 +41,7 @@ constexpr auto endAccLine = space >> endOfLine;
 
 TYPE_PARSER(construct<AccBlockDirective>(
     first("DATA" >> pure(AccBlockDirective::Directive::Data),
+          "HOST_DATA" >> pure(AccBlockDirective::Directive::HostData),
           "KERNELS" >> pure(AccBlockDirective::Directive::Kernels),
           "PARALLEL" >> pure(AccBlockDirective::Directive::Parallel),
           "SERIAL" >> pure(AccBlockDirective::Directive::Serial))))
@@ -51,17 +52,17 @@ TYPE_PARSER(construct<AccBeginBlockDirective>(
 TYPE_PARSER(
     "AUTO" >> construct<AccClause>(construct<AccClause::Auto>()) ||
     "ASYNC" >> construct<AccClause>(construct<AccClause::Async>(maybe(
-            parenthesized(scalarIntConstantExpr)))) || // TODO optional int-expr
+        parenthesized(scalarIntConstantExpr)))) || // TODO optional int-expr
     "ATTACH" >> construct<AccClause>(construct<AccClause::Attach>(
         parenthesized(Parser<AccObjectList>{}))) ||
     "COLLAPSE" >> construct<AccClause>(construct<AccClause::Collapse>(
-            parenthesized(scalarIntConstantExpr))) ||
+        parenthesized(scalarIntConstantExpr))) ||
     "COPY" >> construct<AccClause>(construct<AccClause::Copy>(
-            parenthesized(Parser<AccObjectList>{}))) ||
+        parenthesized(Parser<AccObjectList>{}))) ||
     "COPYIN" >> construct<AccClause>(construct<AccClause::Copyin>(
-            parenthesized(Parser<AccObjectList>{}))) ||
+        parenthesized(Parser<AccObjectList>{}))) ||
     "COPYOUT" >> construct<AccClause>(construct<AccClause::Copyout>(
-            parenthesized(Parser<AccObjectList>{}))) ||
+        parenthesized(Parser<AccObjectList>{}))) ||
     "CREATE" >> construct<AccClause>(construct<AccClause::Create>(
         parenthesized(Parser<AccObjectList>{}))) ||
     "DEFAULT" >> construct<AccClause>(construct<AccClause::Default>(first(
@@ -72,30 +73,33 @@ TYPE_PARSER(
     "DETACH" >> construct<AccClause>(construct<AccClause::Detach>(
         parenthesized(Parser<AccObjectList>{}))) ||
     "DEVICEPTR" >> construct<AccClause>(construct<AccClause::DevicePtr>(
-            parenthesized(Parser<AccObjectList>{}))) ||
+        parenthesized(Parser<AccObjectList>{}))) ||
     "DEVICENUM" >> construct<AccClause>(construct<AccClause::DeviceNum>(
-            parenthesized(scalarIntConstantExpr))) ||
+        parenthesized(scalarIntConstantExpr))) ||
     "FINALIZE" >> construct<AccClause>(construct<AccClause::Finalize>()) ||
     "FIRSTPRIVATE" >> construct<AccClause>(construct<AccClause::FirstPrivate>(
         parenthesized(Parser<AccObjectList>{}))) ||
     "GANG" >> construct<AccClause>(construct<AccClause::Gang>()) ||
     "IF" >> construct<AccClause>(
         construct<AccClause::If>(parenthesized(scalarLogicalExpr))) ||
+    "IF_PRESENT" >> construct<AccClause>(construct<AccClause::IfPresent>()) ||
     "INDEPENDENT" >> construct<AccClause>(
-            construct<AccClause::Independent>()) ||
+        construct<AccClause::Independent>()) ||
     "NO_CREATE" >> construct<AccClause>(construct<AccClause::NoCreate>(
-            parenthesized(Parser<AccObjectList>{}))) ||
+        parenthesized(Parser<AccObjectList>{}))) ||
     "NUM_GANGS" >> construct<AccClause>(construct<AccClause::NumGangs>(
-            parenthesized(scalarIntConstantExpr))) ||
+        parenthesized(scalarIntConstantExpr))) ||
     "NUM_WORKERS" >> construct<AccClause>(construct<AccClause::NumWorkers>(
-            parenthesized(scalarIntConstantExpr))) ||
+        parenthesized(scalarIntConstantExpr))) ||
     "PRESENT" >> construct<AccClause>(construct<AccClause::Create>(
         parenthesized(Parser<AccObjectList>{}))) ||
     "VECTOR_LENGTH" >> construct<AccClause>(construct<AccClause::VectorLength>(
-            parenthesized(scalarIntConstantExpr))) ||
+        parenthesized(scalarIntConstantExpr))) ||
     "SELF" >> construct<AccClause>(construct<AccClause::Self>(
         maybe(parenthesized(scalarLogicalExpr)))) ||
     "SEQ" >> construct<AccClause>(construct<AccClause::Seq>()) ||
+    "USE_DEVICE" >> construct<AccClause>(construct<AccClause::UseDevice>(
+        parenthesized(Parser<AccObjectList>{}))) ||
     "VECTOR" >> construct<AccClause>(construct<AccClause::Vector>()) ||
     "WAIT" >> construct<AccClause>(construct<AccClause::Wait>(
         maybe(parenthesized(scalarIntExpr)))) || // TODO optional int-expr-list

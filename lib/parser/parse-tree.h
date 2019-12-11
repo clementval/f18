@@ -4349,7 +4349,7 @@ WRAPPER_CLASS(AccObjectList, std::list<AccObject>);
 
 // OpenACC directive beginning or ending a block
 struct AccBlockDirective {
-  ENUM_CLASS(Directive, Data, Kernels, Parallel, Serial);
+  ENUM_CLASS(Directive, Data, HostData, Kernels, Parallel, Serial);
   WRAPPER_CLASS_BOILERPLATE(AccBlockDirective, Directive);
   CharBlock source;
 };
@@ -4375,10 +4375,12 @@ struct AccClause {
   EMPTY_CLASS(Auto); // 2.9.6
   EMPTY_CLASS(Finalize); // 2.6.6
   EMPTY_CLASS(Gang); // 2.9.2
+  EMPTY_CLASS(IfPresent); // 2.14.4
   EMPTY_CLASS(Independent); // 2.9.9
   EMPTY_CLASS(Seq); // 2.9.5
   EMPTY_CLASS(Vector); // 2.9.4
   EMPTY_CLASS(Worker); // 2.9.3
+
   WRAPPER_CLASS(Async, std::optional<ScalarIntConstantExpr>); // 2.16.1
   WRAPPER_CLASS(Attach, AccObjectList); // 2.7.11
   WRAPPER_CLASS(Collapse, ScalarIntConstantExpr); // 2.9.1
@@ -4386,7 +4388,7 @@ struct AccClause {
   WRAPPER_CLASS(Copyin, AccObjectList); // 2.7.6
   WRAPPER_CLASS(Copyout, AccObjectList); // 2.7.7
   WRAPPER_CLASS(Create, AccObjectList); // 2.7.8
-  WRAPPER_CLASS(Default, AccDefaultClause); // 2.5.14 // TODO none / present
+  WRAPPER_CLASS(Default, AccDefaultClause); // 2.5.14
   WRAPPER_CLASS(Delete, AccObjectList); // 2.7.10
   WRAPPER_CLASS(Detach, AccObjectList); // 2.7.12
   WRAPPER_CLASS(DeviceNum, ScalarIntConstantExpr); // TODO
@@ -4398,14 +4400,16 @@ struct AccClause {
   WRAPPER_CLASS(NumWorkers, ScalarIntConstantExpr); // 2.5.9
   WRAPPER_CLASS(Present, AccObjectList); // 2.7.4
   WRAPPER_CLASS(Private, AccObjectList); // 2.5.11
+  WRAPPER_CLASS(UseDevice, AccObjectList); // 2.8.1
   WRAPPER_CLASS(Self, std::optional<ScalarLogicalExpr>); // 2.5.5
   WRAPPER_CLASS(VectorLength, ScalarIntConstantExpr); // 2.5.10
   WRAPPER_CLASS(Wait, std::optional<ScalarIntExpr>); // 2.16.2 // TODO wait-agrument optional
   CharBlock source;
-  std::variant<Auto, Finalize, Gang, Independent, Seq, Vector, Worker, Async,
-      Attach, Collapse, Copy, Copyin, Copyout, Create, Default, Delete, Detach,
-      DeviceNum, DevicePtr, If, FirstPrivate, NoCreate, NumGangs, NumWorkers,
-      Present, Private, Self, VectorLength, Wait> u;
+  std::variant<Auto, Finalize, Gang, IfPresent, Independent, Seq, Vector,
+      Worker, Async, Attach, Collapse, Copy, Copyin, Copyout, Create, Default,
+      Delete, Detach, DeviceNum, DevicePtr, If, FirstPrivate, NoCreate,
+      NumGangs, NumWorkers, Present, Private, UseDevice, Self, VectorLength,
+      Wait> u;
 };
 
 struct AccClauseList {
