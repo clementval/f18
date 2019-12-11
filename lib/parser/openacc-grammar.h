@@ -50,8 +50,8 @@ TYPE_PARSER(construct<AccBeginBlockDirective>(
 
 TYPE_PARSER(
     "AUTO" >> construct<AccClause>(construct<AccClause::Auto>()) ||
-    "ASYNC" >> construct<AccClause>(construct<AccClause::Async>(
-            parenthesized(scalarIntConstantExpr))) || // TODO optional int-expr
+    "ASYNC" >> construct<AccClause>(construct<AccClause::Async>(maybe(
+            parenthesized(scalarIntConstantExpr)))) || // TODO optional int-expr
     "ATTACH" >> construct<AccClause>(construct<AccClause::Attach>(
         parenthesized(Parser<AccObjectList>{}))) ||
     "COLLAPSE" >> construct<AccClause>(construct<AccClause::Collapse>(

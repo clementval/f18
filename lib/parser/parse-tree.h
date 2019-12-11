@@ -4372,7 +4372,7 @@ struct AccClause {
   EMPTY_CLASS(Seq); // 2.9.5
   EMPTY_CLASS(Vector); // 2.9.4
   EMPTY_CLASS(Worker); // 2.9.3
-  WRAPPER_CLASS(Async, ScalarIntConstantExpr); // 2.16.1
+  WRAPPER_CLASS(Async, std::optional<ScalarIntConstantExpr>); // 2.16.1
   WRAPPER_CLASS(Attach, AccObjectList); // 2.7.11
   WRAPPER_CLASS(Collapse, ScalarIntConstantExpr); // 2.9.1
   WRAPPER_CLASS(Copy, AccObjectList); // 2.7.5
