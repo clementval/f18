@@ -38,6 +38,8 @@ ENUM_CLASS(AccClause, AUTO, ASYNC, ATTACH, COLLAPSE, COPY, COPYIN, COPYOUT,
 
 using AccClauseSet = common::EnumSet<AccClause, AccClause_enumSize>;
 
+
+
 class AccStructureChecker : public virtual BaseChecker {
 public:
   AccStructureChecker(SemanticsContext &context) : context_{context} {}
@@ -78,8 +80,45 @@ public:
   void Enter(const parser::AccClause::Seq &);
   void Enter(const parser::AccClause::Vector &);
   void Enter(const parser::AccClause::Worker &);
+  void Enter(const parser::AccClause::Wait &);
 
 private:
+
+//  struct AccDirectiveClauses {
+//    const AccDirective directive;
+//    const AccClauseSet allowed;
+//    const AccClauseSet allowedOnce;
+//    const AccClauseSet allowedExclusive;
+//    const AccClauseSet requiredOneOf;
+//  };
+//
+//  static struct AccDirectiveClauses directiveClausesTable[]{
+//    {AccDirective::LOOP,
+//         {AccClause::PRIVATE},
+//         {AccClause::COLLAPSE, AccClause::GANG, AccClause::VECTOR, AccClause::WORKER},
+//         {AccClause::AUTO, AccClause::INDEPENDENT, AccClause::SEQ},
+//         {}
+//    },
+//    {AccDirective::WAIT,
+//        {},
+//        {AccClause::ASYNC},
+//        {},
+//        {}
+//    },
+//    {AccDirective::ENTER_DATA,
+//        {AccClause::ATTACH, AccClause::CREATE, AccClause::COPYIN},
+//        {AccClause::ASYNC, AccClause::WAIT},
+//        {},
+//        {}
+//     },
+//    {AccDirective::EXIT_DATA,
+//        {AccClause::COPYOUT, AccClause::DELETE, AccClause::DETACH},
+//        {AccClause::ASYNC, AccClause::WAIT, AccClause::FINALIZE},
+//        {},
+//        {}
+//     }
+//  };
+
   struct AccContext {
     AccContext(parser::CharBlock source, AccDirective d)
         : directiveSource{source}, directive{d} {}
@@ -156,6 +195,8 @@ private:
 
   void RequiresConstantPositiveParameter(
       const AccClause &clause, const parser::ScalarIntConstantExpr &i);
+  void OptionalConstantPositiveParameter(
+      const AccClause &clause, const std::optional<parser::ScalarIntConstantExpr> &o);
 
   SemanticsContext &context_;
   std::vector<AccContext> accContext_;  // used as a stack

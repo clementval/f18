@@ -126,9 +126,9 @@ void AccStructureChecker::Enter(const parser::AccClause::Collapse &c) {
   RequiresConstantPositiveParameter(AccClause::COLLAPSE, c.v);
 }
 
-void AccStructureChecker::Enter(const parser::AccClause::Async &) {
+void AccStructureChecker::Enter(const parser::AccClause::Async &c) {
   CheckAllowed(AccClause::ASYNC);
-  // TODO specific check for values
+  OptionalConstantPositiveParameter(AccClause::ASYNC, c.v);
 }
 
 void AccStructureChecker::Enter(const parser::AccClause::Copy &) {
@@ -173,6 +173,11 @@ void AccStructureChecker::Enter(const parser::AccClause::Private &) {
 void AccStructureChecker::Enter(const parser::AccClause::VectorLength &) {
   CheckAllowed(AccClause::VECTOR_LENGTH);
   // TODO specific check for values
+}
+
+void AccStructureChecker::Enter(const parser::AccClause::Wait &) {
+  CheckAllowed(AccClause::WAIT);
+  // TODO check arguments
 }
 
 CHECK_SIMPLE_CLAUSE(Auto, AUTO)
@@ -239,8 +244,8 @@ void AccStructureChecker::CheckAllowed(AccClause type) {
 void AccStructureChecker::CheckRequired(AccClause type) {
   if (!FindClause(type)) {
     context_.Say(GetContext().directiveSource,
-                 "At least one %s clause must appear on the %s directive"_err_en_US,
-                 EnumToString(type), EnumToString(GetContext().directive));
+        "At least one %s clause must appear on the %s directive"_err_en_US,
+        EnumToString(type), EnumToString(GetContext().directive));
   }
 }
 
@@ -249,10 +254,19 @@ void AccStructureChecker::RequiresConstantPositiveParameter(
   if (const auto v{GetIntValue(i)}) {
     if (*v <= 0) {
       context_.Say(GetContext().clauseSource,
-                   "The parameter of the %s clause must be "
-                   "a constant positive integer expression"_err_en_US,
-                   EnumToString(clause));
+          "The parameter of the %s clause must be "
+          "a constant positive integer expression"_err_en_US,
+          EnumToString(clause));
     }
+  }
+}
+
+void AccStructureChecker::OptionalConstantPositiveParameter(
+    const AccClause &clause,
+    const std::optional<parser::ScalarIntConstantExpr> &o)
+{
+  if(o != std::nullopt) {
+    RequiresConstantPositiveParameter(clause, o.value());
   }
 }
 
