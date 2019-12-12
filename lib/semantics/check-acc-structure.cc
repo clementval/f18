@@ -139,6 +139,17 @@ void AccStructureChecker::Enter(const parser::OpenACCStandaloneConstruct &x) {
       // TODO add if clause
       // TODO required one of COPYOUT DELETE DETACH
     } break;
+    case parser::AccStandaloneDirective::Directive::Routine: {
+      PushContext(dir.source, AccDirective::ROUTINE);
+      SetContextAllowedOnce({AccClause::DEVICE_TYPE});
+      SetContextAllowedOnce({AccClause::GANG, AccClause::WORKER,
+                             AccClause::VECTOR, AccClause::SEQ, AccClause::BIND,
+                             AccClause::NOHOST});
+      // TODO require_one_of: GANG, VECTOR, WORKER, SEQ
+      // TODO only GANG, WORKER, VECTOR, CLAUSE can follow DEVICE_TYPE
+      // TODO If DEVICE_TYPE, must have one DEFAULT parrallelism level before
+      // or one after each
+    } break;
   }
 }
 
@@ -154,6 +165,7 @@ CHECK_REQ_SCALAR_INT_CONSTANT_CLAUSE(VectorLength, VECTOR_LENGTH)
 
 CHECK_SIMPLE_CLAUSE(Auto, AUTO)
 CHECK_SIMPLE_CLAUSE(Attach, ATTACH)
+CHECK_SIMPLE_CLAUSE(Bind, BIND)
 CHECK_SIMPLE_CLAUSE(Create, CREATE)
 CHECK_SIMPLE_CLAUSE(Default, DEFAULT)
 CHECK_SIMPLE_CLAUSE(Delete, DELETE)
@@ -165,6 +177,7 @@ CHECK_SIMPLE_CLAUSE(If, IF)
 CHECK_SIMPLE_CLAUSE(IfPresent, IF_PRESENT)
 CHECK_SIMPLE_CLAUSE(Independent, INDEPENDENT)
 CHECK_SIMPLE_CLAUSE(NoCreate, NO_CREATE)
+CHECK_SIMPLE_CLAUSE(NoHost, NOHOST)
 CHECK_SIMPLE_CLAUSE(Self, SELF)
 CHECK_SIMPLE_CLAUSE(Seq, SEQ)
 CHECK_SIMPLE_CLAUSE(UseDevice, USE_DEVICE)
@@ -193,6 +206,16 @@ void AccStructureChecker::Enter(const parser::AccClause::Copyout &) {
 
 void AccStructureChecker::Enter(const parser::AccClause::DeviceNum &) {
   CheckAllowed(AccClause::DEVICENUM);
+  // TODO specific check for values
+}
+
+void AccStructureChecker::Enter(const parser::AccClause::DevicePtr &) {
+  CheckAllowed(AccClause::DEVICEPTR);
+  // TODO specific check for values
+}
+
+void AccStructureChecker::Enter(const parser::AccClause::DeviceType &) {
+  CheckAllowed(AccClause::DEVICE_TYPE);
   // TODO specific check for values
 }
 

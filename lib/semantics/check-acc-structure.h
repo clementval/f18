@@ -27,19 +27,17 @@
 namespace Fortran::semantics {
 
 ENUM_CLASS(AccDirective, DATA, ENTER_DATA, EXIT_DATA, HOST_DATA, KERNELS, LOOP,
-    PARALLEL, SERIAL, WAIT)
+    PARALLEL, ROUTINE, SERIAL, WAIT)
 
 using AccDirectiveSet = common::EnumSet<AccDirective, AccDirective_enumSize>;
 
-ENUM_CLASS(AccClause, AUTO, ASYNC, ATTACH, COLLAPSE, COPY, COPYIN, COPYOUT,
-    DEFAULT, DELETE, CREATE, DETACH, DEVICENUM, DEVICEPTR, FINALIZE,
-    FIRSTPRIVATE, GANG, IF, IF_PRESENT, INDEPENDENT, NO_CREATE, NUM_GANGS,
-    NUM_WORKERS, PRESENT, PRIVATE, USE_DEVICE, VECTOR_LENGTH, SELF, SEQ, VECTOR,
-    WAIT, WORKER)
+ENUM_CLASS(AccClause, AUTO, ASYNC, ATTACH, BIND, COLLAPSE, COPY, COPYIN,
+    COPYOUT, DEFAULT, DELETE, CREATE, DETACH, DEVICENUM, DEVICEPTR, DEVICE_TYPE,
+    FINALIZE, FIRSTPRIVATE, GANG, IF, IF_PRESENT, INDEPENDENT, NO_CREATE,
+    NOHOST, NUM_GANGS, NUM_WORKERS, PRESENT, PRIVATE, USE_DEVICE, VECTOR_LENGTH,
+    SELF, SEQ, VECTOR, WAIT, WORKER)
 
 using AccClauseSet = common::EnumSet<AccClause, AccClause_enumSize>;
-
-
 
 class AccStructureChecker : public virtual BaseChecker {
 public:
@@ -58,6 +56,7 @@ public:
   void Enter(const parser::AccClause::Auto &);
   void Enter(const parser::AccClause::Async &);
   void Enter(const parser::AccClause::Attach &);
+  void Enter(const parser::AccClause::Bind &);
   void Enter(const parser::AccClause::Collapse &);
   void Enter(const parser::AccClause::Copy &);
   void Enter(const parser::AccClause::Copyin &);
@@ -67,12 +66,15 @@ public:
   void Enter(const parser::AccClause::Delete &);
   void Enter(const parser::AccClause::Detach &);
   void Enter(const parser::AccClause::DeviceNum &);
+  void Enter(const parser::AccClause::DevicePtr &);
+  void Enter(const parser::AccClause::DeviceType &);
   void Enter(const parser::AccClause::Finalize &);
   void Enter(const parser::AccClause::FirstPrivate &);
   void Enter(const parser::AccClause::Gang &);
   void Enter(const parser::AccClause::If &);
   void Enter(const parser::AccClause::IfPresent &);
   void Enter(const parser::AccClause::NoCreate &);
+  void Enter(const parser::AccClause::NoHost &);
   void Enter(const parser::AccClause::NumGangs &);
   void Enter(const parser::AccClause::NumWorkers &);
   void Enter(const parser::AccClause::Present &);

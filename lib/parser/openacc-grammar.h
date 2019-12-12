@@ -55,6 +55,8 @@ TYPE_PARSER(
         parenthesized(scalarIntConstantExpr)))) || // TODO optional int-expr
     "ATTACH" >> construct<AccClause>(construct<AccClause::Attach>(
         parenthesized(Parser<AccObjectList>{}))) ||
+    "BIND" >> construct<AccClause>(construct<AccClause::Bind>(
+        parenthesized(name))) ||
     "COLLAPSE" >> construct<AccClause>(construct<AccClause::Collapse>(
         parenthesized(scalarIntConstantExpr))) ||
     "COPY" >> construct<AccClause>(construct<AccClause::Copy>(
@@ -76,6 +78,8 @@ TYPE_PARSER(
         parenthesized(Parser<AccObjectList>{}))) ||
     "DEVICENUM" >> construct<AccClause>(construct<AccClause::DeviceNum>(
         parenthesized(scalarIntConstantExpr))) ||
+    "DEVICE_TYPE" >> construct<AccClause>(construct<AccClause::DeviceType>(
+        /*parenthesized(TODO)*/)) ||
     "FINALIZE" >> construct<AccClause>(construct<AccClause::Finalize>()) ||
     "FIRSTPRIVATE" >> construct<AccClause>(construct<AccClause::FirstPrivate>(
         parenthesized(Parser<AccObjectList>{}))) ||
@@ -87,6 +91,7 @@ TYPE_PARSER(
         construct<AccClause::Independent>()) ||
     "NO_CREATE" >> construct<AccClause>(construct<AccClause::NoCreate>(
         parenthesized(Parser<AccObjectList>{}))) ||
+    "NOHOST" >> construct<AccClause>(construct<AccClause::NoHost>()) ||
     "NUM_GANGS" >> construct<AccClause>(construct<AccClause::NumGangs>(
         parenthesized(scalarIntConstantExpr))) ||
     "NUM_WORKERS" >> construct<AccClause>(construct<AccClause::NumWorkers>(

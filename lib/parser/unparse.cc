@@ -1869,6 +1869,7 @@ public:
     case AccStandaloneDirective::Directive::ExitData:
       Word("EXIT DATA"); break;
     case AccStandaloneDirective::Directive::Loop: Word("LOOP"); break;
+    case AccStandaloneDirective::Directive::Routine: Word("ROUTINE"); break;
     case AccStandaloneDirective::Directive::Wait: Word("WAIT"); break;
     }
   }

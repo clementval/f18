@@ -4356,7 +4356,7 @@ struct AccBlockDirective {
 };
 
 struct AccStandaloneDirective {
-  ENUM_CLASS(Directive, EnterData, ExitData, Loop, Wait);
+  ENUM_CLASS(Directive, EnterData, ExitData, Loop, Routine, Wait);
   WRAPPER_CLASS_BOILERPLATE(AccStandaloneDirective, Directive);
   CharBlock source;
 };
@@ -4378,11 +4378,13 @@ struct AccClause {
   EMPTY_CLASS(Gang); // 2.9.2
   EMPTY_CLASS(IfPresent); // 2.14.4
   EMPTY_CLASS(Independent); // 2.9.9
+  EMPTY_CLASS(NoHost); // 2.15.1
   EMPTY_CLASS(Seq); // 2.9.5
   EMPTY_CLASS(Vector); // 2.9.4
   EMPTY_CLASS(Worker); // 2.9.3
   WRAPPER_CLASS(Async, std::optional<ScalarIntConstantExpr>); // 2.16.1
   WRAPPER_CLASS(Attach, AccObjectList); // 2.7.11
+  WRAPPER_CLASS(Bind, Name); // 2.15.1
   WRAPPER_CLASS(Collapse, ScalarIntConstantExpr); // 2.9.1
   WRAPPER_CLASS(Copy, AccObjectList); // 2.7.5
   WRAPPER_CLASS(Copyin, AccObjectList); // 2.7.6
@@ -4393,6 +4395,7 @@ struct AccClause {
   WRAPPER_CLASS(Detach, AccObjectList); // 2.7.12
   WRAPPER_CLASS(DeviceNum, ScalarIntConstantExpr); // TODO
   WRAPPER_CLASS(DevicePtr, AccObjectList); // 2.7.3
+  EMPTY_CLASS(DeviceType); // TODO device-type-list
   WRAPPER_CLASS(FirstPrivate, AccObjectList); // 2.5.12
   WRAPPER_CLASS(If, ScalarLogicalExpr); // 2.5.4
   WRAPPER_CLASS(NoCreate, AccObjectList); // 2.7.9
@@ -4406,11 +4409,11 @@ struct AccClause {
   WRAPPER_CLASS(Wait, std::optional<ScalarIntExpr>); // 2.16.2 // TODO wait-agrument optional
   CharBlock source;
 
-  std::variant<Auto, Finalize, Gang, IfPresent, Independent, Seq, Vector,
-      Worker, Async, Attach, Collapse, Copy, Copyin, Copyout, Create, Default,
-      Delete, Detach, DeviceNum, DevicePtr, If, FirstPrivate, NoCreate,
-      NumGangs, NumWorkers, Present, Private, UseDevice, Self, VectorLength,
-      Wait> u;
+  std::variant<Auto, Finalize, Gang, IfPresent, Independent, NoHost, Seq,
+      Vector, Worker, Async, Attach, Bind, Collapse, Copy, Copyin, Copyout,
+      Create, Default, Delete, Detach, DeviceNum, DevicePtr, DeviceType, If,
+      FirstPrivate, NoCreate, NumGangs, NumWorkers, Present, Private, UseDevice,
+      Self, VectorLength, Wait> u;
 };
 
 struct AccClauseList {
