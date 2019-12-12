@@ -263,6 +263,7 @@ struct AssignStmt;
 struct AssignedGotoStmt;
 struct PauseStmt;
 struct OpenACCConstruct;
+struct OpenACCDeclarativeConstruct;
 struct OpenMPConstruct;
 struct OpenMPDeclarativeConstruct;
 struct OmpEndLoopDirective;
@@ -426,6 +427,7 @@ struct SpecificationConstruct {
       Statement<OtherSpecificationStmt>,
       Statement<common::Indirection<TypeDeclarationStmt>>,
       common::Indirection<StructureDef>,
+      common::Indirection<OpenACCDeclarativeConstruct>,
       common::Indirection<OpenMPDeclarativeConstruct>,
       common::Indirection<CompilerDirective>>
       u;
@@ -467,7 +469,8 @@ struct DeclarationConstruct {
 struct SpecificationPart {
   TUPLE_CLASS_BOILERPLATE(SpecificationPart);
 
-  std::tuple<std::list<OpenMPDeclarativeConstruct>,
+  std::tuple<std::list<OpenACCDeclarativeConstruct>,
+      std::list<OpenMPDeclarativeConstruct>,
       std::list<Statement<common::Indirection<UseStmt>>>,
       std::list<Statement<common::Indirection<ImportStmt>>>, ImplicitPart,
       std::list<DeclarationConstruct>>
@@ -4362,6 +4365,12 @@ struct AccStandaloneDirective {
   CharBlock source;
 };
 
+struct AccDeclarativeDirective {
+  ENUM_CLASS(Directive, Declare);
+  WRAPPER_CLASS_BOILERPLATE(AccDeclarativeDirective, Directive);
+  CharBlock source;
+};
+
 
 // OpenACC Clauses
 
@@ -4440,6 +4449,20 @@ struct OpenACCBlockConstruct {
   TUPLE_CLASS_BOILERPLATE(OpenACCBlockConstruct);
 
   std::tuple<AccBeginBlockDirective, Block, AccEndBlockDirective> t;
+};
+
+struct OpenACCStandaloneDeclarativeConstruct {
+  TUPLE_CLASS_BOILERPLATE(OpenACCStandaloneDeclarativeConstruct);
+
+  CharBlock source;
+  std::tuple<AccDeclarativeDirective, AccClauseList> t;
+};
+
+struct OpenACCDeclarativeConstruct {
+  UNION_CLASS_BOILERPLATE(OpenACCDeclarativeConstruct);
+
+  CharBlock source;
+  std::variant<OpenACCStandaloneDeclarativeConstruct> u;
 };
 
 struct OpenACCStandaloneConstruct {

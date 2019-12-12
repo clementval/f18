@@ -128,6 +128,10 @@ TYPE_PARSER(construct<AccStandaloneDirective>(first(
     "UPDATE" >> pure(AccStandaloneDirective::Directive::Update),
     "WAIT" >> pure(AccStandaloneDirective::Directive::Wait))))
 
+TYPE_PARSER(construct<AccDeclarativeDirective>(first(
+    "DECLARE" >> pure(AccDeclarativeDirective::Directive::Declare)
+    )))
+
 // [Clause, [Clause], ...]
 TYPE_PARSER(sourced(construct<AccClauseList>(
     many(maybe(","_tok) >> sourced(Parser<AccClause>{})))))
@@ -140,6 +144,14 @@ TYPE_PARSER(construct<OpenACCBlockConstruct>(
 TYPE_PARSER(
         construct<OpenACCStandaloneConstruct>(
             sourced(Parser<AccStandaloneDirective>{}), Parser<AccClauseList>{}))
+
+TYPE_PARSER(
+    construct<OpenACCStandaloneDeclarativeConstruct>(
+        sourced(Parser<AccDeclarativeDirective>{}), Parser<AccClauseList>{}))
+
+TYPE_PARSER( // TODO correct parser ?
+    startAccLine >> sourced(construct<OpenACCDeclarativeConstruct>(
+                Parser<OpenACCStandaloneDeclarativeConstruct>{})))
 
 TYPE_CONTEXT_PARSER("OpenACC construct"_en_US,
     startAccLine >>

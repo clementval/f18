@@ -121,6 +121,7 @@ TYPE_CONTEXT_PARSER("specification construct"_en_US,
         construct<SpecificationConstruct>(
             statement(indirect(typeDeclarationStmt))),
         construct<SpecificationConstruct>(indirect(Parser<StructureDef>{})),
+        construct<SpecificationConstruct>(indirect(openaccDeclarativeConstruct)),
         construct<SpecificationConstruct>(indirect(openmpDeclarativeConstruct)),
         construct<SpecificationConstruct>(indirect(compilerDirective))))
 
@@ -309,7 +310,8 @@ TYPE_PARSER(construct<ProgramUnit>(indirect(Parser<Module>{})) ||
 //         [use-stmt]... [import-stmt]... [implicit-part]
 //         [declaration-construct]...
 TYPE_CONTEXT_PARSER("specification part"_en_US,
-    construct<SpecificationPart>(many(openmpDeclarativeConstruct),
+    construct<SpecificationPart>(many(openaccDeclarativeConstruct),
+        many(openmpDeclarativeConstruct),
         many(statement(indirect(Parser<UseStmt>{}))),
         many(unambiguousStatement(indirect(Parser<ImportStmt>{}))),
         implicitPart, many(declarationConstruct)))
@@ -320,7 +322,8 @@ TYPE_CONTEXT_PARSER("specification part"_en_US,
 // specialized error recovery in the event of a spurious executable
 // statement.
 constexpr auto limitedSpecificationPart{inContext("specification part"_en_US,
-    construct<SpecificationPart>(many(openmpDeclarativeConstruct),
+    construct<SpecificationPart>(many(openaccDeclarativeConstruct),
+        many(openmpDeclarativeConstruct),
         many(statement(indirect(Parser<UseStmt>{}))),
         many(unambiguousStatement(indirect(Parser<ImportStmt>{}))),
         implicitPart, many(limitedDeclarationConstruct)))};

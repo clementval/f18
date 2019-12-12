@@ -35,6 +35,11 @@ void AccStructureChecker::Enter(const parser::OpenACCConstruct &) {
   // TODO
 }
 
+void AccStructureChecker::Enter(const parser::OpenACCDeclarativeConstruct &) {
+  return;
+  // TODO
+}
+
 void AccStructureChecker::Enter(const parser::OpenACCBlockConstruct &x) {
   const auto &beginBlockDir{std::get<parser::AccBeginBlockDirective>(x.t)};
   const auto &endBlockDir{std::get<parser::AccEndBlockDirective>(x.t)};
@@ -104,6 +109,24 @@ void AccStructureChecker::Leave(const parser::AccClauseList &) {
 }
 
 void AccStructureChecker::Leave(const parser::OpenACCBlockConstruct &) {
+  accContext_.pop_back();
+}
+
+void AccStructureChecker::Enter(
+    const parser::OpenACCStandaloneDeclarativeConstruct &x)
+{
+  const auto &dir{std::get<parser::AccDeclarativeDirective>(x.t)};
+  switch (dir.v) {
+    case parser::AccDeclarativeDirective::Directive::Declare: {
+      PushContext(dir.source, AccDirective::DECLARE);
+      // TODO allowed/required
+    } break;
+  }
+}
+
+void AccStructureChecker::Leave(
+    const parser::OpenACCStandaloneDeclarativeConstruct &)
+{
   accContext_.pop_back();
 }
 

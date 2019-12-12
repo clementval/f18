@@ -26,8 +26,8 @@
 
 namespace Fortran::semantics {
 
-ENUM_CLASS(AccDirective, DATA, ENTER_DATA, EXIT_DATA, INIT, HOST_DATA, KERNELS,
-    LOOP, PARALLEL, ROUTINE, SERIAL, SHUTDOWN, UPDATE, WAIT)
+ENUM_CLASS(AccDirective, DATA, DECLARE, ENTER_DATA, EXIT_DATA, INIT, HOST_DATA,
+    KERNELS, LOOP, PARALLEL, ROUTINE, SERIAL, SHUTDOWN, UPDATE, WAIT)
 
 using AccDirectiveSet = common::EnumSet<AccDirective, AccDirective_enumSize>;
 
@@ -45,10 +45,13 @@ public:
 
   // Construct and directives
   void Enter(const parser::OpenACCConstruct &);
+  void Enter(const parser::OpenACCDeclarativeConstruct &);
   void Enter(const parser::OpenACCStandaloneConstruct &);
   void Leave(const parser::OpenACCStandaloneConstruct &);
   void Enter(const parser::OpenACCBlockConstruct &);
   void Leave(const parser::OpenACCBlockConstruct &);
+  void Enter(const parser::OpenACCStandaloneDeclarativeConstruct &);
+  void Leave(const parser::OpenACCStandaloneDeclarativeConstruct &);
 
   // Clauses
   void Leave(const parser::AccClauseList &);

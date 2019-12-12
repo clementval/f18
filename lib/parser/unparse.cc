@@ -1762,6 +1762,11 @@ public:
       case AccBlockDirective::Directive::Serial: Word("SERIAL"); break;
     }
   }
+  void Unparse(const AccDeclarativeDirective &x) {
+    switch (x.v) {
+      case AccDeclarativeDirective::Directive::Declare: Word("DECLARE"); break;
+    }
+  }
   void Before(const AccClause::Auto &) { Word("AUTO"); }
   void Before(const AccClause::Gang &) { Word("GANG"); }
   void Before(const AccClause::Independent &) { Word("INDEPENDENT"); }
