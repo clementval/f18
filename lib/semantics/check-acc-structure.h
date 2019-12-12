@@ -27,15 +27,15 @@
 namespace Fortran::semantics {
 
 ENUM_CLASS(AccDirective, DATA, ENTER_DATA, EXIT_DATA, INIT, HOST_DATA, KERNELS,
-    LOOP, PARALLEL, ROUTINE, SERIAL, SHUTDOWN, WAIT)
+    LOOP, PARALLEL, ROUTINE, SERIAL, SHUTDOWN, UPDATE, WAIT)
 
 using AccDirectiveSet = common::EnumSet<AccDirective, AccDirective_enumSize>;
 
 ENUM_CLASS(AccClause, AUTO, ASYNC, ATTACH, BIND, COLLAPSE, COPY, COPYIN,
-    COPYOUT, DEFAULT, DELETE, CREATE, DETACH, DEVICENUM, DEVICEPTR, DEVICE_TYPE,
-    FINALIZE, FIRSTPRIVATE, GANG, IF, IF_PRESENT, INDEPENDENT, NO_CREATE,
-    NOHOST, NUM_GANGS, NUM_WORKERS, PRESENT, PRIVATE, USE_DEVICE, VECTOR_LENGTH,
-    SELF, SEQ, VECTOR, WAIT, WORKER)
+    COPYOUT, DEFAULT, DELETE, CREATE, DETACH, DEVICE, DEVICENUM, DEVICEPTR,
+    DEVICE_TYPE, FINALIZE, FIRSTPRIVATE, GANG, HOST, IF, IF_PRESENT,
+    INDEPENDENT, NO_CREATE, NOHOST, NUM_GANGS, NUM_WORKERS, PRESENT, PRIVATE,
+    USE_DEVICE, VECTOR_LENGTH, SELF, SEQ, VECTOR, WAIT, WORKER)
 
 using AccClauseSet = common::EnumSet<AccClause, AccClause_enumSize>;
 
@@ -65,12 +65,14 @@ public:
   void Enter(const parser::AccClause::Default &);
   void Enter(const parser::AccClause::Delete &);
   void Enter(const parser::AccClause::Detach &);
+  void Enter(const parser::AccClause::Device &);
   void Enter(const parser::AccClause::DeviceNum &);
   void Enter(const parser::AccClause::DevicePtr &);
   void Enter(const parser::AccClause::DeviceType &);
   void Enter(const parser::AccClause::Finalize &);
   void Enter(const parser::AccClause::FirstPrivate &);
   void Enter(const parser::AccClause::Gang &);
+  void Enter(const parser::AccClause::Host &);
   void Enter(const parser::AccClause::If &);
   void Enter(const parser::AccClause::IfPresent &);
   void Enter(const parser::AccClause::NoCreate &);

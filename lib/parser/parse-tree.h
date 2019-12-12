@@ -4357,7 +4357,7 @@ struct AccBlockDirective {
 
 struct AccStandaloneDirective {
   ENUM_CLASS(Directive, EnterData, ExitData, Init, Loop, Routine, Shutdown,
-      Wait);
+      Update, Wait);
   WRAPPER_CLASS_BOILERPLATE(AccStandaloneDirective, Directive);
   CharBlock source;
 };
@@ -4394,10 +4394,12 @@ struct AccClause {
   WRAPPER_CLASS(Default, AccDefaultClause); // 2.5.14
   WRAPPER_CLASS(Delete, AccObjectList); // 2.7.10
   WRAPPER_CLASS(Detach, AccObjectList); // 2.7.12
+  WRAPPER_CLASS(Device, AccObjectList); // 2.14.4
   WRAPPER_CLASS(DeviceNum, ScalarIntConstantExpr); // TODO
   WRAPPER_CLASS(DevicePtr, AccObjectList); // 2.7.3
   EMPTY_CLASS(DeviceType); // TODO device-type-list
   WRAPPER_CLASS(FirstPrivate, AccObjectList); // 2.5.12
+  WRAPPER_CLASS(Host, AccObjectList); // 2.14.4
   WRAPPER_CLASS(If, ScalarLogicalExpr); // 2.5.4
   WRAPPER_CLASS(NoCreate, AccObjectList); // 2.7.9
   WRAPPER_CLASS(NumGangs, ScalarIntConstantExpr); // 2.5.8
@@ -4412,9 +4414,9 @@ struct AccClause {
 
   std::variant<Auto, Finalize, Gang, IfPresent, Independent, NoHost, Seq,
       Vector, Worker, Async, Attach, Bind, Collapse, Copy, Copyin, Copyout,
-      Create, Default, Delete, Detach, DeviceNum, DevicePtr, DeviceType, If,
-      FirstPrivate, NoCreate, NumGangs, NumWorkers, Present, Private, UseDevice,
-      Self, VectorLength, Wait> u;
+      Create, Default, Delete, Detach, Device, DeviceNum, DevicePtr, DeviceType,
+      Host, If, FirstPrivate, NoCreate, NumGangs, NumWorkers, Present, Private,
+      UseDevice, Self, VectorLength, Wait> u;
 };
 
 struct AccClauseList {

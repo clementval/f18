@@ -1825,6 +1825,16 @@ public:
     Walk(x.v);
     Put(")");
   }
+  void Unparse(const AccClause::Device &x) {
+    Word("DEVICE(");
+    Walk(x.v);
+    Put(")");
+  }
+  void Unparse(const AccClause::Host &x) {
+    Word("HOST(");
+    Walk(x.v);
+    Put(")");
+  }
   void Unparse(const AccClause::If &x) {
     Word("IF(");
     Walk(x.v);
@@ -1872,6 +1882,7 @@ public:
     case AccStandaloneDirective::Directive::Loop: Word("LOOP"); break;
     case AccStandaloneDirective::Directive::Routine: Word("ROUTINE"); break;
     case AccStandaloneDirective::Directive::Shutdown: Word("SHUTDOWN"); break;
+    case AccStandaloneDirective::Directive::Update: Word("UPDATE"); break;
     case AccStandaloneDirective::Directive::Wait: Word("WAIT"); break;
     }
   }

@@ -162,6 +162,12 @@ void AccStructureChecker::Enter(const parser::OpenACCStandaloneConstruct &x) {
           AccClause::IF});
       // TODO maybe allowed multiple times
     } break;
+    case parser::AccStandaloneDirective::Directive::Update: {
+      PushContext(dir.source, AccDirective::UPDATE);
+      SetContextAllowed({AccClause::DEVICE, AccClause::HOST, AccClause::SELF});
+      // TODO DEVICE, HOST, SELF requires at least one of them
+      // TODO other clauses ASYNC, WAIT, DEVICE_TYPE, IF, IF_PRESENT
+    } break;
   }
 }
 
@@ -182,9 +188,11 @@ CHECK_SIMPLE_CLAUSE(Create, CREATE)
 CHECK_SIMPLE_CLAUSE(Default, DEFAULT)
 CHECK_SIMPLE_CLAUSE(Delete, DELETE)
 CHECK_SIMPLE_CLAUSE(Detach, DETACH)
+CHECK_SIMPLE_CLAUSE(Device, DEVICE) // TODO more ?
 CHECK_SIMPLE_CLAUSE(Finalize, FINALIZE)
 CHECK_SIMPLE_CLAUSE(FirstPrivate, FIRSTPRIVATE)
 CHECK_SIMPLE_CLAUSE(Gang, GANG)
+CHECK_SIMPLE_CLAUSE(Host, HOST) // TODO more ?
 CHECK_SIMPLE_CLAUSE(If, IF)
 CHECK_SIMPLE_CLAUSE(IfPresent, IF_PRESENT)
 CHECK_SIMPLE_CLAUSE(Independent, INDEPENDENT)

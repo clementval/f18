@@ -74,6 +74,8 @@ TYPE_PARSER(
         parenthesized(Parser<AccObjectList>{}))) ||
     "DETACH" >> construct<AccClause>(construct<AccClause::Detach>(
         parenthesized(Parser<AccObjectList>{}))) ||
+    "DEVICE" >> construct<AccClause>(construct<AccClause::Device>(
+        parenthesized(Parser<AccObjectList>{}))) ||
     "DEVICEPTR" >> construct<AccClause>(construct<AccClause::DevicePtr>(
         parenthesized(Parser<AccObjectList>{}))) ||
     "DEVICENUM" >> construct<AccClause>(construct<AccClause::DeviceNum>(
@@ -84,6 +86,8 @@ TYPE_PARSER(
     "FIRSTPRIVATE" >> construct<AccClause>(construct<AccClause::FirstPrivate>(
         parenthesized(Parser<AccObjectList>{}))) ||
     "GANG" >> construct<AccClause>(construct<AccClause::Gang>()) ||
+    "HOST" >> construct<AccClause>(construct<AccClause::Host>(
+        parenthesized(Parser<AccObjectList>{}))) ||
     "IF" >> construct<AccClause>(
         construct<AccClause::If>(parenthesized(scalarLogicalExpr))) ||
     "IF_PRESENT" >> construct<AccClause>(construct<AccClause::IfPresent>()) ||
@@ -121,6 +125,7 @@ TYPE_PARSER(construct<AccStandaloneDirective>(first(
     "LOOP" >> pure(AccStandaloneDirective::Directive::Loop),
     "ROUTINE" >> pure(AccStandaloneDirective::Directive::Routine),
     "SHUTDOWN" >> pure(AccStandaloneDirective::Directive::Shutdown),
+    "UPDATE" >> pure(AccStandaloneDirective::Directive::Update),
     "WAIT" >> pure(AccStandaloneDirective::Directive::Wait))))
 
 // [Clause, [Clause], ...]
