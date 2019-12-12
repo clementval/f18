@@ -1868,8 +1868,10 @@ public:
       Word("ENTER DATA"); break;
     case AccStandaloneDirective::Directive::ExitData:
       Word("EXIT DATA"); break;
+    case AccStandaloneDirective::Directive::Init: Word("INIT"); break;
     case AccStandaloneDirective::Directive::Loop: Word("LOOP"); break;
     case AccStandaloneDirective::Directive::Routine: Word("ROUTINE"); break;
+    case AccStandaloneDirective::Directive::Shutdown: Word("SHUTDOWN"); break;
     case AccStandaloneDirective::Directive::Wait: Word("WAIT"); break;
     }
   }

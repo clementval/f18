@@ -4356,7 +4356,8 @@ struct AccBlockDirective {
 };
 
 struct AccStandaloneDirective {
-  ENUM_CLASS(Directive, EnterData, ExitData, Loop, Routine, Wait);
+  ENUM_CLASS(Directive, EnterData, ExitData, Init, Loop, Routine, Shutdown,
+      Wait);
   WRAPPER_CLASS_BOILERPLATE(AccStandaloneDirective, Directive);
   CharBlock source;
 };

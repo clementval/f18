@@ -114,12 +114,14 @@ TYPE_PARSER(construct<AccObject>(designator)
         || construct<AccObject>("/" >> name / "/"))
 TYPE_PARSER(construct<AccObjectList>(nonemptyList(Parser<AccObject>{})))
 
-
-TYPE_PARSER(construct<AccStandaloneDirective>(
-        first("LOOP" >> pure(AccStandaloneDirective::Directive::Loop),
-              "WAIT" >> pure(AccStandaloneDirective::Directive::Wait),
-              "ENTER DATA" >> pure(AccStandaloneDirective::Directive::EnterData),
-              "EXIT DATA" >> pure(AccStandaloneDirective::Directive::ExitData))))
+TYPE_PARSER(construct<AccStandaloneDirective>(first(
+    "ENTER DATA" >> pure(AccStandaloneDirective::Directive::EnterData),
+    "EXIT DATA" >> pure(AccStandaloneDirective::Directive::ExitData),
+    "INIT" >> pure(AccStandaloneDirective::Directive::Init),
+    "LOOP" >> pure(AccStandaloneDirective::Directive::Loop),
+    "ROUTINE" >> pure(AccStandaloneDirective::Directive::Routine),
+    "SHUTDOWN" >> pure(AccStandaloneDirective::Directive::Shutdown),
+    "WAIT" >> pure(AccStandaloneDirective::Directive::Wait))))
 
 // [Clause, [Clause], ...]
 TYPE_PARSER(sourced(construct<AccClauseList>(

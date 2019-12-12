@@ -26,8 +26,8 @@
 
 namespace Fortran::semantics {
 
-ENUM_CLASS(AccDirective, DATA, ENTER_DATA, EXIT_DATA, HOST_DATA, KERNELS, LOOP,
-    PARALLEL, ROUTINE, SERIAL, WAIT)
+ENUM_CLASS(AccDirective, DATA, ENTER_DATA, EXIT_DATA, INIT, HOST_DATA, KERNELS,
+    LOOP, PARALLEL, ROUTINE, SERIAL, SHUTDOWN, WAIT)
 
 using AccDirectiveSet = common::EnumSet<AccDirective, AccDirective_enumSize>;
 

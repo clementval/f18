@@ -110,6 +110,12 @@ void AccStructureChecker::Leave(const parser::OpenACCBlockConstruct &) {
 void AccStructureChecker::Enter(const parser::OpenACCStandaloneConstruct &x) {
   const auto &dir{std::get<parser::AccStandaloneDirective>(x.t)};
   switch (dir.v) {
+    case parser::AccStandaloneDirective::Directive::Init: {
+      PushContext(dir.source, AccDirective::INIT);
+      SetContextAllowedOnce({AccClause::DEVICENUM, AccClause::DEVICE_TYPE,
+                            AccClause::IF});
+      // TODO maybe multiple times
+    } break;
     case parser::AccStandaloneDirective::Directive::Loop: {
       PushContext(dir.source, AccDirective::LOOP);
       SetContextAllowed({AccClause::PRIVATE});
@@ -149,6 +155,12 @@ void AccStructureChecker::Enter(const parser::OpenACCStandaloneConstruct &x) {
       // TODO only GANG, WORKER, VECTOR, CLAUSE can follow DEVICE_TYPE
       // TODO If DEVICE_TYPE, must have one DEFAULT parrallelism level before
       // or one after each
+    } break;
+    case parser::AccStandaloneDirective::Directive::Shutdown: {
+      PushContext(dir.source, AccDirective::SHUTDOWN);
+      SetContextAllowedOnce({AccClause::DEVICENUM, AccClause::DEVICE_TYPE,
+          AccClause::IF});
+      // TODO maybe allowed multiple times
     } break;
   }
 }
