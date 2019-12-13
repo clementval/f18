@@ -144,6 +144,9 @@ void AccStructureChecker::Enter(const parser::OpenACCStandaloneConstruct &x) {
                             AccClause::IF});
       // TODO maybe multiple times
     } break;
+    case parser::AccStandaloneDirective::Directive::Cache: {
+      PushContext(dir.source, AccDirective::CACHE);
+    } break;
     case parser::AccStandaloneDirective::Directive::Loop: {
       PushContext(dir.source, AccDirective::LOOP);
       SetContextAllowed({AccClause::PRIVATE});

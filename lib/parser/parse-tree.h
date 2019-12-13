@@ -4359,7 +4359,7 @@ struct AccBlockDirective {
 };
 
 struct AccStandaloneDirective {
-  ENUM_CLASS(Directive, EnterData, ExitData, Init, Loop, Routine,
+  ENUM_CLASS(Directive, Cache, EnterData, ExitData, Init, Loop, Routine,
       Shutdown, Update, Wait);
   WRAPPER_CLASS_BOILERPLATE(AccStandaloneDirective, Directive);
   CharBlock source;
@@ -4379,6 +4379,18 @@ struct AccDefaultClause {
   WRAPPER_CLASS_BOILERPLATE(AccDefaultClause, Arg);
   CharBlock source;
 };
+
+struct AccDataModifier {
+  ENUM_CLASS(Modifier, ReadOnly, Zero)
+  WRAPPER_CLASS_BOILERPLATE(AccDataModifier, Modifier);
+  CharBlock source;
+};
+
+struct AccDataModifierClause {
+  TUPLE_CLASS_BOILERPLATE(AccDataModifierClause);
+  std::tuple<AccDataModifier, AccObjectList> t;
+};
+
 
 struct AccClause {
   UNION_CLASS_BOILERPLATE(AccClause);
@@ -4402,7 +4414,7 @@ struct AccClause {
   WRAPPER_CLASS(Copy, AccObjectList); // 2.7.5
   WRAPPER_CLASS(Copyin, AccObjectList); // 2.7.6
   WRAPPER_CLASS(Copyout, AccObjectList); // 2.7.7
-  WRAPPER_CLASS(Create, AccObjectList); // 2.7.8
+  WRAPPER_CLASS(Create, AccDataModifier); // 2.7.8 TODO re-introduce AccDataModifierClause
   WRAPPER_CLASS(Default, AccDefaultClause); // 2.5.14
   WRAPPER_CLASS(Delete, AccObjectList); // 2.7.10
   WRAPPER_CLASS(Detach, AccObjectList); // 2.7.12
@@ -4480,7 +4492,6 @@ struct OpenACCConstruct {
 
   std::variant<OpenACCBlockConstruct, OpenACCStandaloneConstruct> u;
 };
-
 
 }
 #endif  // FORTRAN_PARSER_PARSE_TREE_H_

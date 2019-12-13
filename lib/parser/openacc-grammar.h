@@ -67,8 +67,10 @@ TYPE_PARSER(
         parenthesized(Parser<AccObjectList>{}))) ||
     "COPYOUT" >> construct<AccClause>(construct<AccClause::Copyout>(
         parenthesized(Parser<AccObjectList>{}))) ||
-    "CREATE" >> construct<AccClause>(construct<AccClause::Create>(
-        parenthesized(Parser<AccObjectList>{}))) ||
+    "CREATE" >> construct<AccClause>(construct<AccClause::Create>(first(
+        // TODO re-introduce AccObjectList
+        "ZERO:" >> pure(AccDataModifier::Modifier::Zero),
+        "READONLY:" >> pure(AccDataModifier::Modifier::ReadOnly)))) ||
     "DEFAULT" >> construct<AccClause>(construct<AccClause::Default>(first(
         "NONE" >> pure(AccDefaultClause::Arg::None),
         "PRESENT" >> pure(AccDefaultClause::Arg::Present)))) ||
@@ -102,7 +104,7 @@ TYPE_PARSER(
         parenthesized(scalarIntConstantExpr))) ||
     "NUM_WORKERS" >> construct<AccClause>(construct<AccClause::NumWorkers>(
         parenthesized(scalarIntConstantExpr))) ||
-    "PRESENT" >> construct<AccClause>(construct<AccClause::Create>(
+    "PRESENT" >> construct<AccClause>(construct<AccClause::Present>(
         parenthesized(Parser<AccObjectList>{}))) ||
     "READ" >> construct<AccClause>(construct<AccClause::Read>()) ||
     "VECTOR_LENGTH" >> construct<AccClause>(construct<AccClause::VectorLength>(
@@ -121,6 +123,13 @@ TYPE_PARSER(
 TYPE_PARSER(construct<AccObject>(designator)
         || construct<AccObject>("/" >> name / "/"))
 TYPE_PARSER(construct<AccObjectList>(nonemptyList(Parser<AccObject>{})))
+//
+//TYPE_PARSER(construct<AccDataModifier>(
+//    first("READONLY:" >> pure(AccDataModifier::Modifier::ReadOnly),
+//          "ZERO:" >> pure(AccDataModifier::Modifier::Zero))))
+//
+//TYPE_PARSER(construct<AccDataModifierClause>(
+//    Parser<AccDataModifier>{}, Parser<AccObjectList>{}))
 
 TYPE_PARSER(construct<AccStandaloneDirective>(first(
     "ENTER DATA" >> pure(AccStandaloneDirective::Directive::EnterData),
