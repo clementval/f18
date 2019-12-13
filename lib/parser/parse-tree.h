@@ -427,7 +427,7 @@ struct SpecificationConstruct {
       Statement<OtherSpecificationStmt>,
       Statement<common::Indirection<TypeDeclarationStmt>>,
       common::Indirection<StructureDef>,
-      common::Indirection<OpenACCDeclarativeConstruct>,
+      //common::Indirection<OpenACCDeclarativeConstruct>,
       common::Indirection<OpenMPDeclarativeConstruct>,
       common::Indirection<CompilerDirective>>
       u;
@@ -469,7 +469,7 @@ struct DeclarationConstruct {
 struct SpecificationPart {
   TUPLE_CLASS_BOILERPLATE(SpecificationPart);
 
-  std::tuple<std::list<OpenACCDeclarativeConstruct>,
+  std::tuple</*std::list<OpenACCDeclarativeConstruct>,*/
       std::list<OpenMPDeclarativeConstruct>,
       std::list<Statement<common::Indirection<UseStmt>>>,
       std::list<Statement<common::Indirection<ImportStmt>>>, ImplicitPart,
