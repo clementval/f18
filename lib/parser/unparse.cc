@@ -1755,6 +1755,7 @@ public:
   // OpenACC Directives & Clauses
   void Unparse(const AccBlockDirective &x) {
     switch (x.v) {
+      case AccBlockDirective::Directive::Atomic: Word("ATOMIC"); break;
       case AccBlockDirective::Directive::Data: Word("DATA"); break;
       case AccBlockDirective::Directive::HostData: Word("HOST_DATA"); break;
       case AccBlockDirective::Directive::Kernels: Word("KERNELS"); break;

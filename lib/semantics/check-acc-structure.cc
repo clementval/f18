@@ -47,6 +47,11 @@ void AccStructureChecker::Enter(const parser::OpenACCBlockConstruct &x) {
       CheckMatching<parser::AccBlockDirective>(beginBlockDir, endBlockDir)};
 
   switch (beginDir.v) {
+    case parser::AccBlockDirective::Directive::Atomic: {
+      PushContext(beginDir.source, AccDirective::ATOMIC);
+      SetContextAllowedExclusive({AccClause::CAPTURE, AccClause::READ,
+                                  AccClause::WRITE});
+    } break;
     case parser::AccBlockDirective::Directive::Parallel: {
       PushContext(beginDir.source, AccDirective::PARALLEL);
       SetContextAllowed({AccClause::COPY, AccClause::COPYIN, AccClause::COPYOUT,
@@ -206,6 +211,7 @@ CHECK_REQ_SCALAR_INT_CONSTANT_CLAUSE(VectorLength, VECTOR_LENGTH)
 
 CHECK_SIMPLE_CLAUSE(Auto, AUTO)
 CHECK_SIMPLE_CLAUSE(Attach, ATTACH)
+CHECK_SIMPLE_CLAUSE(Capture, CAPTURE)
 CHECK_SIMPLE_CLAUSE(Bind, BIND)
 CHECK_SIMPLE_CLAUSE(Create, CREATE)
 CHECK_SIMPLE_CLAUSE(Default, DEFAULT)
@@ -221,11 +227,13 @@ CHECK_SIMPLE_CLAUSE(IfPresent, IF_PRESENT)
 CHECK_SIMPLE_CLAUSE(Independent, INDEPENDENT)
 CHECK_SIMPLE_CLAUSE(NoCreate, NO_CREATE)
 CHECK_SIMPLE_CLAUSE(NoHost, NOHOST)
+CHECK_SIMPLE_CLAUSE(Read, READ)
 CHECK_SIMPLE_CLAUSE(Self, SELF)
 CHECK_SIMPLE_CLAUSE(Seq, SEQ)
 CHECK_SIMPLE_CLAUSE(UseDevice, USE_DEVICE)
 CHECK_SIMPLE_CLAUSE(Vector, VECTOR)
 CHECK_SIMPLE_CLAUSE(Worker, WORKER)
+CHECK_SIMPLE_CLAUSE(Write, WRITE)
 
 void AccStructureChecker::Enter(const parser::AccClause::Async &c) {
   CheckAllowed(AccClause::ASYNC);

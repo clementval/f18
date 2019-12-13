@@ -40,7 +40,8 @@ constexpr auto startAccLine = skipStuffBeforeStatement >> "!$ACC "_sptok;
 constexpr auto endAccLine = space >> endOfLine;
 
 TYPE_PARSER(construct<AccBlockDirective>(
-    first("DATA" >> pure(AccBlockDirective::Directive::Data),
+    first("ATOMIC" >> pure(AccBlockDirective::Directive::Atomic),
+          "DATA" >> pure(AccBlockDirective::Directive::Data),
           "HOST_DATA" >> pure(AccBlockDirective::Directive::HostData),
           "KERNELS" >> pure(AccBlockDirective::Directive::Kernels),
           "PARALLEL" >> pure(AccBlockDirective::Directive::Parallel),
@@ -55,6 +56,7 @@ TYPE_PARSER(
         parenthesized(scalarIntConstantExpr)))) || // TODO optional int-expr
     "ATTACH" >> construct<AccClause>(construct<AccClause::Attach>(
         parenthesized(Parser<AccObjectList>{}))) ||
+    "CAPTURE" >> construct<AccClause>(construct<AccClause::Capture>()) ||
     "BIND" >> construct<AccClause>(construct<AccClause::Bind>(
         parenthesized(name))) ||
     "COLLAPSE" >> construct<AccClause>(construct<AccClause::Collapse>(
@@ -102,6 +104,7 @@ TYPE_PARSER(
         parenthesized(scalarIntConstantExpr))) ||
     "PRESENT" >> construct<AccClause>(construct<AccClause::Create>(
         parenthesized(Parser<AccObjectList>{}))) ||
+    "READ" >> construct<AccClause>(construct<AccClause::Read>()) ||
     "VECTOR_LENGTH" >> construct<AccClause>(construct<AccClause::VectorLength>(
         parenthesized(scalarIntConstantExpr))) ||
     "SELF" >> construct<AccClause>(construct<AccClause::Self>(
@@ -112,7 +115,8 @@ TYPE_PARSER(
     "VECTOR" >> construct<AccClause>(construct<AccClause::Vector>()) ||
     "WAIT" >> construct<AccClause>(construct<AccClause::Wait>(
         maybe(parenthesized(scalarIntExpr)))) || // TODO optional int-expr-list
-    "WORKER" >> construct<AccClause>(construct<AccClause::Worker>()))
+    "WORKER" >> construct<AccClause>(construct<AccClause::Worker>()) ||
+    "WRITE" >>  construct<AccClause>(construct<AccClause::Auto>()))
 
 TYPE_PARSER(construct<AccObject>(designator)
         || construct<AccObject>("/" >> name / "/"))

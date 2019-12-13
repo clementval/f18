@@ -26,16 +26,16 @@
 
 namespace Fortran::semantics {
 
-ENUM_CLASS(AccDirective, DATA, DECLARE, ENTER_DATA, EXIT_DATA, INIT, HOST_DATA,
-    KERNELS, LOOP, PARALLEL, ROUTINE, SERIAL, SHUTDOWN, UPDATE, WAIT)
+ENUM_CLASS(AccDirective, ATOMIC, DATA, DECLARE, ENTER_DATA, EXIT_DATA, INIT,
+    HOST_DATA, KERNELS, LOOP, PARALLEL, ROUTINE, SERIAL, SHUTDOWN, UPDATE, WAIT)
 
 using AccDirectiveSet = common::EnumSet<AccDirective, AccDirective_enumSize>;
 
-ENUM_CLASS(AccClause, AUTO, ASYNC, ATTACH, BIND, COLLAPSE, COPY, COPYIN,
-    COPYOUT, DEFAULT, DELETE, CREATE, DETACH, DEVICE, DEVICENUM, DEVICEPTR,
-    DEVICE_TYPE, FINALIZE, FIRSTPRIVATE, GANG, HOST, IF, IF_PRESENT,
+ENUM_CLASS(AccClause, AUTO, ASYNC, ATTACH, CAPTURE, BIND, COLLAPSE, COPY,
+    COPYIN, COPYOUT, DEFAULT, DELETE, CREATE, DETACH, DEVICE, DEVICENUM,
+    DEVICEPTR, DEVICE_TYPE, FINALIZE, FIRSTPRIVATE, GANG, HOST, IF, IF_PRESENT,
     INDEPENDENT, NO_CREATE, NOHOST, NUM_GANGS, NUM_WORKERS, PRESENT, PRIVATE,
-    USE_DEVICE, VECTOR_LENGTH, SELF, SEQ, VECTOR, WAIT, WORKER)
+    READ, USE_DEVICE, VECTOR_LENGTH, SELF, SEQ, VECTOR, WAIT, WORKER, WRITE)
 
 using AccClauseSet = common::EnumSet<AccClause, AccClause_enumSize>;
 
@@ -59,6 +59,7 @@ public:
   void Enter(const parser::AccClause::Auto &);
   void Enter(const parser::AccClause::Async &);
   void Enter(const parser::AccClause::Attach &);
+  void Enter(const parser::AccClause::Capture &);
   void Enter(const parser::AccClause::Bind &);
   void Enter(const parser::AccClause::Collapse &);
   void Enter(const parser::AccClause::Copy &);
@@ -78,20 +79,22 @@ public:
   void Enter(const parser::AccClause::Host &);
   void Enter(const parser::AccClause::If &);
   void Enter(const parser::AccClause::IfPresent &);
+  void Enter(const parser::AccClause::Independent&);
   void Enter(const parser::AccClause::NoCreate &);
   void Enter(const parser::AccClause::NoHost &);
   void Enter(const parser::AccClause::NumGangs &);
   void Enter(const parser::AccClause::NumWorkers &);
   void Enter(const parser::AccClause::Present &);
   void Enter(const parser::AccClause::Private &);
-  void Enter(const parser::AccClause::VectorLength &);
-  void Enter(const parser::AccClause::Independent&);
+  void Enter(const parser::AccClause::Read &);
   void Enter(const parser::AccClause::Self &);
   void Enter(const parser::AccClause::Seq &);
   void Enter(const parser::AccClause::UseDevice &);
   void Enter(const parser::AccClause::Vector &);
+  void Enter(const parser::AccClause::VectorLength &);
   void Enter(const parser::AccClause::Worker &);
   void Enter(const parser::AccClause::Wait &);
+  void Enter(const parser::AccClause::Write &);
 
 private:
 
