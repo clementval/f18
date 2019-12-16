@@ -67,10 +67,8 @@ TYPE_PARSER(
         parenthesized(Parser<AccObjectList>{}))) ||
     "COPYOUT" >> construct<AccClause>(construct<AccClause::Copyout>(
         parenthesized(Parser<AccObjectList>{}))) ||
-    "CREATE" >> construct<AccClause>(construct<AccClause::Create>(first(
-        // TODO re-introduce AccObjectList
-        "ZERO:" >> pure(AccDataModifier::Modifier::Zero),
-        "READONLY:" >> pure(AccDataModifier::Modifier::ReadOnly)))) ||
+    "CREATE" >> construct<AccClause>(
+        parenthesized(Parser<AccCreateClause>{})) ||
     "DEFAULT" >> construct<AccClause>(construct<AccClause::Default>(first(
         "NONE" >> pure(AccDefaultClause::Arg::None),
         "PRESENT" >> pure(AccDefaultClause::Arg::Present)))) ||
@@ -123,13 +121,14 @@ TYPE_PARSER(
 TYPE_PARSER(construct<AccObject>(designator)
         || construct<AccObject>("/" >> name / "/"))
 TYPE_PARSER(construct<AccObjectList>(nonemptyList(Parser<AccObject>{})))
-//
-//TYPE_PARSER(construct<AccDataModifier>(
-//    first("READONLY:" >> pure(AccDataModifier::Modifier::ReadOnly),
-//          "ZERO:" >> pure(AccDataModifier::Modifier::Zero))))
-//
-//TYPE_PARSER(construct<AccDataModifierClause>(
-//    Parser<AccDataModifier>{}, Parser<AccObjectList>{}))
+
+TYPE_PARSER(construct<AccDataModifier>(
+     first(
+        "ZERO:" >> pure(AccDataModifier::Modifier::Zero),
+        "READONLY:" >> pure(AccDataModifier::Modifier::ReadOnly))))
+
+TYPE_PARSER(construct<AccCreateClause>(
+    maybe(Parser<AccDataModifier>{}), Parser<AccObjectList>{}))
 
 TYPE_PARSER(construct<AccStandaloneDirective>(first(
     "ENTER DATA" >> pure(AccStandaloneDirective::Directive::EnterData),

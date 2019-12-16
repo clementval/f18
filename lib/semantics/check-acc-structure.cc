@@ -216,7 +216,6 @@ CHECK_SIMPLE_CLAUSE(Auto, AUTO)
 CHECK_SIMPLE_CLAUSE(Attach, ATTACH)
 CHECK_SIMPLE_CLAUSE(Capture, CAPTURE)
 CHECK_SIMPLE_CLAUSE(Bind, BIND)
-CHECK_SIMPLE_CLAUSE(Create, CREATE)
 CHECK_SIMPLE_CLAUSE(Default, DEFAULT)
 CHECK_SIMPLE_CLAUSE(Delete, DELETE)
 CHECK_SIMPLE_CLAUSE(Detach, DETACH)
@@ -237,6 +236,18 @@ CHECK_SIMPLE_CLAUSE(UseDevice, USE_DEVICE)
 CHECK_SIMPLE_CLAUSE(Vector, VECTOR)
 CHECK_SIMPLE_CLAUSE(Worker, WORKER)
 CHECK_SIMPLE_CLAUSE(Write, WRITE)
+
+void AccStructureChecker::Enter(const parser::AccCreateClause &c) {
+  CheckAllowed(AccClause::CREATE);
+  if (const auto &modifier{std::get<std::optional<parser::AccDataModifier>>(c.t)}) {
+    if(modifier->v != parser::AccDataModifier::Modifier::Zero) {
+      context_.Say(GetContext().clauseSource,
+                   "Only the ZERO modifier is permitted for the CREATE clause "
+                   "on the %s directive "_err_en_US,
+                   EnumToString(GetContext().directive));
+    }
+  }
+}
 
 void AccStructureChecker::Enter(const parser::AccClause::Async &c) {
   CheckAllowed(AccClause::ASYNC);

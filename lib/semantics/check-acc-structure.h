@@ -56,6 +56,7 @@ public:
 
   // Clauses
   void Leave(const parser::AccClauseList &);
+  void Enter(const parser::AccCreateClause &);
   void Enter(const parser::AccClause &);
   void Enter(const parser::AccClause::Auto &);
   void Enter(const parser::AccClause::Async &);
@@ -66,7 +67,6 @@ public:
   void Enter(const parser::AccClause::Copy &);
   void Enter(const parser::AccClause::Copyin &);
   void Enter(const parser::AccClause::Copyout &);
-  void Enter(const parser::AccClause::Create &);
   void Enter(const parser::AccClause::Default &);
   void Enter(const parser::AccClause::Delete &);
   void Enter(const parser::AccClause::Detach &);
