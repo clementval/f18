@@ -261,8 +261,18 @@ void AccStructureChecker::Enter(const parser::AccClause::Copy &) {
   // TODO specific check for values
 }
 
-void AccStructureChecker::Enter(const parser::AccClause::Copyin &) {
+void AccStructureChecker::Enter(const parser::AccClause::Copyin &c) {
   CheckAllowed(AccClause::COPYIN);
+  const auto &modifierClause{c.v};
+  if (const auto &modifier{std::get<std::optional<parser::AccDataModifier>>(modifierClause.t)}) {
+    if(modifier->v != parser::AccDataModifier::Modifier::ReadOnly) {
+      context_.Say(GetContext().clauseSource,
+                   "Only the READONLY modifier is permitted for the %s clause "
+                   "on the %s directive"_err_en_US,
+                   EnumToString(AccClause::COPYIN),
+                   EnumToString(GetContext().directive));
+    }
+  }
   // TODO specific check for values
 }
 

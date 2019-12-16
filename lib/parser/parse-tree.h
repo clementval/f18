@@ -4411,7 +4411,7 @@ struct AccClause {
   WRAPPER_CLASS(Bind, Name); // 2.15.1
   WRAPPER_CLASS(Collapse, ScalarIntConstantExpr); // 2.9.1
   WRAPPER_CLASS(Copy, AccObjectList); // 2.7.5
-  WRAPPER_CLASS(Copyin, AccObjectList); // 2.7.6
+  WRAPPER_CLASS(Copyin, AccModifierClause); // 2.7.6
   WRAPPER_CLASS(Copyout, AccModifierClause); // 2.7.7
   WRAPPER_CLASS(Create, AccModifierClause); // 2.7.8
   WRAPPER_CLASS(Default, AccDefaultClause); // 2.5.14

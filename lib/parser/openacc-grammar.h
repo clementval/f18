@@ -64,7 +64,7 @@ TYPE_PARSER(
     "COPY" >> construct<AccClause>(construct<AccClause::Copy>(
         parenthesized(Parser<AccObjectList>{}))) ||
     "COPYIN" >> construct<AccClause>(construct<AccClause::Copyin>(
-        parenthesized(Parser<AccObjectList>{}))) ||
+        parenthesized(Parser<AccModifierClause>{}))) ||
     "COPYOUT" >> construct<AccClause>(construct<AccClause::Copyout>(
         parenthesized(Parser<AccModifierClause>{}))) ||
     "CREATE" >> construct<AccClause>(construct<AccClause::Create>(
