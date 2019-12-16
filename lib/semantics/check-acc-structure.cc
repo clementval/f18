@@ -236,10 +236,12 @@ CHECK_SIMPLE_CLAUSE(UseDevice, USE_DEVICE)
 CHECK_SIMPLE_CLAUSE(Vector, VECTOR)
 CHECK_SIMPLE_CLAUSE(Worker, WORKER)
 CHECK_SIMPLE_CLAUSE(Write, WRITE)
-
-void AccStructureChecker::Enter(const parser::AccCreateClause &c) {
+//
+void AccStructureChecker::Enter(const parser::AccClause::Create &c) {
   CheckAllowed(AccClause::CREATE);
-  if (const auto &modifier{std::get<std::optional<parser::AccDataModifier>>(c.t)}) {
+
+  const auto &modifierClause{c.v};
+  if (const auto &modifier{std::get<std::optional<parser::AccDataModifier>>(modifierClause.t)}) {
     if(modifier->v != parser::AccDataModifier::Modifier::Zero) {
       context_.Say(GetContext().clauseSource,
                    "Only the ZERO modifier is permitted for the CREATE clause "
@@ -264,8 +266,18 @@ void AccStructureChecker::Enter(const parser::AccClause::Copyin &) {
   // TODO specific check for values
 }
 
-void AccStructureChecker::Enter(const parser::AccClause::Copyout &) {
+void AccStructureChecker::Enter(const parser::AccClause::Copyout &c) {
   CheckAllowed(AccClause::COPYOUT);
+
+  const auto &modifierClause{c.v};
+  if (const auto &modifier{std::get<std::optional<parser::AccDataModifier>>(modifierClause.t)}) {
+    if(modifier->v != parser::AccDataModifier::Modifier::Zero) {
+      context_.Say(GetContext().clauseSource,
+                   "Only the ZERO modifier is permitted for the COPYOUT clause "
+                   "on the %s directive"_err_en_US,
+                   EnumToString(GetContext().directive));
+    }
+  }
   // TODO specific check for values
 }
 

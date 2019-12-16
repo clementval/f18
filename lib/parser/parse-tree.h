@@ -4386,14 +4386,10 @@ struct AccDataModifier {
   CharBlock source;
 };
 
-// 2.7.8 create( [zero:]var-list )
-struct AccCreateClause {
-  TUPLE_CLASS_BOILERPLATE(AccCreateClause);
+struct AccModifierClause {
+  TUPLE_CLASS_BOILERPLATE(AccModifierClause);
   std::tuple<std::optional<AccDataModifier>, AccObjectList> t;
 };
-
-
-
 
 struct AccClause {
   UNION_CLASS_BOILERPLATE(AccClause);
@@ -4416,7 +4412,8 @@ struct AccClause {
   WRAPPER_CLASS(Collapse, ScalarIntConstantExpr); // 2.9.1
   WRAPPER_CLASS(Copy, AccObjectList); // 2.7.5
   WRAPPER_CLASS(Copyin, AccObjectList); // 2.7.6
-  WRAPPER_CLASS(Copyout, AccObjectList); // 2.7.7
+  WRAPPER_CLASS(Copyout, AccModifierClause); // 2.7.7
+  WRAPPER_CLASS(Create, AccModifierClause); // 2.7.8
   WRAPPER_CLASS(Default, AccDefaultClause); // 2.5.14
   WRAPPER_CLASS(Delete, AccObjectList); // 2.7.10
   WRAPPER_CLASS(Detach, AccObjectList); // 2.7.12
@@ -4440,7 +4437,7 @@ struct AccClause {
 
   std::variant<Auto, Capture, Finalize, Gang, IfPresent, Independent, NoHost,
       Read, Seq, Vector, Worker, Write, Async, Attach, Bind, Collapse, Copy,
-      Copyin, Copyout, AccCreateClause, Default, Delete, Detach, Device, DeviceNum,
+      Copyin, Copyout, Create, Default, Delete, Detach, Device, DeviceNum,
       DevicePtr, DeviceType, Host, If, FirstPrivate, NoCreate, NumGangs,
       NumWorkers, Present, Private, UseDevice, Self, VectorLength, Wait> u;
 };
