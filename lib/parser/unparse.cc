@@ -1805,10 +1805,14 @@ public:
     Walk(x.v);
     Put(")");
   }
-  void Unparse(const AccCreateClause &/*x*/) {
+  void Unparse(const AccCreateClause &x) {
     Word("CREATE(");
-//    Walk(x.v); TODO
+    Walk(std::get<std::optional<AccDataModifier>>(x.t), ":");
+    Walk(std::get<AccObjectList>(x.t));
     Put(")");
+  }
+  void Unparse(const AccDataModifier::Modifier &x) {
+    Word(AccDataModifier::EnumToString(x));
   }
   void Unparse(const AccClause::Delete &x) {
     Word("DELETE(");
