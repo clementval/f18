@@ -1810,7 +1810,7 @@ public:
     Walk(x.v);
     Put(")");
   }
-  void Unparse(const AccModifierClause &x) {
+  void Unparse(const AccObjectListWithModifier &x) {
     Walk(std::get<std::optional<AccDataModifier>>(x.t), ":");
     Walk(std::get<AccObjectList>(x.t));
   }

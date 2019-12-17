@@ -51,11 +51,11 @@ TYPE_PARSER(
     "COPY" >> construct<AccClause>(construct<AccClause::Copy>(
         parenthesized(Parser<AccObjectList>{}))) ||
     "COPYIN" >> construct<AccClause>(construct<AccClause::Copyin>(
-        parenthesized(Parser<AccModifierClause>{}))) ||
+        parenthesized(Parser<AccObjectListWithModifier>{}))) ||
     "COPYOUT" >> construct<AccClause>(construct<AccClause::Copyout>(
-        parenthesized(Parser<AccModifierClause>{}))) ||
+        parenthesized(Parser<AccObjectListWithModifier>{}))) ||
     "CREATE" >> construct<AccClause>(construct<AccClause::Create>(
-        parenthesized(Parser<AccModifierClause>{}))) ||
+        parenthesized(Parser<AccObjectListWithModifier>{}))) ||
     "DEFAULT" >> construct<AccClause>(construct<AccClause::Default>(first(
         "NONE" >> pure(AccDefaultClause::Arg::None),
         "PRESENT" >> pure(AccDefaultClause::Arg::Present)))) ||
@@ -101,7 +101,7 @@ TYPE_PARSER(
         parenthesized(Parser<AccObjectList>{}))) ||
     "VECTOR" >> construct<AccClause>(construct<AccClause::Vector>()) ||
     "WAIT" >> construct<AccClause>(construct<AccClause::Wait>(
-        maybe(parenthesized(Parser<AccWaitArgument>{})))) ||
+        maybe(parenthesized(scalarIntConstantExpr/*Parser<AccWaitArgument>{}*/)))) ||
     "WORKER" >> construct<AccClause>(construct<AccClause::Worker>()) ||
     "WRITE" >>  construct<AccClause>(construct<AccClause::Auto>()))
 
@@ -109,19 +109,14 @@ TYPE_PARSER(construct<AccObject>(designator)
         || construct<AccObject>("/" >> name / "/"))
 TYPE_PARSER(construct<AccObjectList>(nonemptyList(Parser<AccObject>{})))
 
-TYPE_PARSER(
-    construct<AccModifierClause>(
-        Parser<AccDataModifier>{}, Parser<AccObjectList>{}))
-
-
+TYPE_PARSER(construct<AccObjectListWithModifier>(
+        maybe(Parser<AccDataModifier>{}), Parser<AccObjectList>{}))
 
 // TODO
-TYPE_PARSER(construct<AccWaitArgument>(
-    maybe("DEVNUM:" >> pure(scalarIntExpr)),
-    scalarIntExpr
-    ))
-
-
+//TYPE_PARSER(construct<AccWaitArgument>(
+//    maybe("DEVNUM:" >> pure(scalarIntExpr)),
+//    scalarIntExpr
+//    ))
 
 TYPE_PARSER(construct<AccDataModifier>(
      first(

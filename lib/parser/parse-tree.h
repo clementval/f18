@@ -4386,15 +4386,15 @@ struct AccDataModifier {
   CharBlock source;
 };
 
-struct AccModifierClause {
-  TUPLE_CLASS_BOILERPLATE(AccModifierClause);
+struct AccObjectListWithModifier {
+  TUPLE_CLASS_BOILERPLATE(AccObjectListWithModifier);
   std::tuple<std::optional<AccDataModifier>, AccObjectList> t;
 };
 
-struct AccWaitArgument {
-  TUPLE_CLASS_BOILERPLATE(AccWaitArgument);
-  std::tuple<std::optional<ScalarIntExpr>, ScalarIntExpr> t;
-};
+//struct AccWaitArgument {
+//  TUPLE_CLASS_BOILERPLATE(AccWaitArgument);
+//  std::tuple<std::optional<ScalarIntExpr>, ScalarIntExpr> t;
+//};
 
 struct AccClause {
   UNION_CLASS_BOILERPLATE(AccClause);
@@ -4416,9 +4416,9 @@ struct AccClause {
   WRAPPER_CLASS(Bind, Name); // 2.15.1
   WRAPPER_CLASS(Collapse, ScalarIntConstantExpr); // 2.9.1
   WRAPPER_CLASS(Copy, AccObjectList); // 2.7.5
-  WRAPPER_CLASS(Copyin, AccModifierClause); // 2.7.6
-  WRAPPER_CLASS(Copyout, AccModifierClause); // 2.7.7
-  WRAPPER_CLASS(Create, AccModifierClause); // 2.7.8
+  WRAPPER_CLASS(Copyin, AccObjectListWithModifier); // 2.7.6
+  WRAPPER_CLASS(Copyout, AccObjectListWithModifier); // 2.7.7
+  WRAPPER_CLASS(Create, AccObjectListWithModifier); // 2.7.8
   WRAPPER_CLASS(Default, AccDefaultClause); // 2.5.14
   WRAPPER_CLASS(Delete, AccObjectList); // 2.7.10
   WRAPPER_CLASS(Detach, AccObjectList); // 2.7.12
@@ -4437,7 +4437,7 @@ struct AccClause {
   WRAPPER_CLASS(UseDevice, AccObjectList); // 2.8.1
   WRAPPER_CLASS(Self, std::optional<ScalarLogicalExpr>); // 2.5.5
   WRAPPER_CLASS(VectorLength, ScalarIntConstantExpr); // 2.5.10
-  WRAPPER_CLASS(Wait, std::optional<AccWaitArgument>); // 2.16.2
+  WRAPPER_CLASS(Wait, std::optional<ScalarIntConstantExpr>); // 2.16.2
   CharBlock source;
 
   std::variant<Auto, Capture, Finalize, Gang, IfPresent, Independent, NoHost,

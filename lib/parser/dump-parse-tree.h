@@ -530,7 +530,7 @@ public:
   NODE_ENUM(parser::AccDeclarativeDirective, Directive)
   NODE(parser, AccDataModifier)
   NODE_ENUM(parser::AccDataModifier, Modifier)
-  NODE(parser, AccModifierClause)
+  NODE(parser, AccObjectListWithModifier)
   NODE(parser, AccClause)
   NODE(parser, AccClauseList)
   NODE(parser::AccClause, Auto)
