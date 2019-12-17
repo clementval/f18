@@ -4391,6 +4391,11 @@ struct AccModifierClause {
   std::tuple<std::optional<AccDataModifier>, AccObjectList> t;
 };
 
+struct AccWaitArgument {
+  TUPLE_CLASS_BOILERPLATE(AccWaitArgument);
+  std::tuple<std::optional<ScalarIntExpr>, ScalarIntExpr> t;
+};
+
 struct AccClause {
   UNION_CLASS_BOILERPLATE(AccClause);
 
@@ -4432,7 +4437,7 @@ struct AccClause {
   WRAPPER_CLASS(UseDevice, AccObjectList); // 2.8.1
   WRAPPER_CLASS(Self, std::optional<ScalarLogicalExpr>); // 2.5.5
   WRAPPER_CLASS(VectorLength, ScalarIntConstantExpr); // 2.5.10
-  WRAPPER_CLASS(Wait, std::optional<ScalarIntExpr>); // 2.16.2 // TODO wait-agrument optional
+  WRAPPER_CLASS(Wait, std::optional<AccWaitArgument>); // 2.16.2
   CharBlock source;
 
   std::variant<Auto, Capture, Finalize, Gang, IfPresent, Independent, NoHost,

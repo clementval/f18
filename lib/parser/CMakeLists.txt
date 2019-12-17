@@ -23,6 +23,7 @@ add_library(FortranParser
   instrumented-parser.cc
   io-parsers.cc
   message.cc
+  openacc-parsers.cc
   openmp-parsers.cc
   parse-tree.cc
   parsing.cc
