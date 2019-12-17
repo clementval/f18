@@ -32,32 +32,10 @@
 namespace Fortran::semantics {
 static bool IsDescriptor(const ObjectEntityDetails &details) {
   if (const auto *type{details.type()}) {
-    if (const IntrinsicTypeSpec * typeSpec{type->AsIntrinsic()}) {
-      if (typeSpec->category() == TypeCategory::Character) {
-        // TODO maybe character lengths won't be in descriptors
+    if (auto dynamicType{evaluate::DynamicType::From(*type)}) {
+      if (dynamicType->RequiresDescriptor()) {
         return true;
       }
-    } else if (const DerivedTypeSpec * typeSpec{type->AsDerived()}) {
-      if (details.isDummy()) {
-        return true;
-      }
-      // Any length type parameter?
-      if (const Scope * scope{typeSpec->scope()}) {
-        if (const Symbol * symbol{scope->symbol()}) {
-          if (const auto *details{symbol->detailsIf<DerivedTypeDetails>()}) {
-            for (const Symbol &param : details->paramDecls()) {
-              if (const auto *details{param.detailsIf<TypeParamDetails>()}) {
-                if (details->attr() == common::TypeParamAttr::Len) {
-                  return true;
-                }
-              }
-            }
-          }
-        }
-      }
-    } else if (type->category() == DeclTypeSpec::Category::TypeStar ||
-        type->category() == DeclTypeSpec::Category::ClassStar) {
-      return true;
     }
   }
   if (details.IsAssumedShape() || details.IsDeferredShape() ||
@@ -85,6 +63,17 @@ bool IsDescriptor(const Symbol &symbol0) {
         symbol.attrs().test(Attr::EXTERNAL)) {
       return IsDescriptor(*procDetails);
     }
+  } else if (const auto *assocDetails{symbol.detailsIf<AssocEntityDetails>()}) {
+    if (const auto &expr{assocDetails->expr()}) {
+      if (expr->Rank() > 0) {
+        return true;
+      }
+      if (const auto dynamicType{expr->GetType()}) {
+        if (dynamicType->RequiresDescriptor()) {
+          return true;
+        }
+      }
+    }
   }
   return false;
 }
@@ -109,6 +98,20 @@ bool DynamicType::IsAssumedLengthCharacter() const {
 
 bool DynamicType::IsTypelessIntrinsicArgument() const {
   return category_ == TypeCategory::Integer && kind_ == TypelessKind;
+}
+
+const semantics::DerivedTypeSpec *GetDerivedTypeSpec(
+    const std::optional<DynamicType> &type) {
+  return type ? GetDerivedTypeSpec(*type) : nullptr;
+}
+
+const semantics::DerivedTypeSpec *GetDerivedTypeSpec(const DynamicType &type) {
+  if (type.category() == TypeCategory::Derived &&
+      !type.IsUnlimitedPolymorphic()) {
+    return &type.GetDerivedTypeSpec();
+  } else {
+    return nullptr;
+  }
 }
 
 static const semantics::Symbol *FindParentComponent(
@@ -392,6 +395,31 @@ DynamicType DynamicType::ResultTypeForMultiply(const DynamicType &that) const {
   default: CRASH_NO_CASE;
   }
   return *this;
+}
+
+bool DynamicType::RequiresDescriptor() const {
+  if (IsPolymorphic() || IsAssumedLengthCharacter()) {
+    return true;
+  }
+  if (derived_) {
+    // Any length type parameter?
+    if (const auto *scope{derived_->scope()}) {
+      if (const auto *symbol{scope->symbol()}) {
+        if (const auto *details{
+                symbol->detailsIf<semantics::DerivedTypeDetails>()}) {
+          for (const Symbol &param : details->paramDecls()) {
+            if (const auto *details{
+                    param.detailsIf<semantics::TypeParamDetails>()}) {
+              if (details->attr() == common::TypeParamAttr::Len) {
+                return true;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return false;
 }
 
 bool SomeKind<TypeCategory::Derived>::operator==(

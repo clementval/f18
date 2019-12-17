@@ -162,6 +162,8 @@ public:
     return DEREF(derived_);
   }
 
+  bool RequiresDescriptor() const;
+
   // 7.3.2.3 & 15.5.2.4 type compatibility.
   // x.IsTypeCompatibleWith(y) is true if "x => y" or passing actual y to
   // dummy argument x would be valid.  Be advised, this is not a reflexive
@@ -209,6 +211,11 @@ private:
   const semantics::ParamValue *charLength_{nullptr};
   const semantics::DerivedTypeSpec *derived_{nullptr};  // TYPE(T), CLASS(T)
 };
+
+// Return the DerivedTypeSpec of a DynamicType if it has one.
+const semantics::DerivedTypeSpec *GetDerivedTypeSpec(const DynamicType &);
+const semantics::DerivedTypeSpec *GetDerivedTypeSpec(
+    const std::optional<DynamicType> &);
 
 std::string DerivedTypeSpecAsFortran(const semantics::DerivedTypeSpec &);
 

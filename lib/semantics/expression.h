@@ -186,7 +186,7 @@ public:
     return result;
   }
   template<typename A> MaybeExpr Analyze(const parser::Constant<A> &x) {
-    auto save{
+    auto restorer{
         GetFoldingContext().messages().SetLocation(FindSourceLocation(x))};
     auto result{Analyze(x.thing)};
     if (result) {
@@ -311,8 +311,7 @@ private:
   MaybeExpr TopLevelChecks(DataRef &&);
   std::optional<Expr<SubscriptInteger>> GetSubstringBound(
       const std::optional<parser::ScalarIntExpr> &);
-  MaybeExpr AnalyzeDefinedOp(
-      parser::Messages &, const parser::Name &, ActualArguments &&);
+  MaybeExpr AnalyzeDefinedOp(const parser::Name &, ActualArguments &&);
 
   struct CalleeAndArguments {
     ProcedureDesignator procedureDesignator;
@@ -328,8 +327,10 @@ private:
       const parser::Call &, bool isSubroutine);
   std::optional<characteristics::Procedure> CheckCall(
       parser::CharBlock, const ProcedureDesignator &, ActualArguments &);
-  const Symbol *ResolveGeneric(const Symbol &, const ActualArguments &,
-      const std::optional<Expr<SomeDerived>> & = std::nullopt);
+  using AdjustActuals =
+      std::optional<std::function<bool(const Symbol &, ActualArguments &)>>;
+  const Symbol *ResolveGeneric(
+      const Symbol &, const ActualArguments &, AdjustActuals = std::nullopt);
   std::optional<CalleeAndArguments> GetCalleeAndArguments(
       const parser::Name &, ActualArguments &&, bool isSubroutine = false);
   std::optional<CalleeAndArguments> GetCalleeAndArguments(
