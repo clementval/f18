@@ -155,10 +155,6 @@ void AccStructureChecker::Enter(const parser::OpenACCStandaloneConstruct &x) {
       SetContextAllowedExclusive({AccClause::AUTO, AccClause::INDEPENDENT,
                                   AccClause::SEQ});
     } break;
-    case parser::AccStandaloneDirective::Directive::Wait: {
-      PushContext(dir.source, AccDirective::WAIT);
-      SetContextAllowedOnce({AccClause::ASYNC});
-    } break;
     case parser::AccStandaloneDirective::Directive::EnterData: {
       PushContext(dir.source, AccDirective::ENTER_DATA);
       SetContextAllowed({AccClause::ATTACH, AccClause::CREATE,

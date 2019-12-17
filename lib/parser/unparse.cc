@@ -1775,6 +1775,7 @@ public:
   void Before(const AccClause::Seq &) { Word("SEQ"); }
   void Before(const AccClause::Vector &) { Word("VECTOR"); }
   void Before(const AccClause::Worker &) { Word("WORKER"); }
+  void Before(const AccClause::Wait &) { Word("Wait"); }
   void Unparse(const AccClause::Collapse &x) {
     Word("COLLAPSE(");
     Walk(x.v);
@@ -1896,7 +1897,6 @@ public:
     case AccStandaloneDirective::Directive::Routine: Word("ROUTINE"); break;
     case AccStandaloneDirective::Directive::Shutdown: Word("SHUTDOWN"); break;
     case AccStandaloneDirective::Directive::Update: Word("UPDATE"); break;
-    case AccStandaloneDirective::Directive::Wait: Word("WAIT"); break;
     }
   }
   void Unparse(const AccObject &x) {
@@ -1907,6 +1907,18 @@ public:
         }, x.u);
   }
   void Unparse(const AccObjectList &x) { Walk(x.v, ","); }
+
+
+  void Unparse(const OpenACCWaitConstruct &x){
+    BeginOpenACC();
+    Word("!$ACC ");
+    Word("WAIT(");
+    Walk(std::get<std::optional<AccWaitArgument>>(x.t));
+    Walk(std::get<AccClauseList>(x.t));
+    Put(")");
+    Put("\n");
+    EndOpenACC();
+  }
 
   // OpenMP Clauses & Directives
   void Unparse(const OmpObject &x) {

@@ -4344,7 +4344,6 @@ struct OpenMPConstruct {
 
 struct AccObject {
   UNION_CLASS_BOILERPLATE(AccObject);
-
   std::variant<Designator, /*common block*/ Name> u;
 };
 
@@ -4360,7 +4359,7 @@ struct AccBlockDirective {
 
 struct AccStandaloneDirective {
   ENUM_CLASS(Directive, Cache, EnterData, ExitData, Init, Loop, Routine,
-      Shutdown, Update, Wait);
+      Shutdown, Update);
   WRAPPER_CLASS_BOILERPLATE(AccStandaloneDirective, Directive);
   CharBlock source;
 };
@@ -4373,7 +4372,6 @@ struct AccDeclarativeDirective {
 
 
 // OpenACC Clauses
-
 struct AccDefaultClause {
   ENUM_CLASS(Arg, None, Present)
   WRAPPER_CLASS_BOILERPLATE(AccDefaultClause, Arg);
@@ -4452,6 +4450,13 @@ struct AccClauseList {
   CharBlock source;
 };
 
+struct OpenACCWaitConstruct {
+  TUPLE_CLASS_BOILERPLATE(OpenACCWaitConstruct);
+
+  CharBlock source;
+  std::tuple<Verbatim, std::optional<AccWaitArgument>, AccClauseList> t;
+};
+
 struct AccBeginBlockDirective {
   TUPLE_CLASS_BOILERPLATE(AccBeginBlockDirective);
 
@@ -4494,7 +4499,7 @@ struct OpenACCStandaloneConstruct {
 struct OpenACCConstruct {
   UNION_CLASS_BOILERPLATE(OpenACCConstruct);
 
-  std::variant<OpenACCBlockConstruct, OpenACCStandaloneConstruct> u;
+  std::variant<OpenACCBlockConstruct, OpenACCStandaloneConstruct, OpenACCWaitConstruct> u;
 };
 
 }

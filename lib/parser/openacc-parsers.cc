@@ -112,7 +112,8 @@ TYPE_PARSER(construct<AccObjectList>(nonemptyList(Parser<AccObject>{})))
 TYPE_PARSER(construct<AccObjectListWithModifier>(
         maybe(Parser<AccDataModifier>{}), Parser<AccObjectList>{}))
 
-TYPE_PARSER(construct<AccWaitArgument>(maybe("DEVNUM:" >> scalarIntExpr / ":"), nonemptyList(scalarIntExpr)))
+TYPE_PARSER(construct<AccWaitArgument>(maybe("DEVNUM:" >> scalarIntExpr / ":"),
+    nonemptyList(scalarIntExpr))) // TODO recognize as complex instead of list of int
 
 TYPE_PARSER(construct<AccDataModifier>(
      first(
@@ -126,8 +127,7 @@ TYPE_PARSER(construct<AccStandaloneDirective>(first(
     "LOOP" >> pure(AccStandaloneDirective::Directive::Loop),
     "ROUTINE" >> pure(AccStandaloneDirective::Directive::Routine),
     "SHUTDOWN" >> pure(AccStandaloneDirective::Directive::Shutdown),
-    "UPDATE" >> pure(AccStandaloneDirective::Directive::Update),
-    "WAIT" >> pure(AccStandaloneDirective::Directive::Wait))))
+    "UPDATE" >> pure(AccStandaloneDirective::Directive::Update))))
 
 TYPE_PARSER(construct<AccDeclarativeDirective>(first(
     "DECLARE" >> pure(AccDeclarativeDirective::Directive::Declare)
@@ -141,6 +141,11 @@ TYPE_PARSER(sourced(construct<AccClauseList>(
 TYPE_PARSER(construct<OpenACCBlockConstruct>(
     Parser<AccBeginBlockDirective>{} / endAccLine, block,
     Parser<AccEndBlockDirective>{} / endAccLine))
+
+// 2.16.3 Wait directive
+TYPE_PARSER(sourced(construct<OpenACCWaitConstruct>(
+    sourced(construct<Verbatim>("WAIT"_tok)),
+    maybe(parenthesized(Parser<AccWaitArgument>{})), Parser<AccClauseList>{})))
 
 TYPE_PARSER(
         construct<OpenACCStandaloneConstruct>(
@@ -157,8 +162,8 @@ TYPE_PARSER( // TODO correct parser ?
 TYPE_CONTEXT_PARSER("OpenACC construct"_en_US,
     startAccLine >>
         first(construct<OpenACCConstruct>(Parser<OpenACCBlockConstruct>{}),
-              construct<OpenACCConstruct>(Parser<OpenACCStandaloneConstruct>{})))
-
+              construct<OpenACCConstruct>(Parser<OpenACCStandaloneConstruct>{}),
+              construct<OpenACCConstruct>(Parser<OpenACCWaitConstruct>{})))
 
 // END ACC Block directives
 TYPE_PARSER(

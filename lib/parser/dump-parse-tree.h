@@ -518,6 +518,7 @@ public:
   NODE(parser, OpenACCDeclarativeConstruct)
   NODE(parser, OpenACCStandaloneDeclarativeConstruct)
   NODE(parser, OpenACCStandaloneConstruct)
+  NODE(parser, OpenACCWaitConstruct)
   NODE(parser, AccObject)
   NODE(parser, AccObjectList)
   NODE(parser, AccBlockDirective)

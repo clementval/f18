@@ -144,11 +144,11 @@ TYPE_PARSER(
 
 TYPE_CONTEXT_PARSER("Omp LINEAR clause"_en_US,
     construct<OmpLinearClause>(
-        construct<OmpLinearClause>(construct<OmpLinearClause::WithModifier>(
-            Parser<OmpLinearModifier>{}, parenthesized(nonemptyList(name)),
-            maybe(":" >> scalarIntConstantExpr))) ||
-        construct<OmpLinearClause>(construct<OmpLinearClause::WithoutModifier>(
-            nonemptyList(name), maybe(":" >> scalarIntConstantExpr)))))
+    construct<OmpLinearClause>(construct<OmpLinearClause::WithModifier>(
+    Parser<OmpLinearModifier>{}, parenthesized(nonemptyList(name)),
+    maybe(":" >> scalarIntConstantExpr))) ||
+construct<OmpLinearClause>(construct<OmpLinearClause::WithoutModifier>(
+    nonemptyList(name), maybe(":" >> scalarIntConstantExpr)))))
 
 // 2.8.1 ALIGNED (list: alignment)
 TYPE_PARSER(construct<OmpAlignedClause>(
