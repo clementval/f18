@@ -101,7 +101,7 @@ TYPE_PARSER(
         parenthesized(Parser<AccObjectList>{}))) ||
     "VECTOR" >> construct<AccClause>(construct<AccClause::Vector>()) ||
     "WAIT" >> construct<AccClause>(construct<AccClause::Wait>(
-        maybe(parenthesized(scalarIntConstantExpr/*Parser<AccWaitArgument>{}*/)))) ||
+        maybe(Parser<AccWaitArgument>{}))) ||
     "WORKER" >> construct<AccClause>(construct<AccClause::Worker>()) ||
     "WRITE" >>  construct<AccClause>(construct<AccClause::Auto>()))
 
@@ -112,11 +112,7 @@ TYPE_PARSER(construct<AccObjectList>(nonemptyList(Parser<AccObject>{})))
 TYPE_PARSER(construct<AccObjectListWithModifier>(
         maybe(Parser<AccDataModifier>{}), Parser<AccObjectList>{}))
 
-// TODO
-//TYPE_PARSER(construct<AccWaitArgument>(
-//    maybe("DEVNUM:" >> pure(scalarIntExpr)),
-//    scalarIntExpr
-//    ))
+TYPE_PARSER(construct<AccWaitArgument>(maybe("DEVNUM:" >> scalarIntExpr / ":"), nonemptyList(scalarIntExpr)))
 
 TYPE_PARSER(construct<AccDataModifier>(
      first(
