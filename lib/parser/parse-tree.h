@@ -4429,7 +4429,7 @@ struct AccClause {
   WRAPPER_CLASS(Device, AccObjectList); // 2.14.4
   WRAPPER_CLASS(DeviceNum, ScalarIntConstantExpr); // TODO
   WRAPPER_CLASS(DevicePtr, AccObjectList); // 2.7.3
-  EMPTY_CLASS(DeviceType); // TODO device-type-list
+  WRAPPER_CLASS(DeviceType, std::optional<std::list<Name>>); // TODO device-type-list
   WRAPPER_CLASS(FirstPrivate, AccObjectList); // 2.5.12
   WRAPPER_CLASS(Host, AccObjectList); // 2.14.4
   WRAPPER_CLASS(If, ScalarLogicalExpr); // 2.5.4

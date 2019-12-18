@@ -536,6 +536,7 @@ public:
   NODE_ENUM(parser::AccDataModifier, Modifier)
   NODE(parser, AccClause)
   NODE(parser, AccClauseList)
+  NODE(parser, AccWaitArgument)
   NODE(parser::AccClause, Auto)
   NODE(parser::AccClause, Capture)
   NODE(parser::AccClause, Gang)
@@ -578,7 +579,7 @@ public:
   NODE(parser::AccClause, VectorLength)
   NODE(parser::AccClause, Wait)
   NODE(parser::AccClause, Write)
-  NODE(parser, AccWaitArgument)
+
   NODE(parser, OpenMPAtomicConstruct)
   NODE(parser, OpenMPBlockConstruct)
   NODE(parser, OpenMPCancelConstruct)
