@@ -94,6 +94,9 @@ TYPE_PARSER(
     "READ" >> construct<AccClause>(construct<AccClause::Read>()) ||
     "VECTOR_LENGTH" >> construct<AccClause>(construct<AccClause::VectorLength>(
         parenthesized(scalarIntConstantExpr))) ||
+    "REDUCTION" >> construct<AccClause>(construct<AccClause::Reduction>(
+        parenthesized(construct<AccObjectListWithReduction>(
+            Parser<DefinedOperator>{} / ":", Parser<AccObjectList>{})))) ||
     "SELF" >> construct<AccClause>(construct<AccClause::Self>(
         maybe(parenthesized(scalarLogicalExpr)))) ||
     "SEQ" >> construct<AccClause>(construct<AccClause::Seq>()) ||
@@ -147,6 +150,11 @@ TYPE_PARSER(sourced(construct<OpenACCWaitConstruct>(
     sourced(construct<Verbatim>("WAIT"_tok)),
     maybe(parenthesized(Parser<AccWaitArgument>{})), Parser<AccClauseList>{})))
 
+// 2.10 Cache directive
+TYPE_PARSER(sourced(construct<OpenACCCacheConstruct>(
+    sourced(construct<Verbatim>("CACHE"_tok)),
+    parenthesized(Parser<AccObjectListWithModifier>{}))))
+
 TYPE_PARSER(
         construct<OpenACCStandaloneConstruct>(
             sourced(Parser<AccStandaloneDirective>{}), Parser<AccClauseList>{}))
@@ -163,6 +171,7 @@ TYPE_CONTEXT_PARSER("OpenACC construct"_en_US,
     startAccLine >>
         first(construct<OpenACCConstruct>(Parser<OpenACCBlockConstruct>{}),
               construct<OpenACCConstruct>(Parser<OpenACCStandaloneConstruct>{}),
+              construct<OpenACCConstruct>(Parser<OpenACCCacheConstruct>{}),
               construct<OpenACCConstruct>(Parser<OpenACCWaitConstruct>{})))
 
 // END ACC Block directives

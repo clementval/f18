@@ -4389,6 +4389,12 @@ struct AccObjectListWithModifier {
   std::tuple<std::optional<AccDataModifier>, AccObjectList> t;
 };
 
+struct AccObjectListWithReduction {
+  TUPLE_CLASS_BOILERPLATE(AccObjectListWithReduction);
+  std::tuple<DefinedOperator, AccObjectList> t;
+};
+
+
 struct AccWaitArgument {
   TUPLE_CLASS_BOILERPLATE(AccWaitArgument);
   std::tuple<std::optional<ScalarIntExpr>, std::list<ScalarIntExpr>> t;
@@ -4433,6 +4439,7 @@ struct AccClause {
   WRAPPER_CLASS(Present, AccObjectList); // 2.7.4
   WRAPPER_CLASS(Private, AccObjectList); // 2.5.11
   WRAPPER_CLASS(UseDevice, AccObjectList); // 2.8.1
+  WRAPPER_CLASS(Reduction, AccObjectListWithReduction); // 2.5.13
   WRAPPER_CLASS(Self, std::optional<ScalarLogicalExpr>); // 2.5.5
   WRAPPER_CLASS(VectorLength, ScalarIntConstantExpr); // 2.5.10
   WRAPPER_CLASS(Wait, std::optional<AccWaitArgument>); // 2.16.2
@@ -4442,12 +4449,19 @@ struct AccClause {
       Read, Seq, Vector, Worker, Write, Async, Attach, Bind, Collapse, Copy,
       Copyin, Copyout, Create, Default, Delete, Detach, Device, DeviceNum,
       DevicePtr, DeviceType, Host, If, FirstPrivate, NoCreate, NumGangs,
-      NumWorkers, Present, Private, UseDevice, Self, VectorLength, Wait> u;
+      NumWorkers, Present, Private, UseDevice, Reduction, Self, VectorLength,
+      Wait> u;
 };
 
 struct AccClauseList {
   WRAPPER_CLASS_BOILERPLATE(AccClauseList, std::list<AccClause>);
   CharBlock source;
+};
+
+struct OpenACCCacheConstruct {
+  TUPLE_CLASS_BOILERPLATE(OpenACCCacheConstruct);
+  CharBlock source;
+  std::tuple<Verbatim, AccObjectListWithModifier> t;
 };
 
 struct OpenACCWaitConstruct {
@@ -4499,7 +4513,7 @@ struct OpenACCStandaloneConstruct {
 struct OpenACCConstruct {
   UNION_CLASS_BOILERPLATE(OpenACCConstruct);
 
-  std::variant<OpenACCBlockConstruct, OpenACCStandaloneConstruct, OpenACCWaitConstruct> u;
+  std::variant<OpenACCBlockConstruct, OpenACCStandaloneConstruct, OpenACCCacheConstruct, OpenACCWaitConstruct> u;
 };
 
 }

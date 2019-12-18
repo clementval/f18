@@ -1859,6 +1859,11 @@ public:
     Walk(x.v);
     Put(")");
   }
+  void Unparse(const AccClause::Reduction &x) {
+    Word("REDUCTION(");
+    Walk(x.v);
+    Put(")");
+  }
   void Unparse(const AccClause::UseDevice &x) {
     Word("USE_DEVICE(");
     Walk(x.v);
@@ -1907,8 +1912,20 @@ public:
         }, x.u);
   }
   void Unparse(const AccObjectList &x) { Walk(x.v, ","); }
-
-
+  void Unparse(const AccObjectListWithReduction &x) {
+    Walk(std::get<DefinedOperator>(x.t));
+    Put(":");
+    Walk(std::get<AccObjectList>(x.t));
+  }
+  void Unparse(const OpenACCCacheConstruct &x) {
+    BeginOpenACC();
+    Word("!$ACC ");
+    Word("CACHE(");
+    Walk(std::get<AccObjectListWithModifier>(x.t));
+    Put(")");
+    Put("\n");
+    EndOpenACC();
+  }
   void Unparse(const OpenACCWaitConstruct &x){
     BeginOpenACC();
     Word("!$ACC ");
@@ -1919,7 +1936,6 @@ public:
     Put("\n");
     EndOpenACC();
   }
-
   // OpenMP Clauses & Directives
   void Unparse(const OmpObject &x) {
     std::visit(
