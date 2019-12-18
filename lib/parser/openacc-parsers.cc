@@ -86,6 +86,12 @@ TYPE_PARSER(
     "DEVICENUM" >> construct<AccClause>(construct<AccClause::DeviceNum>(
         parenthesized(scalarIntConstantExpr))) ||
     "DEVICE_TYPE" >> construct<AccClause>(construct<AccClause::DeviceType>(
+        parenthesized("*" >> maybe(nonemptyList(name))))) ||
+    "DTYPE" >> construct<AccClause>(construct<AccClause::DeviceType>(
+        parenthesized("*" >> maybe(nonemptyList(name))))) ||
+    "DEVICE_TYPE" >> construct<AccClause>(construct<AccClause::DeviceType>(
+        parenthesized(maybe(nonemptyList(name))))) ||
+    "DTYPE" >> construct<AccClause>(construct<AccClause::DeviceType>(
         parenthesized(maybe(nonemptyList(name))))) ||
     "FINALIZE" >> construct<AccClause>(construct<AccClause::Finalize>()) ||
     "FIRSTPRIVATE" >> construct<AccClause>(construct<AccClause::FirstPrivate>(
