@@ -42,13 +42,13 @@ module openacc
   interface acc_copyin
     module procedure &
       acc_copyin_i_1d_p1, acc_copyin_i_2d_p1, acc_copyin_i_3d_p1, &
-        acc_copyinacc_copyin_i_4d_p1, &
+        acc_copyin_i_4d_p1, &
       acc_copyin_r_1d_p1, acc_copyin_r_2d_p1, acc_copyin_r_3d_p1, &
-        acc_copyinacc_copyin_r_4d_p1, &
+        acc_copyin_r_4d_p1, &
       acc_copyin_l_1d_p1, acc_copyin_l_2d_p1, acc_copyin_l_3d_p1, &
-        acc_copyinacc_copyin_l_4d_p1, &
+        acc_copyin_l_4d_p1, &
       acc_copyin_c_1d_p1, acc_copyin_c_2d_p1, acc_copyin_c_3d_p1, &
-        acc_copyinacc_copyin_c_4d_p1, &
+        acc_copyin_c_4d_p1, &
       acc_copyin_i_l_p2, acc_copyin_r_l_p2, acc_copyin_l_l_p2, acc_copyin_c_l_p2
   end interface
 
@@ -439,19 +439,19 @@ contains
   end subroutine acc_copyin_i_4d_p1
 
   subroutine acc_copyin_r_1d_p1( a )
-    real, dimension(:) :: a
+    real(8), dimension(:) :: a
   end subroutine acc_copyin_r_1d_p1
 
   subroutine acc_copyin_r_2d_p1( a )
-    real, dimension(:,:) :: a
+    real(8), dimension(:,:) :: a
   end subroutine acc_copyin_r_2d_p1
 
   subroutine acc_copyin_r_3d_p1( a )
-    real, dimension(:,:,:) :: a
+    real(8), dimension(:,:,:) :: a
   end subroutine acc_copyin_r_3d_p1
 
   subroutine acc_copyin_r_4d_p1( a )
-    real, dimension(:,:,:,:) :: a
+    real(8), dimension(:,:,:,:) :: a
   end subroutine acc_copyin_r_4d_p1
 
   subroutine acc_copyin_l_1d_p1( a )
@@ -492,7 +492,7 @@ contains
   end subroutine acc_copyin_i_l_p2
 
   subroutine acc_copyin_r_l_p2( a , len )
-    real :: a
+    real(8) :: a
     integer :: len
   end subroutine acc_copyin_r_l_p2
 
@@ -528,22 +528,22 @@ contains
   end subroutine acc_copyin_async_i_4d_p2
 
   subroutine acc_copyin_async_r_1d_p2( a, async )
-    real, dimension(:) :: a
+    real(8), dimension(:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_copyin_async_r_1d_p2
 
   subroutine acc_copyin_async_r_2d_p2( a, async )
-    real, dimension(:,:) :: a
+    real(8), dimension(:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_copyin_async_r_2d_p2
 
   subroutine acc_copyin_async_r_3d_p2( a, async )
-    real, dimension(:,:,:) :: a
+    real(8), dimension(:,:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_copyin_async_r_3d_p2
 
   subroutine acc_copyin_async_r_4d_p2( a, async )
-    real, dimension(:,:,:,:) :: a
+    real(8), dimension(:,:,:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_copyin_async_r_4d_p2
 
@@ -594,7 +594,7 @@ contains
   end subroutine acc_copyin_async_i_l_p3
 
   subroutine acc_copyin_async_r_l_p3( a, len, async )
-    real :: a
+    real(8) :: a
     integer :: len
     integer(acc_handle_kind) :: async
   end subroutine acc_copyin_async_r_l_p3
@@ -629,19 +629,19 @@ contains
   end subroutine acc_create_i_4d_p1
 
   subroutine acc_create_r_1d_p1( a )
-    real, dimension(:) :: a
+    real(8), dimension(:) :: a
   end subroutine acc_create_r_1d_p1
 
   subroutine acc_create_r_2d_p1( a )
-    real, dimension(:,:) :: a
+    real(8), dimension(:,:) :: a
   end subroutine acc_create_r_2d_p1
 
   subroutine acc_create_r_3d_p1( a )
-    real, dimension(:,:,:) :: a
+    real(8), dimension(:,:,:) :: a
   end subroutine acc_create_r_3d_p1
 
   subroutine acc_create_r_4d_p1( a )
-    real, dimension(:,:,:,:) :: a
+    real(8), dimension(:,:,:,:) :: a
   end subroutine acc_create_r_4d_p1
 
   subroutine acc_create_l_1d_p1( a )
@@ -682,7 +682,7 @@ contains
   end subroutine acc_create_i_l_p2
 
   subroutine acc_create_r_l_p2( a, len )
-    real :: a
+    real(8) :: a
     integer :: len
   end subroutine acc_create_r_l_p2
 
@@ -718,22 +718,22 @@ contains
   end subroutine acc_create_async_i_4d_p2
 
   subroutine acc_create_async_r_1d_p2( a, async )
-    real, dimension(:) :: a
+    real(8), dimension(:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_create_async_r_1d_p2
 
   subroutine acc_create_async_r_2d_p2( a, async )
-    real, dimension(:,:) :: a
+    real(8), dimension(:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_create_async_r_2d_p2
 
   subroutine acc_create_async_r_3d_p2( a, async )
-    real, dimension(:,:,:) :: a
+    real(8), dimension(:,:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_create_async_r_3d_p2
 
   subroutine acc_create_async_r_4d_p2( a, async )
-    real, dimension(:,:,:,:) :: a
+    real(8), dimension(:,:,:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_create_async_r_4d_p2
 
@@ -784,7 +784,7 @@ contains
   end subroutine acc_create_async_i_l_p3
 
   subroutine acc_create_async_r_l_p3( a, len, async )
-    real :: a
+    real(8) :: a
     integer :: len
     integer(acc_handle_kind) :: async
   end subroutine acc_create_async_r_l_p3
@@ -819,19 +819,19 @@ contains
   end subroutine acc_copyout_i_4d_p1
 
   subroutine acc_copyout_r_1d_p1( a )
-    real, dimension(:) :: a
+    real(8), dimension(:) :: a
   end subroutine acc_copyout_r_1d_p1
 
   subroutine acc_copyout_r_2d_p1( a )
-    real, dimension(:,:) :: a
+    real(8), dimension(:,:) :: a
   end subroutine acc_copyout_r_2d_p1
 
   subroutine acc_copyout_r_3d_p1( a )
-    real, dimension(:,:,:) :: a
+    real(8), dimension(:,:,:) :: a
   end subroutine acc_copyout_r_3d_p1
 
   subroutine acc_copyout_r_4d_p1( a )
-    real, dimension(:,:,:,:) :: a
+    real(8), dimension(:,:,:,:) :: a
   end subroutine acc_copyout_r_4d_p1
 
   subroutine acc_copyout_l_1d_p1( a )
@@ -872,7 +872,7 @@ contains
   end subroutine acc_copyout_i_l_p2
 
   subroutine acc_copyout_r_l_p2( a, len )
-    real :: a
+    real(8) :: a
     integer :: len
   end subroutine acc_copyout_r_l_p2
 
@@ -908,22 +908,22 @@ contains
   end subroutine acc_copyout_async_i_4d_p2
 
   subroutine acc_copyout_async_r_1d_p2( a, async )
-    real, dimension(:) :: a
+    real(8), dimension(:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_copyout_async_r_1d_p2
 
   subroutine acc_copyout_async_r_2d_p2( a, async )
-    real, dimension(:,:) :: a
+    real(8), dimension(:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_copyout_async_r_2d_p2
 
   subroutine acc_copyout_async_r_3d_p2( a, async )
-    real, dimension(:,:,:) :: a
+    real(8), dimension(:,:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_copyout_async_r_3d_p2
 
   subroutine acc_copyout_async_r_4d_p2( a, async )
-    real, dimension(:,:,:,:) :: a
+    real(8), dimension(:,:,:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_copyout_async_r_4d_p2
 
@@ -974,7 +974,7 @@ contains
   end subroutine acc_copyout_async_i_l_p3
 
   subroutine acc_copyout_async_r_l_p3( a, len, async )
-    real :: a
+    real(8) :: a
     integer :: len
     integer(acc_handle_kind) :: async
   end subroutine acc_copyout_async_r_l_p3
@@ -1009,19 +1009,19 @@ contains
   end subroutine acc_copyout_finalize_i_4d_p1
 
   subroutine acc_copyout_finalize_r_1d_p1( a )
-    real, dimension(:) :: a
+    real(8), dimension(:) :: a
   end subroutine acc_copyout_finalize_r_1d_p1
 
   subroutine acc_copyout_finalize_r_2d_p1( a )
-    real, dimension(:,:) :: a
+    real(8), dimension(:,:) :: a
   end subroutine acc_copyout_finalize_r_2d_p1
 
   subroutine acc_copyout_finalize_r_3d_p1( a )
-    real, dimension(:,:,:) :: a
+    real(8), dimension(:,:,:) :: a
   end subroutine acc_copyout_finalize_r_3d_p1
 
   subroutine acc_copyout_finalize_r_4d_p1( a )
-    real, dimension(:,:,:,:) :: a
+    real(8), dimension(:,:,:,:) :: a
   end subroutine acc_copyout_finalize_r_4d_p1
 
   subroutine acc_copyout_finalize_l_1d_p1( a )
@@ -1062,7 +1062,7 @@ contains
   end subroutine acc_copyout_finalize_i_l_p2
 
   subroutine acc_copyout_finalize_r_l_p2( a, len )
-    real :: a
+    real(8) :: a
     integer :: len
   end subroutine acc_copyout_finalize_r_l_p2
 
@@ -1098,22 +1098,22 @@ contains
   end subroutine acc_copyout_finalize_async_i_4d_p2
 
   subroutine acc_copyout_finalize_async_r_1d_p2( a, async )
-    real, dimension(:) :: a
+    real(8), dimension(:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_copyout_finalize_async_r_1d_p2
 
   subroutine acc_copyout_finalize_async_r_2d_p2( a, async )
-    real, dimension(:,:) :: a
+    real(8), dimension(:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_copyout_finalize_async_r_2d_p2
 
   subroutine acc_copyout_finalize_async_r_3d_p2( a, async )
-    real, dimension(:,:,:) :: a
+    real(8), dimension(:,:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_copyout_finalize_async_r_3d_p2
 
   subroutine acc_copyout_finalize_async_r_4d_p2( a, async )
-    real, dimension(:,:,:,:) :: a
+    real(8), dimension(:,:,:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_copyout_finalize_async_r_4d_p2
 
@@ -1164,7 +1164,7 @@ contains
   end subroutine acc_copyout_finalize_async_i_l_p3
 
   subroutine acc_copyout_finalize_async_r_l_p3( a, len, async )
-    real :: a
+    real(8) :: a
     integer :: len
     integer(acc_handle_kind) :: async
   end subroutine acc_copyout_finalize_async_r_l_p3
@@ -1199,19 +1199,19 @@ contains
   end subroutine acc_delete_i_4d_p1
 
   subroutine acc_delete_r_1d_p1( a )
-    real, dimension(:) :: a
+    real(8), dimension(:) :: a
   end subroutine acc_delete_r_1d_p1
 
   subroutine acc_delete_r_2d_p1( a )
-    real, dimension(:,:) :: a
+    real(8), dimension(:,:) :: a
   end subroutine acc_delete_r_2d_p1
 
   subroutine acc_delete_r_3d_p1( a )
-    real, dimension(:,:,:) :: a
+    real(8), dimension(:,:,:) :: a
   end subroutine acc_delete_r_3d_p1
 
   subroutine acc_delete_r_4d_p1( a )
-    real, dimension(:,:,:,:) :: a
+    real(8), dimension(:,:,:,:) :: a
   end subroutine acc_delete_r_4d_p1
 
   subroutine acc_delete_l_1d_p1( a )
@@ -1252,7 +1252,7 @@ contains
   end subroutine acc_delete_i_l_p2
 
   subroutine acc_delete_r_l_p2( a, len )
-    real :: a
+    real(8) :: a
     integer ::  len
   end subroutine acc_delete_r_l_p2
 
@@ -1288,22 +1288,22 @@ contains
   end subroutine acc_delete_async_i_4d_p2
 
   subroutine acc_delete_async_r_1d_p2( a, async )
-    real, dimension(:) :: a
+    real(8), dimension(:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_delete_async_r_1d_p2
 
   subroutine acc_delete_async_r_2d_p2( a, async )
-    real, dimension(:,:) :: a
+    real(8), dimension(:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_delete_async_r_2d_p2
 
   subroutine acc_delete_async_r_3d_p2( a, async )
-    real, dimension(:,:,:) :: a
+    real(8), dimension(:,:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_delete_async_r_3d_p2
 
   subroutine acc_delete_async_r_4d_p2( a, async )
-    real, dimension(:,:,:,:) :: a
+    real(8), dimension(:,:,:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_delete_async_r_4d_p2
 
@@ -1354,7 +1354,7 @@ contains
   end subroutine acc_delete_async_i_l_p3
 
   subroutine acc_delete_async_r_l_p3( a, len, async )
-    real :: a
+    real(8) :: a
     integer :: len
     integer(acc_handle_kind) :: async
   end subroutine acc_delete_async_r_l_p3
@@ -1389,19 +1389,19 @@ contains
   end subroutine acc_delete_finalize_i_4d_p1
 
   subroutine acc_delete_finalize_r_1d_p1( a )
-    real, dimension(:) :: a
+    real(8), dimension(:) :: a
   end subroutine acc_delete_finalize_r_1d_p1
 
   subroutine acc_delete_finalize_r_2d_p1( a )
-    real, dimension(:,:) :: a
+    real(8), dimension(:,:) :: a
   end subroutine acc_delete_finalize_r_2d_p1
 
   subroutine acc_delete_finalize_r_3d_p1( a )
-    real, dimension(:,:,:) :: a
+    real(8), dimension(:,:,:) :: a
   end subroutine acc_delete_finalize_r_3d_p1
 
   subroutine acc_delete_finalize_r_4d_p1( a )
-    real, dimension(:,:,:,:) :: a
+    real(8), dimension(:,:,:,:) :: a
   end subroutine acc_delete_finalize_r_4d_p1
 
   subroutine acc_delete_finalize_l_1d_p1( a )
@@ -1442,7 +1442,7 @@ contains
   end subroutine acc_delete_finalize_i_l_p2
 
   subroutine acc_delete_finalize_r_l_p2( a, len )
-    real :: a
+    real(8) :: a
     integer :: len
   end subroutine acc_delete_finalize_r_l_p2
 
@@ -1478,22 +1478,22 @@ contains
   end subroutine acc_delete_finalize_async_i_4d_p2
 
   subroutine acc_delete_finalize_async_r_1d_p2( a, async )
-    real, dimension(:) :: a
+    real(8), dimension(:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_delete_finalize_async_r_1d_p2
 
   subroutine acc_delete_finalize_async_r_2d_p2( a, async )
-    real, dimension(:,:) :: a
+    real(8), dimension(:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_delete_finalize_async_r_2d_p2
 
   subroutine acc_delete_finalize_async_r_3d_p2( a, async )
-    real, dimension(:,:,:) :: a
+    real(8), dimension(:,:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_delete_finalize_async_r_3d_p2
 
   subroutine acc_delete_finalize_async_r_4d_p2( a, async )
-    real, dimension(:,:,:,:) :: a
+    real(8), dimension(:,:,:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_delete_finalize_async_r_4d_p2
 
@@ -1544,7 +1544,7 @@ contains
   end subroutine acc_delete_finalize_async_i_l_p3
 
   subroutine acc_delete_finalize_async_r_l_p3( a, len, async )
-    real :: a
+    real(8) :: a
     integer :: len
     integer(acc_handle_kind) :: async
   end subroutine acc_delete_finalize_async_r_l_p3
@@ -1579,19 +1579,19 @@ contains
   end subroutine acc_update_device_i_4d_p1
 
   subroutine acc_update_device_r_1d_p1( a )
-    real, dimension(:) :: a
+    real(8), dimension(:) :: a
   end subroutine acc_update_device_r_1d_p1
 
   subroutine acc_update_device_r_2d_p1( a )
-    real, dimension(:,:) :: a
+    real(8), dimension(:,:) :: a
   end subroutine acc_update_device_r_2d_p1
 
   subroutine acc_update_device_r_3d_p1( a )
-    real, dimension(:,:,:) :: a
+    real(8), dimension(:,:,:) :: a
   end subroutine acc_update_device_r_3d_p1
 
   subroutine acc_update_device_r_4d_p1( a )
-    real, dimension(:,:,:,:) :: a
+    real(8), dimension(:,:,:,:) :: a
   end subroutine acc_update_device_r_4d_p1
 
   subroutine acc_update_device_l_1d_p1( a )
@@ -1632,7 +1632,7 @@ contains
   end subroutine acc_update_device_i_l_p2
 
   subroutine acc_update_device_r_l_p2( a, len )
-    real :: a
+    real(8) :: a
     integer :: len
   end subroutine acc_update_device_r_l_p2
 
@@ -1668,22 +1668,22 @@ contains
   end subroutine acc_update_device_async_i_4d_p2
 
   subroutine acc_update_device_async_r_1d_p2( a, async )
-    real, dimension(:) :: a
+    real(8), dimension(:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_update_device_async_r_1d_p2
 
   subroutine acc_update_device_async_r_2d_p2( a, async )
-    real, dimension(:,:) :: a
+    real(8), dimension(:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_update_device_async_r_2d_p2
 
   subroutine acc_update_device_async_r_3d_p2( a, async )
-    real, dimension(:,:,:) :: a
+    real(8), dimension(:,:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_update_device_async_r_3d_p2
 
   subroutine acc_update_device_async_r_4d_p2( a, async )
-    real, dimension(:,:,:,:) :: a
+    real(8), dimension(:,:,:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_update_device_async_r_4d_p2
 
@@ -1734,7 +1734,7 @@ contains
   end subroutine acc_update_device_async_i_l_p3
 
   subroutine acc_update_device_async_r_l_p3( a, len, async )
-    real :: a
+    real(8) :: a
     integer :: len
     integer(acc_handle_kind) :: async
   end subroutine acc_update_device_async_r_l_p3
@@ -1769,19 +1769,19 @@ contains
   end subroutine acc_update_self_i_4d_p1
 
   subroutine acc_update_self_r_1d_p1( a )
-    real, dimension(:) :: a
+    real(8), dimension(:) :: a
   end subroutine acc_update_self_r_1d_p1
 
   subroutine acc_update_self_r_2d_p1( a )
-    real, dimension(:,:) :: a
+    real(8), dimension(:,:) :: a
   end subroutine acc_update_self_r_2d_p1
 
   subroutine acc_update_self_r_3d_p1( a )
-    real, dimension(:,:,:) :: a
+    real(8), dimension(:,:,:) :: a
   end subroutine acc_update_self_r_3d_p1
 
   subroutine acc_update_self_r_4d_p1( a )
-    real, dimension(:,:,:,:) :: a
+    real(8), dimension(:,:,:,:) :: a
   end subroutine acc_update_self_r_4d_p1
 
   subroutine acc_update_self_l_1d_p1( a )
@@ -1822,7 +1822,7 @@ contains
   end subroutine acc_update_self_i_l_p2
 
   subroutine acc_update_self_r_l_p2( a, len )
-    real :: a
+    real(8) :: a
     integer :: len
   end subroutine acc_update_self_r_l_p2
 
@@ -1858,22 +1858,22 @@ contains
   end subroutine acc_update_self_async_i_4d_p2
 
   subroutine acc_update_self_async_r_1d_p2( a, async )
-    real, dimension(:) :: a
+    real(8), dimension(:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_update_self_async_r_1d_p2
 
   subroutine acc_update_self_async_r_2d_p2( a, async )
-    real, dimension(:,:) :: a
+    real(8), dimension(:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_update_self_async_r_2d_p2
 
   subroutine acc_update_self_async_r_3d_p2( a, async )
-    real, dimension(:,:,:) :: a
+    real(8), dimension(:,:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_update_self_async_r_3d_p2
 
   subroutine acc_update_self_async_r_4d_p2( a, async )
-    real, dimension(:,:,:,:) :: a
+    real(8), dimension(:,:,:,:) :: a
     integer(acc_handle_kind) :: async
   end subroutine acc_update_self_async_r_4d_p2
 
@@ -1924,7 +1924,7 @@ contains
   end subroutine acc_update_self_async_i_l_p3
 
   subroutine acc_update_self_async_r_l_p3( a, len, async )
-    real :: a
+    real(8) :: a
     integer :: len
     integer(acc_handle_kind) :: async
   end subroutine acc_update_self_async_r_l_p3
@@ -1959,19 +1959,19 @@ contains
   end function acc_is_present_i_4d_p1
 
   logical function acc_is_present_r_1d_p1( a )
-    real, dimension(:) :: a
+    real(8), dimension(:) :: a
   end function acc_is_present_r_1d_p1
 
   logical function acc_is_present_r_2d_p1( a )
-    real, dimension(:,:) :: a
+    real(8), dimension(:,:) :: a
   end function acc_is_present_r_2d_p1
 
   logical function acc_is_present_r_3d_p1( a )
-    real, dimension(:,:,:) :: a
+    real(8), dimension(:,:,:) :: a
   end function acc_is_present_r_3d_p1
 
   logical function acc_is_present_r_4d_p1( a )
-    real, dimension(:,:,:,:) :: a
+    real(8), dimension(:,:,:,:) :: a
   end function acc_is_present_r_4d_p1
 
   logical function acc_is_present_l_1d_p1( a )
@@ -2012,7 +2012,7 @@ contains
   end function acc_is_present_i_l_p2
 
   logical function acc_is_present_r_l_p2( a, len )
-    real :: a
+    real(8) :: a
     integer :: len
   end function acc_is_present_r_l_p2
 
