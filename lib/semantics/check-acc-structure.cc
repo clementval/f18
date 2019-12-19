@@ -69,8 +69,9 @@ void AccStructureChecker::Enter(const parser::OpenACCBlockConstruct &x) {
       PushContext(beginDir.source, AccDirective::DATA);
       SetContextAllowed({AccClause::ATTACH, AccClause::COPY, AccClause::COPYIN,
                          AccClause::COPYOUT, AccClause::CREATE,
-                         AccClause::DEVICEPTR, AccClause::NO_CREATE});
-      SetContextAllowedOnce({AccClause::DEFAULT});
+                         AccClause::DEVICEPTR, AccClause::NO_CREATE,
+                         AccClause::PRESENT});
+      SetContextAllowedOnce({AccClause::DEFAULT, AccClause::IF});
     } break;
     case parser::AccBlockDirective::Directive::Kernels: {
       PushContext(beginDir.source, AccDirective::KERNELS);
@@ -192,8 +193,10 @@ void AccStructureChecker::Enter(const parser::OpenACCStandaloneConstruct &x) {
     case parser::AccStandaloneDirective::Directive::Update: {
       PushContext(dir.source, AccDirective::UPDATE);
       SetContextAllowed({AccClause::DEVICE, AccClause::HOST, AccClause::SELF});
+      SetContextAllowedOnce({AccClause::ASYNC, AccClause::IF,
+                             AccClause::IF_PRESENT})
       // TODO DEVICE, HOST, SELF requires at least one of them
-      // TODO other clauses ASYNC, WAIT, DEVICE_TYPE, IF, IF_PRESENT
+      // TODO other clauses WAIT, DEVICE_TYPE
     } break;
   }
 }

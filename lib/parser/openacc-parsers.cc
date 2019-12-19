@@ -40,7 +40,7 @@ TYPE_PARSER(construct<AccBeginBlockDirective>(
 TYPE_PARSER(
     "AUTO" >> construct<AccClause>(construct<AccClause::Auto>()) ||
     "ASYNC" >> construct<AccClause>(construct<AccClause::Async>(maybe(
-        parenthesized(scalarIntConstantExpr)))) ||
+        parenthesized(scalarIntExpr)))) ||
     "ATTACH" >> construct<AccClause>(construct<AccClause::Attach>(
         parenthesized(Parser<AccObjectList>{}))) ||
     "CAPTURE" >> construct<AccClause>(construct<AccClause::Capture>()) ||
