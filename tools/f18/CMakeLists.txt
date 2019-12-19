@@ -47,6 +47,7 @@ set(MODULES
   "iso_c_binding"
   "iso_fortran_env"
   "omp_lib"
+  "openacc"
 )
 
 # Create module files directly from the top-level module source directory
