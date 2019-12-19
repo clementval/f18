@@ -1859,6 +1859,11 @@ public:
     Walk(x.v);
     Put(")");
   }
+  void Unparse(const AccClause::Private &x) {
+    Word("PRIVATE(");
+    Walk(x.v);
+    Put(")");
+  }
   void Unparse(const AccClause::Reduction &x) {
     Word("REDUCTION(");
     Walk(x.v);

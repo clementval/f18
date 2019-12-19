@@ -136,6 +136,40 @@ void AccStructureChecker::Leave(
   accContext_.pop_back();
 }
 
+void AccStructureChecker::Enter(const parser::OpenACCCombinedConstruct &x) {
+  const auto &beginBlockDir{std::get<parser::AccBeginCombinedDirective>(x.t)};
+  const auto &beginDir{std::get<parser::AccCombinedDirective>(beginBlockDir.t)};
+  switch (beginDir.v) {
+    case parser::AccCombinedDirective::Directive::KernelsLoop: {
+      PushContext(beginDir.source, AccDirective::KERNELS_LOOP);
+    } break;
+    case parser::AccCombinedDirective::Directive::ParallelLoop: {
+      PushContext(beginDir.source, AccDirective::PARALLEL_LOOP);
+      SetContextAllowed({AccClause::COPY, AccClause::COPYIN, AccClause::COPYOUT,
+                         AccClause::CREATE, AccClause::NO_CREATE,
+                         AccClause::PRESENT, AccClause::DEVICEPTR,
+                         AccClause::ATTACH, AccClause::PRIVATE,
+                         AccClause::FIRSTPRIVATE, AccClause::WAIT});
+      SetContextAllowedOnce({AccClause::ASYNC, AccClause::COLLAPSE,
+                             AccClause::DEFAULT, AccClause::GANG,
+                             AccClause::IF, AccClause::NUM_GANGS,
+                             AccClause::NUM_WORKERS, AccClause::SELF,
+                             AccClause::VECTOR, AccClause::VECTOR_LENGTH,
+                             AccClause::WORKER});
+      SetContextAllowedExclusive({AccClause::AUTO, AccClause::INDEPENDENT,
+                                  AccClause::SEQ});
+      // TODO add REDUCTION, DEVICE_TYPE,
+    } break;
+    case parser::AccCombinedDirective::Directive::SerialLoop: {
+      PushContext(beginDir.source, AccDirective::SERIAL_LOOP);
+    } break;
+  }
+}
+
+void AccStructureChecker::Leave(const parser::OpenACCCombinedConstruct &) {
+  accContext_.pop_back();
+}
+
 void AccStructureChecker::Enter(const parser::OpenACCStandaloneConstruct &x) {
   const auto &dir{std::get<parser::AccStandaloneDirective>(x.t)};
   switch (dir.v) {
@@ -194,7 +228,7 @@ void AccStructureChecker::Enter(const parser::OpenACCStandaloneConstruct &x) {
       PushContext(dir.source, AccDirective::UPDATE);
       SetContextAllowed({AccClause::DEVICE, AccClause::HOST, AccClause::SELF});
       SetContextAllowedOnce({AccClause::ASYNC, AccClause::IF,
-                             AccClause::IF_PRESENT})
+                             AccClause::IF_PRESENT});
       // TODO DEVICE, HOST, SELF requires at least one of them
       // TODO other clauses WAIT, DEVICE_TYPE
     } break;
@@ -212,6 +246,7 @@ CHECK_REQ_SCALAR_INT_CONSTANT_CLAUSE(NumWorkers, NUM_WORKERS)
 CHECK_REQ_SCALAR_INT_CONSTANT_CLAUSE(VectorLength, VECTOR_LENGTH)
 
 CHECK_SIMPLE_CLAUSE(Auto, AUTO)
+CHECK_SIMPLE_CLAUSE(Async, ASYNC)
 CHECK_SIMPLE_CLAUSE(Attach, ATTACH)
 CHECK_SIMPLE_CLAUSE(Capture, CAPTURE)
 CHECK_SIMPLE_CLAUSE(Bind, BIND)
@@ -248,11 +283,6 @@ void AccStructureChecker::Enter(const parser::AccClause::Create &c) {
                    EnumToString(GetContext().directive));
     }
   }
-}
-
-void AccStructureChecker::Enter(const parser::AccClause::Async &c) {
-  CheckAllowed(AccClause::ASYNC);
-  OptionalConstantPositiveParameter(AccClause::ASYNC, c.v);
 }
 
 void AccStructureChecker::Enter(const parser::AccClause::Copy &) {

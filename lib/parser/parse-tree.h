@@ -4352,7 +4352,6 @@ WRAPPER_CLASS(AccObjectList, std::list<AccObject>);
 // OpenACC directive beginning or ending a block
 struct AccBlockDirective {
   ENUM_CLASS(Directive, Atomic, Data, HostData, Kernels, Parallel, Serial);
-
   WRAPPER_CLASS_BOILERPLATE(AccBlockDirective, Directive);
   CharBlock source;
 };
@@ -4361,6 +4360,13 @@ struct AccStandaloneDirective {
   ENUM_CLASS(Directive, Cache, EnterData, ExitData, Init, Loop, Routine,
       Shutdown, Update);
   WRAPPER_CLASS_BOILERPLATE(AccStandaloneDirective, Directive);
+  CharBlock source;
+};
+
+// 2.11 Combined constructs
+struct AccCombinedDirective {
+  ENUM_CLASS(Directive, KernelsLoop, ParallelLoop, SerialLoop)
+  WRAPPER_CLASS_BOILERPLATE(AccCombinedDirective, Directive);
   CharBlock source;
 };
 
@@ -4479,41 +4485,52 @@ struct AccBeginBlockDirective {
 
 struct AccEndBlockDirective {
   TUPLE_CLASS_BOILERPLATE(AccEndBlockDirective);
-
   std::tuple<AccBlockDirective, AccClauseList> t;
 };
 
 struct OpenACCBlockConstruct {
   TUPLE_CLASS_BOILERPLATE(OpenACCBlockConstruct);
-
   std::tuple<AccBeginBlockDirective, Block, AccEndBlockDirective> t;
 };
 
 struct OpenACCStandaloneDeclarativeConstruct {
   TUPLE_CLASS_BOILERPLATE(OpenACCStandaloneDeclarativeConstruct);
-
   CharBlock source;
   std::tuple<AccDeclarativeDirective, AccClauseList> t;
 };
 
+struct AccBeginCombinedDirective {
+  TUPLE_CLASS_BOILERPLATE(AccBeginCombinedDirective);
+  std::tuple<AccCombinedDirective, AccClauseList> t;
+};
+
+struct AccEndCombinedDirective {
+  TUPLE_CLASS_BOILERPLATE(AccEndCombinedDirective);
+  std::tuple<AccCombinedDirective> t;
+};
+
+struct OpenACCCombinedConstruct {
+  TUPLE_CLASS_BOILERPLATE(OpenACCCombinedConstruct);
+  CharBlock source;
+  std::tuple<AccBeginCombinedDirective, Block, std::optional<AccEndCombinedDirective>> t;
+};
+
 struct OpenACCDeclarativeConstruct {
   UNION_CLASS_BOILERPLATE(OpenACCDeclarativeConstruct);
-
   CharBlock source;
   std::variant<OpenACCStandaloneDeclarativeConstruct> u;
 };
 
 struct OpenACCStandaloneConstruct {
   TUPLE_CLASS_BOILERPLATE(OpenACCStandaloneConstruct);
-
   CharBlock source;
   std::tuple<AccStandaloneDirective, AccClauseList> t;
 };
 
 struct OpenACCConstruct {
   UNION_CLASS_BOILERPLATE(OpenACCConstruct);
-
-  std::variant<OpenACCBlockConstruct, OpenACCStandaloneConstruct, OpenACCCacheConstruct, OpenACCWaitConstruct> u;
+  std::variant<OpenACCBlockConstruct, OpenACCCombinedConstruct,
+  OpenACCStandaloneConstruct, OpenACCCacheConstruct, OpenACCWaitConstruct> u;
 };
 
 }

@@ -113,6 +113,8 @@ TYPE_PARSER(
         parenthesized(scalarIntConstantExpr))) ||
     "PRESENT" >> construct<AccClause>(construct<AccClause::Present>(
         parenthesized(Parser<AccObjectList>{}))) ||
+    "PRIVATE" >> construct<AccClause>(construct<AccClause::Private>(
+        parenthesized(Parser<AccObjectList>{}))) ||
     "READ" >> construct<AccClause>(construct<AccClause::Read>()) ||
     "VECTOR_LENGTH" >> construct<AccClause>(construct<AccClause::VectorLength>(
         parenthesized(scalarIntConstantExpr))) ||
@@ -155,6 +157,23 @@ TYPE_PARSER(construct<AccStandaloneDirective>(first(
     "SHUTDOWN" >> pure(AccStandaloneDirective::Directive::Shutdown),
     "UPDATE" >> pure(AccStandaloneDirective::Directive::Update))))
 
+
+// OpenACC combined construct
+TYPE_PARSER(construct<AccCombinedDirective>(first(
+    "KERNELS LOOP" >> pure(AccCombinedDirective::Directive::KernelsLoop),
+    "PARALLEL LOOP" >> pure(AccCombinedDirective::Directive::ParallelLoop),
+    "SERIAL LOOP" >> pure(AccCombinedDirective::Directive::SerialLoop))))
+
+TYPE_PARSER(startAccLine >> construct<AccEndCombinedDirective>(
+    sourced("END"_tok >> Parser<AccCombinedDirective>{})))
+
+TYPE_PARSER(construct<AccBeginCombinedDirective>(
+    sourced(Parser<AccCombinedDirective>{}), Parser<AccClauseList>{}))
+
+TYPE_PARSER(construct<OpenACCCombinedConstruct>(
+    Parser<AccBeginCombinedDirective>{} / endAccLine, block,
+    maybe(Parser<AccEndCombinedDirective>{} / endAccLine)))
+
 TYPE_PARSER(construct<AccDeclarativeDirective>(first(
     "DECLARE" >> pure(AccDeclarativeDirective::Directive::Declare)
     )))
@@ -190,7 +209,8 @@ TYPE_PARSER(startAccLine >> sourced(construct<OpenACCDeclarativeConstruct>(
 
 TYPE_CONTEXT_PARSER("OpenACC construct"_en_US,
     startAccLine >>
-        first(construct<OpenACCConstruct>(Parser<OpenACCBlockConstruct>{}),
+        first(construct<OpenACCConstruct>(Parser<OpenACCCombinedConstruct>{}),
+              construct<OpenACCConstruct>(Parser<OpenACCBlockConstruct>{}),
               construct<OpenACCConstruct>(Parser<OpenACCStandaloneConstruct>{}),
               construct<OpenACCConstruct>(Parser<OpenACCCacheConstruct>{}),
               construct<OpenACCConstruct>(Parser<OpenACCWaitConstruct>{})))
