@@ -124,6 +124,8 @@ TYPE_PARSER(
     "SELF" >> construct<AccClause>(construct<AccClause::Self>(
         maybe(parenthesized(scalarLogicalExpr)))) ||
     "SEQ" >> construct<AccClause>(construct<AccClause::Seq>()) ||
+    "TILE" >> construct<AccClause>(construct<AccClause::Tile>(
+        parenthesized(Parser<AccSizeExprList>{}))) ||
     "USE_DEVICE" >> construct<AccClause>(construct<AccClause::UseDevice>(
         parenthesized(Parser<AccObjectList>{}))) ||
     "VECTOR" >> construct<AccClause>(construct<AccClause::Vector>()) ||
@@ -142,6 +144,14 @@ TYPE_PARSER(construct<AccObjectListWithModifier>(
 
 TYPE_PARSER(construct<AccWaitArgument>(maybe("DEVNUM:" >> scalarIntExpr / ":"),
     nonemptyList(scalarIntExpr))) // TODO recognize as complex instead of list of int
+
+// 2.9 size-expr is one of:
+// *
+// int-expr
+TYPE_PARSER(construct<AccSizeExpr>(scalarIntExpr)
+    || construct<AccSizeExpr>("*" >> maybe(scalarIntExpr)))
+
+TYPE_PARSER(construct<AccSizeExprList>(nonemptyList(Parser<AccSizeExpr>{})))
 
 // Modifier for copyin, copyout, cache and create
 TYPE_PARSER(construct<AccDataModifier>(first(

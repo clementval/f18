@@ -145,11 +145,11 @@ void AccStructureChecker::Enter(const parser::OpenACCCombinedConstruct &x) {
     } break;
     case parser::AccCombinedDirective::Directive::ParallelLoop: {
       PushContext(beginDir.source, AccDirective::PARALLEL_LOOP);
-      SetContextAllowed({AccClause::COPY, AccClause::COPYIN, AccClause::COPYOUT,
-                         AccClause::CREATE, AccClause::NO_CREATE,
-                         AccClause::PRESENT, AccClause::DEVICEPTR,
-                         AccClause::ATTACH, AccClause::PRIVATE,
-                         AccClause::FIRSTPRIVATE, AccClause::WAIT});
+      SetContextAllowed({AccClause::ATTACH, AccClause::COPY, AccClause::COPYIN,
+                         AccClause::COPYOUT, AccClause::CREATE,
+                         AccClause::DEVICEPTR, AccClause::FIRSTPRIVATE,
+                         AccClause::NO_CREATE, AccClause::PRESENT,
+                         AccClause::PRIVATE, AccClause::TILE, AccClause::WAIT});
       SetContextAllowedOnce({AccClause::ASYNC, AccClause::COLLAPSE,
                              AccClause::DEFAULT, AccClause::GANG,
                              AccClause::IF, AccClause::NUM_GANGS,

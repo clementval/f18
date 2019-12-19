@@ -4406,6 +4406,16 @@ struct AccWaitArgument {
   std::tuple<std::optional<ScalarIntExpr>, std::list<ScalarIntExpr>> t;
 };
 
+struct AccSizeExpr {
+  TUPLE_CLASS_BOILERPLATE(AccSizeExpr);
+  CharBlock source;
+  std::tuple<std::optional<ScalarIntExpr>> t; // if null then *
+};
+
+struct AccSizeExprList {
+  WRAPPER_CLASS_BOILERPLATE(AccSizeExprList, std::list<AccSizeExpr>);
+};
+
 struct AccClause {
   UNION_CLASS_BOILERPLATE(AccClause);
 
@@ -4444,6 +4454,7 @@ struct AccClause {
   WRAPPER_CLASS(NumWorkers, ScalarIntConstantExpr); // 2.5.9
   WRAPPER_CLASS(Present, AccObjectList); // 2.7.4
   WRAPPER_CLASS(Private, AccObjectList); // 2.5.11
+  WRAPPER_CLASS(Tile, AccSizeExprList); // 2.9.7
   WRAPPER_CLASS(UseDevice, AccObjectList); // 2.8.1
   WRAPPER_CLASS(Reduction, AccObjectListWithReduction); // 2.5.13
   WRAPPER_CLASS(Self, std::optional<ScalarLogicalExpr>); // 2.5.5
@@ -4455,8 +4466,8 @@ struct AccClause {
       Read, Seq, Vector, Worker, Write, Async, Attach, Bind, Collapse, Copy,
       Copyin, Copyout, Create, Default, Delete, Detach, Device, DeviceNum,
       DevicePtr, DeviceType, Host, If, FirstPrivate, NoCreate, NumGangs,
-      NumWorkers, Present, Private, UseDevice, Reduction, Self, VectorLength,
-      Wait> u;
+      NumWorkers, Present, Private, Tile, UseDevice, Reduction, Self,
+      VectorLength, Wait> u;
 };
 
 struct AccClauseList {
@@ -4472,14 +4483,12 @@ struct OpenACCCacheConstruct {
 
 struct OpenACCWaitConstruct {
   TUPLE_CLASS_BOILERPLATE(OpenACCWaitConstruct);
-
   CharBlock source;
   std::tuple<Verbatim, std::optional<AccWaitArgument>, AccClauseList> t;
 };
 
 struct AccBeginBlockDirective {
   TUPLE_CLASS_BOILERPLATE(AccBeginBlockDirective);
-
   std::tuple<AccBlockDirective, AccClauseList> t;
 };
 
@@ -4512,7 +4521,8 @@ struct AccEndCombinedDirective {
 struct OpenACCCombinedConstruct {
   TUPLE_CLASS_BOILERPLATE(OpenACCCombinedConstruct);
   CharBlock source;
-  std::tuple<AccBeginCombinedDirective, Block, std::optional<AccEndCombinedDirective>> t;
+  std::tuple<AccBeginCombinedDirective, Block,
+      std::optional<AccEndCombinedDirective>> t;
 };
 
 struct OpenACCDeclarativeConstruct {
