@@ -41,411 +41,255 @@ module openacc
   ! Signatures for acc_copyin
   interface acc_copyin
     module procedure &
-      acc_copyin_i_1d_p1, acc_copyin_i_2d_p1, acc_copyin_i_3d_p1, acc_copyin_i_4d_p1, &
-      acc_copyin_r_1d_p1, acc_copyin_r_2d_p1, acc_copyin_r_3d_p1, acc_copyin_r_4d_p1, &
-      acc_copyin_l_1d_p1, acc_copyin_l_2d_p1, acc_copyin_l_3d_p1, acc_copyin_l_4d_p1, &
-      acc_copyin_c_1d_p1, acc_copyin_c_2d_p1, acc_copyin_c_3d_p1, acc_copyin_c_4d_p1, &
+      acc_copyin_i_1d_p1, acc_copyin_i_2d_p1, acc_copyin_i_3d_p1, &
+        acc_copyinacc_copyin_i_4d_p1, &
+      acc_copyin_r_1d_p1, acc_copyin_r_2d_p1, acc_copyin_r_3d_p1, &
+        acc_copyinacc_copyin_r_4d_p1, &
+      acc_copyin_l_1d_p1, acc_copyin_l_2d_p1, acc_copyin_l_3d_p1, &
+        acc_copyinacc_copyin_l_4d_p1, &
+      acc_copyin_c_1d_p1, acc_copyin_c_2d_p1, acc_copyin_c_3d_p1, &
+        acc_copyinacc_copyin_c_4d_p1, &
       acc_copyin_i_l_p2, acc_copyin_r_l_p2, acc_copyin_l_l_p2, acc_copyin_c_l_p2
   end interface
 
   ! Signatures for acc_copyin_async
   interface acc_copyin_async
     module procedure &
-      acc_copyin_async_i_1d_p2, &
-      acc_copyin_async_i_2d_p2, &
-      acc_copyin_async_i_3d_p2, &
-      acc_copyin_async_i_4d_p2, &
-      acc_copyin_async_r_1d_p2, &
-      acc_copyin_async_r_2d_p2, &
-      acc_copyin_async_r_3d_p2, &
-      acc_copyin_async_r_4d_p2, &
-      acc_copyin_async_l_1d_p2, &
-      acc_copyin_async_l_2d_p2, &
-      acc_copyin_async_l_3d_p2, &
-      acc_copyin_async_l_4d_p2, &
-      acc_copyin_async_c_1d_p2, &
-      acc_copyin_async_c_2d_p2, &
-      acc_copyin_async_c_3d_p2, &
-      acc_copyin_async_c_4d_p2, &
-      acc_copyin_async_i_l_p3, &
-      acc_copyin_async_r_l_p3, &
-      acc_copyin_async_l_l_p3, &
-      acc_copyin_async_c_l_p3
+      acc_copyin_async_i_1d_p2, acc_copyin_async_i_2d_p2, &
+      acc_copyin_async_i_3d_p2, acc_copyin_async_i_4d_p2, &
+      acc_copyin_async_r_1d_p2, acc_copyin_async_r_2d_p2, &
+      acc_copyin_async_r_3d_p2, acc_copyin_async_r_4d_p2, &
+      acc_copyin_async_l_1d_p2, acc_copyin_async_l_2d_p2, &
+      acc_copyin_async_l_3d_p2, acc_copyin_async_l_4d_p2, &
+      acc_copyin_async_c_1d_p2, acc_copyin_async_c_2d_p2, &
+      acc_copyin_async_c_3d_p2, acc_copyin_async_c_4d_p2, &
+      acc_copyin_async_i_l_p3, acc_copyin_async_r_l_p3, &
+      acc_copyin_async_l_l_p3, acc_copyin_async_c_l_p3
   end interface
 
   ! Signatures for acc_create
   interface acc_create
     module procedure &
-      acc_create_i_1d_p1, &
-      acc_create_i_2d_p1, &
-      acc_create_i_3d_p1, &
-      acc_create_i_4d_p1, &
-      acc_create_r_1d_p1, &
-      acc_create_r_2d_p1, &
-      acc_create_r_3d_p1, &
-      acc_create_r_4d_p1, &
-      acc_create_l_1d_p1, &
-      acc_create_l_2d_p1, &
-      acc_create_l_3d_p1, &
-      acc_create_l_4d_p1, &
-      acc_create_c_1d_p1, &
-      acc_create_c_2d_p1, &
-      acc_create_c_3d_p1, &
-      acc_create_c_4d_p1, &
-      acc_create_i_l_p2, &
-      acc_create_r_l_p2, &
-      acc_create_l_l_p2, &
-      acc_create_c_l_p2
+      acc_create_i_1d_p1, acc_create_i_2d_p1, acc_create_i_3d_p1, &
+        acc_create_i_4d_p1, &
+      acc_create_r_1d_p1, acc_create_r_2d_p1, acc_create_r_3d_p1, &
+        acc_create_r_4d_p1, &
+      acc_create_l_1d_p1, acc_create_l_2d_p1, acc_create_l_3d_p1, &
+        acc_create_l_4d_p1, &
+      acc_create_c_1d_p1, acc_create_c_2d_p1, acc_create_c_3d_p1, &
+        acc_create_c_4d_p1, &
+      acc_create_i_l_p2, acc_create_r_l_p2, acc_create_l_l_p2, &
+        acc_create_c_l_p2
   end interface
 
   ! Signatures for acc_create_async
   interface acc_create_async
     module procedure &
-      acc_create_async_i_1d_p2, &
-      acc_create_async_i_2d_p2, &
-      acc_create_async_i_3d_p2, &
-      acc_create_async_i_4d_p2, &
-      acc_create_async_r_1d_p2, &
-      acc_create_async_r_2d_p2, &
-      acc_create_async_r_3d_p2, &
-      acc_create_async_r_4d_p2, &
-      acc_create_async_l_1d_p2, &
-      acc_create_async_l_2d_p2, &
-      acc_create_async_l_3d_p2, &
-      acc_create_async_l_4d_p2, &
-      acc_create_async_c_1d_p2, &
-      acc_create_async_c_2d_p2, &
-      acc_create_async_c_3d_p2, &
-      acc_create_async_c_4d_p2, &
-      acc_create_async_i_l_p3, &
-      acc_create_async_r_l_p3, &
-      acc_create_async_l_l_p3, &
-      acc_create_async_c_l_p3
+      acc_create_async_i_1d_p2, acc_create_async_i_2d_p2, &
+      acc_create_async_i_3d_p2, acc_create_async_i_4d_p2, &
+      acc_create_async_r_1d_p2, acc_create_async_r_2d_p2, &
+      acc_create_async_r_3d_p2, acc_create_async_r_4d_p2, &
+      acc_create_async_l_1d_p2, acc_create_async_l_2d_p2, &
+      acc_create_async_l_3d_p2, acc_create_async_l_4d_p2, &
+      acc_create_async_c_1d_p2, acc_create_async_c_2d_p2, &
+      acc_create_async_c_3d_p2, acc_create_async_c_4d_p2, &
+      acc_create_async_i_l_p3, acc_create_async_r_l_p3, &
+      acc_create_async_l_l_p3, acc_create_async_c_l_p3
   end interface
 
   ! Signatures for acc_copyout
   interface acc_copyout
     module procedure &
-      acc_copyout_i_1d_p1, &
-      acc_copyout_i_2d_p1, &
-      acc_copyout_i_3d_p1, &
-      acc_copyout_i_4d_p1, &
-      acc_copyout_r_1d_p1, &
-      acc_copyout_r_2d_p1, &
-      acc_copyout_r_3d_p1, &
-      acc_copyout_r_4d_p1, &
-      acc_copyout_l_1d_p1, &
-      acc_copyout_l_2d_p1, &
-      acc_copyout_l_3d_p1, &
-      acc_copyout_l_4d_p1, &
-      acc_copyout_c_1d_p1, &
-      acc_copyout_c_2d_p1, &
-      acc_copyout_c_3d_p1, &
-      acc_copyout_c_4d_p1, &
-      acc_copyout_i_l_p2, &
-      acc_copyout_r_l_p2, &
-      acc_copyout_l_l_p2, &
-      acc_copyout_c_l_p2
+      acc_copyout_i_1d_p1, acc_copyout_i_2d_p1, acc_copyout_i_3d_p1, &
+        acc_copyout_i_4d_p1, &
+      acc_copyout_r_1d_p1, acc_copyout_r_2d_p1, acc_copyout_r_3d_p1, &
+        acc_copyout_r_4d_p1, &
+      acc_copyout_l_1d_p1, acc_copyout_l_2d_p1, acc_copyout_l_3d_p1, &
+        acc_copyout_l_4d_p1, &
+      acc_copyout_c_1d_p1, acc_copyout_c_2d_p1, acc_copyout_c_3d_p1, &
+        acc_copyout_c_4d_p1, &
+      acc_copyout_i_l_p2, acc_copyout_r_l_p2, acc_copyout_l_l_p2, &
+        acc_copyout_c_l_p2
   end interface
 
   ! Signatures for acc_copyout_async
   interface acc_copyout_async
     module procedure &
-      acc_copyout_async_i_1d_p2, &
-      acc_copyout_async_i_2d_p2, &
-      acc_copyout_async_i_3d_p2, &
-      acc_copyout_async_i_4d_p2, &
-      acc_copyout_async_r_1d_p2, &
-      acc_copyout_async_r_2d_p2, &
-      acc_copyout_async_r_3d_p2, &
-      acc_copyout_async_r_4d_p2, &
-      acc_copyout_async_l_1d_p2, &
-      acc_copyout_async_l_2d_p2, &
-      acc_copyout_async_l_3d_p2, &
-      acc_copyout_async_l_4d_p2, &
-      acc_copyout_async_c_1d_p2, &
-      acc_copyout_async_c_2d_p2, &
-      acc_copyout_async_c_3d_p2, &
-      acc_copyout_async_c_4d_p2, &
-      acc_copyout_async_i_l_p3, &
-      acc_copyout_async_r_l_p3, &
-      acc_copyout_async_l_l_p3, &
-      acc_copyout_async_c_l_p3
+      acc_copyout_async_i_1d_p2, acc_copyout_async_i_2d_p2, &
+      acc_copyout_async_i_3d_p2, acc_copyout_async_i_4d_p2, &
+      acc_copyout_async_r_1d_p2, acc_copyout_async_r_2d_p2, &
+      acc_copyout_async_r_3d_p2, acc_copyout_async_r_4d_p2, &
+      acc_copyout_async_l_1d_p2, acc_copyout_async_l_2d_p2, &
+      acc_copyout_async_l_3d_p2, acc_copyout_async_l_4d_p2, &
+      acc_copyout_async_c_1d_p2, acc_copyout_async_c_2d_p2, &
+      acc_copyout_async_c_3d_p2, acc_copyout_async_c_4d_p2, &
+      acc_copyout_async_i_l_p3, acc_copyout_async_r_l_p3, &
+      acc_copyout_async_l_l_p3, acc_copyout_async_c_l_p3
     end interface
 
   ! Signatures for acc_copyout_finalize
   interface acc_copyout_finalize
     module procedure &
-      acc_copyout_finalize_i_1d_p1, &
-      acc_copyout_finalize_i_2d_p1, &
-      acc_copyout_finalize_i_3d_p1, &
-      acc_copyout_finalize_i_4d_p1, &
-      acc_copyout_finalize_r_1d_p1, &
-      acc_copyout_finalize_r_2d_p1, &
-      acc_copyout_finalize_r_3d_p1, &
-      acc_copyout_finalize_r_4d_p1, &
-      acc_copyout_finalize_l_1d_p1, &
-      acc_copyout_finalize_l_2d_p1, &
-      acc_copyout_finalize_l_3d_p1, &
-      acc_copyout_finalize_l_4d_p1, &
-      acc_copyout_finalize_c_1d_p1, &
-      acc_copyout_finalize_c_2d_p1, &
-      acc_copyout_finalize_c_3d_p1, &
-      acc_copyout_finalize_c_4d_p1, &
-      acc_copyout_finalize_i_l_p2, &
-      acc_copyout_finalize_r_l_p2, &
-      acc_copyout_finalize_l_l_p2, &
-      acc_copyout_finalize_c_l_p2
+      acc_copyout_finalize_i_1d_p1, acc_copyout_finalize_i_2d_p1, &
+      acc_copyout_finalize_i_3d_p1, acc_copyout_finalize_i_4d_p1, &
+      acc_copyout_finalize_r_1d_p1, acc_copyout_finalize_r_2d_p1, &
+      acc_copyout_finalize_r_3d_p1, acc_copyout_finalize_r_4d_p1, &
+      acc_copyout_finalize_l_1d_p1, acc_copyout_finalize_l_2d_p1, &
+      acc_copyout_finalize_l_3d_p1, acc_copyout_finalize_l_4d_p1, &
+      acc_copyout_finalize_c_1d_p1, acc_copyout_finalize_c_2d_p1, &
+      acc_copyout_finalize_c_3d_p1, acc_copyout_finalize_c_4d_p1, &
+      acc_copyout_finalize_i_l_p2, acc_copyout_finalize_r_l_p2, &
+      acc_copyout_finalize_l_l_p2, acc_copyout_finalize_c_l_p2
   end interface
 
   ! Signatures for acc_copyout_finalize_async
   interface acc_copyout_finalize_async
     module procedure &
-      acc_copyout_finalize_async_i_1d_p2, &
-      acc_copyout_finalize_async_i_2d_p2, &
-      acc_copyout_finalize_async_i_3d_p2, &
-      acc_copyout_finalize_async_i_4d_p2, &
-      acc_copyout_finalize_async_r_1d_p2, &
-      acc_copyout_finalize_async_r_2d_p2, &
-      acc_copyout_finalize_async_r_3d_p2, &
-      acc_copyout_finalize_async_r_4d_p2, &
-      acc_copyout_finalize_async_l_1d_p2, &
-      acc_copyout_finalize_async_l_2d_p2, &
-      acc_copyout_finalize_async_l_3d_p2, &
-      acc_copyout_finalize_async_l_4d_p2, &
-      acc_copyout_finalize_async_c_1d_p2, &
-      acc_copyout_finalize_async_c_2d_p2, &
-      acc_copyout_finalize_async_c_3d_p2, &
-      acc_copyout_finalize_async_c_4d_p2, &
-      acc_copyout_finalize_async_i_l_p3, &
-      acc_copyout_finalize_async_r_l_p3, &
-      acc_copyout_finalize_async_l_l_p3, &
-      acc_copyout_finalize_async_c_l_p3
+      acc_copyout_finalize_async_i_1d_p2, acc_copyout_finalize_async_i_2d_p2, &
+      acc_copyout_finalize_async_i_3d_p2, acc_copyout_finalize_async_i_4d_p2, &
+      acc_copyout_finalize_async_r_1d_p2, acc_copyout_finalize_async_r_2d_p2, &
+      acc_copyout_finalize_async_r_3d_p2, acc_copyout_finalize_async_r_4d_p2, &
+      acc_copyout_finalize_async_l_1d_p2, acc_copyout_finalize_async_l_2d_p2, &
+      acc_copyout_finalize_async_l_3d_p2, acc_copyout_finalize_async_l_4d_p2, &
+      acc_copyout_finalize_async_c_1d_p2, acc_copyout_finalize_async_c_2d_p2, &
+      acc_copyout_finalize_async_c_3d_p2, acc_copyout_finalize_async_c_4d_p2, &
+      acc_copyout_finalize_async_i_l_p3, acc_copyout_finalize_async_r_l_p3, &
+      acc_copyout_finalize_async_l_l_p3, acc_copyout_finalize_async_c_l_p3
   end interface
 
   ! Signatures for acc_delete
   interface acc_delete
     module procedure &
-      acc_delete_i_1d_p1, &
-      acc_delete_i_2d_p1, &
-      acc_delete_i_3d_p1, &
-      acc_delete_i_4d_p1, &
-      acc_delete_r_1d_p1, &
-      acc_delete_r_2d_p1, &
-      acc_delete_r_3d_p1, &
-      acc_delete_r_4d_p1, &
-      acc_delete_l_1d_p1, &
-      acc_delete_l_2d_p1, &
-      acc_delete_l_3d_p1, &
-      acc_delete_l_4d_p1, &
-      acc_delete_c_1d_p1, &
-      acc_delete_c_2d_p1, &
-      acc_delete_c_3d_p1, &
-      acc_delete_c_4d_p1, &
-      acc_delete_i_l_p2, &
-      acc_delete_r_l_p2, &
-      acc_delete_l_l_p2, &
-      acc_delete_c_l_p2
+      acc_delete_i_1d_p1, acc_delete_i_2d_p1, acc_delete_i_3d_p1, &
+        acc_delete_i_4d_p1, &
+      acc_delete_r_1d_p1, acc_delete_r_2d_p1, acc_delete_r_3d_p1, &
+        acc_delete_r_4d_p1, &
+      acc_delete_l_1d_p1, acc_delete_l_2d_p1, acc_delete_l_3d_p1, &
+        acc_delete_l_4d_p1, &
+      acc_delete_c_1d_p1, acc_delete_c_2d_p1, acc_delete_c_3d_p1, &
+        acc_delete_c_4d_p1, &
+      acc_delete_i_l_p2, acc_delete_r_l_p2, acc_delete_l_l_p2, &
+        acc_delete_c_l_p2
     end interface
 
   ! Signatures for acc_delete_async
   interface acc_delete_async
     module procedure &
-      acc_delete_async_i_1d_p2, &
-      acc_delete_async_i_2d_p2, &
-      acc_delete_async_i_3d_p2, &
-      acc_delete_async_i_4d_p2, &
-      acc_delete_async_r_1d_p2, &
-      acc_delete_async_r_2d_p2, &
-      acc_delete_async_r_3d_p2, &
-      acc_delete_async_r_4d_p2, &
-      acc_delete_async_l_1d_p2, &
-      acc_delete_async_l_2d_p2, &
-      acc_delete_async_l_3d_p2, &
-      acc_delete_async_l_4d_p2, &
-      acc_delete_async_c_1d_p2, &
-      acc_delete_async_c_2d_p2, &
-      acc_delete_async_c_3d_p2, &
-      acc_delete_async_c_4d_p2, &
-      acc_delete_async_i_l_p3, &
-      acc_delete_async_r_l_p3, &
-      acc_delete_async_l_l_p3, &
-      acc_delete_async_c_l_p3
+      acc_delete_async_i_1d_p2, acc_delete_async_i_2d_p2, &
+      acc_delete_async_i_3d_p2, acc_delete_async_i_4d_p2, &
+      acc_delete_async_r_1d_p2, acc_delete_async_r_2d_p2, &
+      acc_delete_async_r_3d_p2, acc_delete_async_r_4d_p2, &
+      acc_delete_async_l_1d_p2, acc_delete_async_l_2d_p2, &
+      acc_delete_async_l_3d_p2, acc_delete_async_l_4d_p2, &
+      acc_delete_async_c_1d_p2, acc_delete_async_c_2d_p2, &
+      acc_delete_async_c_3d_p2, acc_delete_async_c_4d_p2, &
+      acc_delete_async_i_l_p3, acc_delete_async_r_l_p3, &
+      acc_delete_async_l_l_p3, acc_delete_async_c_l_p3
   end interface
 
   ! Signatures for acc_delete_finalize
   interface acc_delete_finalize
     module procedure &
-      acc_delete_finalize_i_1d_p1, &
-      acc_delete_finalize_i_2d_p1, &
-      acc_delete_finalize_i_3d_p1, &
-      acc_delete_finalize_i_4d_p1, &
-      acc_delete_finalize_r_1d_p1, &
-      acc_delete_finalize_r_2d_p1, &
-      acc_delete_finalize_r_3d_p1, &
-      acc_delete_finalize_r_4d_p1, &
-      acc_delete_finalize_l_1d_p1, &
-      acc_delete_finalize_l_2d_p1, &
-      acc_delete_finalize_l_3d_p1, &
-      acc_delete_finalize_l_4d_p1, &
-      acc_delete_finalize_c_1d_p1, &
-      acc_delete_finalize_c_2d_p1, &
-      acc_delete_finalize_c_3d_p1, &
-      acc_delete_finalize_c_4d_p1, &
-      acc_delete_finalize_i_l_p2, &
-      acc_delete_finalize_r_l_p2, &
-      acc_delete_finalize_l_l_p2, &
-      acc_delete_finalize_c_l_p2
+      acc_delete_finalize_i_1d_p1, acc_delete_finalize_i_2d_p1, &
+      acc_delete_finalize_i_3d_p1, acc_delete_finalize_i_4d_p1, &
+      acc_delete_finalize_r_1d_p1, acc_delete_finalize_r_2d_p1, &
+      acc_delete_finalize_r_3d_p1, acc_delete_finalize_r_4d_p1, &
+      acc_delete_finalize_l_1d_p1, acc_delete_finalize_l_2d_p1, &
+      acc_delete_finalize_l_3d_p1, acc_delete_finalize_l_4d_p1, &
+      acc_delete_finalize_c_1d_p1, acc_delete_finalize_c_2d_p1, &
+      acc_delete_finalize_c_3d_p1, acc_delete_finalize_c_4d_p1, &
+      acc_delete_finalize_i_l_p2, acc_delete_finalize_r_l_p2, &
+      acc_delete_finalize_l_l_p2, acc_delete_finalize_c_l_p2
   end interface
 
   ! Signatures for acc_delete_finalize_async
   interface acc_delete_finalize_async
     module procedure &
-      acc_delete_finalize_async_i_1d_p2, &
-      acc_delete_finalize_async_i_2d_p2, &
-      acc_delete_finalize_async_i_3d_p2, &
-      acc_delete_finalize_async_i_4d_p2, &
-      acc_delete_finalize_async_r_1d_p2, &
-      acc_delete_finalize_async_r_2d_p2, &
-      acc_delete_finalize_async_r_3d_p2, &
-      acc_delete_finalize_async_r_4d_p2, &
-      acc_delete_finalize_async_l_1d_p2, &
-      acc_delete_finalize_async_l_2d_p2, &
-      acc_delete_finalize_async_l_3d_p2, &
-      acc_delete_finalize_async_l_4d_p2, &
-      acc_delete_finalize_async_c_1d_p2, &
-      acc_delete_finalize_async_c_2d_p2, &
-      acc_delete_finalize_async_c_3d_p2, &
-      acc_delete_finalize_async_c_4d_p2, &
-      acc_delete_finalize_async_i_l_p3, &
-      acc_delete_finalize_async_r_l_p3, &
-      acc_delete_finalize_async_l_l_p3, &
-      acc_delete_finalize_async_c_l_p3
+      acc_delete_finalize_async_i_1d_p2, acc_delete_finalize_async_i_2d_p2, &
+      acc_delete_finalize_async_i_3d_p2, acc_delete_finalize_async_i_4d_p2, &
+      acc_delete_finalize_async_r_1d_p2, acc_delete_finalize_async_r_2d_p2, &
+      acc_delete_finalize_async_r_3d_p2, acc_delete_finalize_async_r_4d_p2, &
+      acc_delete_finalize_async_l_1d_p2, acc_delete_finalize_async_l_2d_p2, &
+      acc_delete_finalize_async_l_3d_p2, acc_delete_finalize_async_l_4d_p2, &
+      acc_delete_finalize_async_c_1d_p2, acc_delete_finalize_async_c_2d_p2, &
+      acc_delete_finalize_async_c_3d_p2, acc_delete_finalize_async_c_4d_p2, &
+      acc_delete_finalize_async_i_l_p3, acc_delete_finalize_async_r_l_p3, &
+      acc_delete_finalize_async_l_l_p3, acc_delete_finalize_async_c_l_p3
   end interface
 
   ! Signatures for acc_update_device
   interface acc_update_device
     module procedure &
-      acc_update_device_i_1d_p1, &
-      acc_update_device_i_2d_p1, &
-      acc_update_device_i_3d_p1, &
-      acc_update_device_i_4d_p1, &
-      acc_update_device_r_1d_p1, &
-      acc_update_device_r_2d_p1, &
-      acc_update_device_r_3d_p1, &
-      acc_update_device_r_4d_p1, &
-      acc_update_device_l_1d_p1, &
-      acc_update_device_l_2d_p1, &
-      acc_update_device_l_3d_p1, &
-      acc_update_device_l_4d_p1, &
-      acc_update_device_c_1d_p1, &
-      acc_update_device_c_2d_p1, &
-      acc_update_device_c_3d_p1, &
-      acc_update_device_c_4d_p1, &
-      acc_update_device_i_l_p2, &
-      acc_update_device_r_l_p2, &
-      acc_update_device_l_l_p2, &
-      acc_update_device_c_l_p2
+      acc_update_device_i_1d_p1, acc_update_device_i_2d_p1, &
+      acc_update_device_i_3d_p1, acc_update_device_i_4d_p1, &
+      acc_update_device_r_1d_p1, acc_update_device_r_2d_p1, &
+      acc_update_device_r_3d_p1, acc_update_device_r_4d_p1, &
+      acc_update_device_l_1d_p1, acc_update_device_l_2d_p1, &
+      acc_update_device_l_3d_p1, acc_update_device_l_4d_p1, &
+      acc_update_device_c_1d_p1, acc_update_device_c_2d_p1, &
+      acc_update_device_c_3d_p1, acc_update_device_c_4d_p1, &
+      acc_update_device_i_l_p2, acc_update_device_r_l_p2, &
+      acc_update_device_l_l_p2, acc_update_device_c_l_p2
   end interface
 
   ! Signatures for acc_update_device_async
   interface acc_update_device_async
     module procedure &
-      acc_update_device_async_i_1d_p2, &
-      acc_update_device_async_i_2d_p2, &
-      acc_update_device_async_i_3d_p2, &
-      acc_update_device_async_i_4d_p2, &
-      acc_update_device_async_r_1d_p2, &
-      acc_update_device_async_r_2d_p2, &
-      acc_update_device_async_r_3d_p2, &
-      acc_update_device_async_r_4d_p2, &
-      acc_update_device_async_l_1d_p2, &
-      acc_update_device_async_l_2d_p2, &
-      acc_update_device_async_l_3d_p2, &
-      acc_update_device_async_l_4d_p2, &
-      acc_update_device_async_c_1d_p2, &
-      acc_update_device_async_c_2d_p2, &
-      acc_update_device_async_c_3d_p2, &
-      acc_update_device_async_c_4d_p2, &
-      acc_update_device_async_i_l_p3, &
-      acc_update_device_async_r_l_p3, &
-      acc_update_device_async_l_l_p3, &
-      acc_update_device_async_c_l_p3
+      acc_update_device_async_i_1d_p2, acc_update_device_async_i_2d_p2, &
+      acc_update_device_async_i_3d_p2, acc_update_device_async_i_4d_p2, &
+      acc_update_device_async_r_1d_p2, acc_update_device_async_r_2d_p2, &
+      acc_update_device_async_r_3d_p2, acc_update_device_async_r_4d_p2, &
+      acc_update_device_async_l_1d_p2, acc_update_device_async_l_2d_p2, &
+      acc_update_device_async_l_3d_p2, acc_update_device_async_l_4d_p2, &
+      acc_update_device_async_c_1d_p2, acc_update_device_async_c_2d_p2, &
+      acc_update_device_async_c_3d_p2, acc_update_device_async_c_4d_p2, &
+      acc_update_device_async_i_l_p3, acc_update_device_async_r_l_p3, &
+      acc_update_device_async_l_l_p3, acc_update_device_async_c_l_p3
   end interface
 
   ! Signatures for acc_update_self
   interface acc_update_self
     module procedure &
-      acc_update_self_i_1d_p1, &
-      acc_update_self_i_2d_p1, &
-      acc_update_self_i_3d_p1, &
-      acc_update_self_i_4d_p1, &
-      acc_update_self_r_1d_p1, &
-      acc_update_self_r_2d_p1, &
-      acc_update_self_r_3d_p1, &
-      acc_update_self_r_4d_p1, &
-      acc_update_self_l_1d_p1, &
-      acc_update_self_l_2d_p1, &
-      acc_update_self_l_3d_p1, &
-      acc_update_self_l_4d_p1, &
-      acc_update_self_c_1d_p1, &
-      acc_update_self_c_2d_p1, &
-      acc_update_self_c_3d_p1, &
-      acc_update_self_c_4d_p1, &
-      acc_update_self_i_l_p2, &
-      acc_update_self_r_l_p2, &
-      acc_update_self_l_l_p2, &
-      acc_update_self_c_l_p2
+      acc_update_self_i_1d_p1, acc_update_self_i_2d_p1, &
+      acc_update_self_i_3d_p1, acc_update_self_i_4d_p1, &
+      acc_update_self_r_1d_p1, acc_update_self_r_2d_p1, &
+      acc_update_self_r_3d_p1, acc_update_self_r_4d_p1, &
+      acc_update_self_l_1d_p1, acc_update_self_l_2d_p1, &
+      acc_update_self_l_3d_p1, acc_update_self_l_4d_p1, &
+      acc_update_self_c_1d_p1, acc_update_self_c_2d_p1, &
+      acc_update_self_c_3d_p1, acc_update_self_c_4d_p1, &
+      acc_update_self_i_l_p2, acc_update_self_r_l_p2, &
+      acc_update_self_l_l_p2, acc_update_self_c_l_p2
   end interface
 
   ! Signatures for acc_update_self_async
   interface acc_update_self_async
     module procedure &
-      acc_update_self_async_i_1d_p2, &
-      acc_update_self_async_i_2d_p2, &
-      acc_update_self_async_i_3d_p2, &
-      acc_update_self_async_i_4d_p2, &
-      acc_update_self_async_r_1d_p2, &
-      acc_update_self_async_r_2d_p2, &
-      acc_update_self_async_r_3d_p2, &
-      acc_update_self_async_r_4d_p2, &
-      acc_update_self_async_l_1d_p2, &
-      acc_update_self_async_l_2d_p2, &
-      acc_update_self_async_l_3d_p2, &
-      acc_update_self_async_l_4d_p2, &
-      acc_update_self_async_c_1d_p2, &
-      acc_update_self_async_c_2d_p2, &
-      acc_update_self_async_c_3d_p2, &
-      acc_update_self_async_c_4d_p2, &
-      acc_update_self_async_i_l_p3, &
-      acc_update_self_async_r_l_p3, &
-      acc_update_self_async_l_l_p3, &
-      acc_update_self_async_c_l_p3
+      acc_update_self_async_i_1d_p2, acc_update_self_async_i_2d_p2, &
+      acc_update_self_async_i_3d_p2, acc_update_self_async_i_4d_p2, &
+      acc_update_self_async_r_1d_p2, acc_update_self_async_r_2d_p2, &
+      acc_update_self_async_r_3d_p2, acc_update_self_async_r_4d_p2, &
+      acc_update_self_async_l_1d_p2, acc_update_self_async_l_2d_p2, &
+      acc_update_self_async_l_3d_p2, acc_update_self_async_l_4d_p2, &
+      acc_update_self_async_c_1d_p2, acc_update_self_async_c_2d_p2, &
+      acc_update_self_async_c_3d_p2, acc_update_self_async_c_4d_p2, &
+      acc_update_self_async_i_l_p3, acc_update_self_async_r_l_p3, &
+      acc_update_self_async_l_l_p3, acc_update_self_async_c_l_p3
   end interface
 
   ! Signatures for acc_is_present
   interface acc_is_present
     module procedure &
-      acc_is_present_i_1d_p1, &
-      acc_is_present_i_2d_p1, &
-      acc_is_present_i_3d_p1, &
-      acc_is_present_i_4d_p1, &
-      acc_is_present_r_1d_p1, &
-      acc_is_present_r_2d_p1, &
-      acc_is_present_r_3d_p1, &
-      acc_is_present_r_4d_p1, &
-      acc_is_present_l_1d_p1, &
-      acc_is_present_l_2d_p1, &
-      acc_is_present_l_3d_p1, &
-      acc_is_present_l_4d_p1, &
-      acc_is_present_c_1d_p1, &
-      acc_is_present_c_2d_p1, &
-      acc_is_present_c_3d_p1, &
-      acc_is_present_c_4d_p1, &
-      acc_is_present_i_l_p2, &
-      acc_is_present_r_l_p2, &
-      acc_is_present_l_l_p2, &
-      acc_is_present_c_l_p2
+      acc_is_present_i_1d_p1, acc_is_present_i_2d_p1, acc_is_present_i_3d_p1, &
+        acc_is_present_i_4d_p1, &
+      acc_is_present_r_1d_p1, acc_is_present_r_2d_p1, acc_is_present_r_3d_p1, &
+        acc_is_present_r_4d_p1, &
+      acc_is_present_l_1d_p1, acc_is_present_l_2d_p1, acc_is_present_l_3d_p1, &
+        acc_is_present_l_4d_p1, &
+      acc_is_present_c_1d_p1, acc_is_present_c_2d_p1, acc_is_present_c_3d_p1, &
+        acc_is_present_c_4d_p1, &
+      acc_is_present_i_l_p2, acc_is_present_r_l_p2, acc_is_present_l_l_p2, &
+        acc_is_present_c_l_p2
   end interface
 
 contains
