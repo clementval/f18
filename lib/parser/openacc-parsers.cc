@@ -179,8 +179,8 @@ TYPE_PARSER(sourced(construct<OpenACCCacheConstruct>(
     parenthesized(Parser<AccObjectListWithModifier>{}))))
 
 TYPE_PARSER(
-        construct<OpenACCStandaloneConstruct>(
-            sourced(Parser<AccStandaloneDirective>{}), Parser<AccClauseList>{}))
+    construct<OpenACCStandaloneConstruct>(
+        sourced(Parser<AccStandaloneDirective>{}), Parser<AccClauseList>{}))
 
 TYPE_PARSER(construct<OpenACCStandaloneDeclarativeConstruct>(
     sourced(Parser<AccDeclarativeDirective>{}), Parser<AccClauseList>{}))
@@ -198,7 +198,7 @@ TYPE_CONTEXT_PARSER("OpenACC construct"_en_US,
 // END ACC Block directives
 TYPE_PARSER(
     startAccLine >> construct<AccEndBlockDirective>(
-                        sourced("END"_tok >> Parser<AccBlockDirective>{}),
-                        Parser<AccClauseList>{}))
+        sourced("END"_tok >> Parser<AccBlockDirective>{}),
+        Parser<AccClauseList>{}))
 
 }
