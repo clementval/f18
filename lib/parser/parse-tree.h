@@ -4395,11 +4395,16 @@ struct AccObjectListWithModifier {
   std::tuple<std::optional<AccDataModifier>, AccObjectList> t;
 };
 
-struct AccObjectListWithReduction {
-  TUPLE_CLASS_BOILERPLATE(AccObjectListWithReduction);
-  std::tuple<DefinedOperator, AccObjectList> t;
+// 2.5.13. + | * | max | min | iand | ior | ieor | .and. | .or. | .eqv | .neqv
+struct AccReductionOperator {
+  UNION_CLASS_BOILERPLATE(AccReductionOperator);
+  std::variant<DefinedOperator, ProcedureDesignator> u;
 };
 
+struct AccObjectListWithReduction {
+  TUPLE_CLASS_BOILERPLATE(AccObjectListWithReduction);
+  std::tuple<AccReductionOperator, AccObjectList> t;
+};
 
 struct AccWaitArgument {
   TUPLE_CLASS_BOILERPLATE(AccWaitArgument);

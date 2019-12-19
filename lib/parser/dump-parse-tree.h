@@ -585,6 +585,7 @@ public:
   NODE(parser::AccClause, VectorLength)
   NODE(parser::AccClause, Wait)
   NODE(parser::AccClause, Write)
+  NODE(parser, AccReductionOperator)
   NODE(parser, AccSizeExpr)
   NODE(parser, AccSizeExprList)
   NODE(parser, OpenMPAtomicConstruct)

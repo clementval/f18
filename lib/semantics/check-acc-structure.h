@@ -36,8 +36,8 @@ ENUM_CLASS(AccClause, AUTO, ASYNC, ATTACH, CAPTURE, BIND, COLLAPSE, COPY,
     COPYIN, COPYOUT, DEFAULT, DELETE, CREATE, DETACH, DEVICE, DEVICENUM,
     DEVICEPTR, DEVICE_TYPE, FINALIZE, FIRSTPRIVATE, GANG, HOST, IF, IF_PRESENT,
     INDEPENDENT, NO_CREATE, NOHOST, NUM_GANGS, NUM_WORKERS, PRESENT, PRIVATE,
-    READ, TILE, USE_DEVICE, VECTOR_LENGTH, SELF, SEQ, VECTOR, WAIT, WORKER,
-    WRITE)
+    READ, REDUCTION, TILE, USE_DEVICE, VECTOR_LENGTH, SELF, SEQ, VECTOR, WAIT,
+    WORKER, WRITE)
 
 using AccClauseSet = common::EnumSet<AccClause, AccClause_enumSize>;
 
@@ -91,8 +91,10 @@ public:
   void Enter(const parser::AccClause::Present &);
   void Enter(const parser::AccClause::Private &);
   void Enter(const parser::AccClause::Read &);
+  void Enter(const parser::AccClause::Reduction &);
   void Enter(const parser::AccClause::Self &);
   void Enter(const parser::AccClause::Seq &);
+  void Enter(const parser::AccClause::Tile &);
   void Enter(const parser::AccClause::UseDevice &);
   void Enter(const parser::AccClause::Vector &);
   void Enter(const parser::AccClause::VectorLength &);

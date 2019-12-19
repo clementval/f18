@@ -186,6 +186,7 @@ void AccStructureChecker::Enter(const parser::OpenACCStandaloneConstruct &x) {
       PushContext(dir.source, AccDirective::LOOP);
       SetContextAllowed({AccClause::PRIVATE});
       SetContextAllowedOnce({AccClause::COLLAPSE, AccClause::GANG,
+                             AccClause::REDUCTION,
                              AccClause::VECTOR, AccClause::WORKER});
       SetContextAllowedExclusive({AccClause::AUTO, AccClause::INDEPENDENT,
                                   AccClause::SEQ});
@@ -264,8 +265,10 @@ CHECK_SIMPLE_CLAUSE(Independent, INDEPENDENT)
 CHECK_SIMPLE_CLAUSE(NoCreate, NO_CREATE)
 CHECK_SIMPLE_CLAUSE(NoHost, NOHOST)
 CHECK_SIMPLE_CLAUSE(Read, READ)
+CHECK_SIMPLE_CLAUSE(Reduction, REDUCTION) // TODO more?
 CHECK_SIMPLE_CLAUSE(Self, SELF)
 CHECK_SIMPLE_CLAUSE(Seq, SEQ)
+CHECK_SIMPLE_CLAUSE(Tile, TILE)
 CHECK_SIMPLE_CLAUSE(UseDevice, USE_DEVICE)
 CHECK_SIMPLE_CLAUSE(Vector, VECTOR)
 CHECK_SIMPLE_CLAUSE(Worker, WORKER)

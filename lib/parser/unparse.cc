@@ -1918,7 +1918,7 @@ public:
   }
   void Unparse(const AccObjectList &x) { Walk(x.v, ","); }
   void Unparse(const AccObjectListWithReduction &x) {
-    Walk(std::get<DefinedOperator>(x.t));
+    Walk(std::get<AccReductionOperator>(x.t));
     Put(":");
     Walk(std::get<AccObjectList>(x.t));
   }

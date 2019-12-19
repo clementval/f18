@@ -120,7 +120,7 @@ TYPE_PARSER(
         parenthesized(scalarIntConstantExpr))) ||
     "REDUCTION" >> construct<AccClause>(construct<AccClause::Reduction>(
         parenthesized(construct<AccObjectListWithReduction>(
-            Parser<DefinedOperator>{} / ":", Parser<AccObjectList>{})))) ||
+            Parser<AccReductionOperator>{} / ":", Parser<AccObjectList>{})))) ||
     "SELF" >> construct<AccClause>(construct<AccClause::Self>(
         maybe(parenthesized(scalarLogicalExpr)))) ||
     "SEQ" >> construct<AccClause>(construct<AccClause::Seq>()) ||
@@ -144,6 +144,9 @@ TYPE_PARSER(construct<AccObjectListWithModifier>(
 
 TYPE_PARSER(construct<AccWaitArgument>(maybe("DEVNUM:" >> scalarIntExpr / ":"),
     nonemptyList(scalarIntExpr))) // TODO recognize as complex instead of list of int
+
+TYPE_PARSER(construct<AccReductionOperator>(Parser<DefinedOperator>{}) ||
+            construct<AccReductionOperator>(Parser<ProcedureDesignator>{}))
 
 // 2.9 size-expr is one of:
 // *
