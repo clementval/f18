@@ -1752,6 +1752,17 @@ public:
     Walk(std::get<Name>(x.t));
   }
 
+  void Unparse(const AccCombinedDirective &x) {
+    switch(x.v) {
+      case AccCombinedDirective::Directive::KernelsLoop:
+        Word("KERNELS LOOP"); break;
+      case AccCombinedDirective::Directive::ParallelLoop:
+        Word("PARALLEL LOOP"); break;
+      case AccCombinedDirective::Directive::SerialLoop:
+        Word("SERIAL LOOP"); break;
+    }
+  }
+
   // OpenACC Directives & Clauses
   void Unparse(const AccBlockDirective &x) {
     switch (x.v) {

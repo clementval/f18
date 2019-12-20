@@ -26,13 +26,7 @@ namespace Fortran::parser {
 constexpr auto startAccLine = skipStuffBeforeStatement >> "!$ACC "_sptok;
 constexpr auto endAccLine = space >> endOfLine;
 
-TYPE_PARSER(construct<AccBlockDirective>(
-    first("ATOMIC" >> pure(AccBlockDirective::Directive::Atomic),
-          "DATA" >> pure(AccBlockDirective::Directive::Data),
-          "HOST_DATA" >> pure(AccBlockDirective::Directive::HostData),
-          "KERNELS" >> pure(AccBlockDirective::Directive::Kernels),
-          "PARALLEL" >> pure(AccBlockDirective::Directive::Parallel),
-          "SERIAL" >> pure(AccBlockDirective::Directive::Serial))))
+
 
 TYPE_PARSER(construct<AccBeginBlockDirective>(
     sourced(Parser<AccBlockDirective>{}), Parser<AccClauseList>{}))
@@ -72,9 +66,8 @@ TYPE_PARSER(
         parenthesized(Parser<AccObjectListWithModifier>{}))) ||
     "PCREATE" >> construct<AccClause>(construct<AccClause::Create>(
         parenthesized(Parser<AccObjectListWithModifier>{}))) ||
-    "DEFAULT" >> construct<AccClause>(construct<AccClause::Default>(first(
-        "NONE" >> pure(AccDefaultClause::Arg::None),
-        "PRESENT" >> pure(AccDefaultClause::Arg::Present)))) ||
+    "DEFAULT" >> construct<AccClause>(construct<AccClause::Default>(
+        Parser<AccDefaultClause>{})) ||
     "DELETE" >> construct<AccClause>(construct<AccClause::Delete>(
         parenthesized(Parser<AccObjectList>{}))) ||
     "DETACH" >> construct<AccClause>(construct<AccClause::Detach>(
@@ -148,6 +141,11 @@ TYPE_PARSER(construct<AccWaitArgument>(maybe("DEVNUM:" >> scalarIntExpr / ":"),
 TYPE_PARSER(construct<AccReductionOperator>(Parser<DefinedOperator>{}) ||
             construct<AccReductionOperator>(Parser<ProcedureDesignator>{}))
 
+// Default clause
+TYPE_PARSER(construct<AccDefaultClause>(parenthesized(first(
+    "NONE" >> pure(AccDefaultClause::Arg::None),
+    "PRESENT" >> pure(AccDefaultClause::Arg::Present)))))
+
 // 2.9 size-expr is one of:
 // *
 // int-expr
@@ -161,6 +159,19 @@ TYPE_PARSER(construct<AccDataModifier>(first(
     "ZERO:" >> pure(AccDataModifier::Modifier::Zero),
     "READONLY:" >> pure(AccDataModifier::Modifier::ReadOnly))))
 
+TYPE_PARSER(construct<AccCombinedDirective>(first(
+    "KERNELS LOOP" >> pure(AccCombinedDirective::Directive::KernelsLoop),
+    "PARALLEL LOOP" >> pure(AccCombinedDirective::Directive::ParallelLoop),
+    "SERIAL LOOP" >> pure(AccCombinedDirective::Directive::SerialLoop))))
+
+TYPE_PARSER(construct<AccBlockDirective>(first(
+    "ATOMIC" >> pure(AccBlockDirective::Directive::Atomic),
+    "DATA" >> pure(AccBlockDirective::Directive::Data),
+    "HOST_DATA" >> pure(AccBlockDirective::Directive::HostData),
+    "KERNELS" >> pure(AccBlockDirective::Directive::Kernels),
+    "PARALLEL" >> pure(AccBlockDirective::Directive::Parallel),
+    "SERIAL" >> pure(AccBlockDirective::Directive::Serial))))
+
 TYPE_PARSER(construct<AccStandaloneDirective>(first(
     "ENTER DATA" >> pure(AccStandaloneDirective::Directive::EnterData),
     "EXIT DATA" >> pure(AccStandaloneDirective::Directive::ExitData),
@@ -169,13 +180,6 @@ TYPE_PARSER(construct<AccStandaloneDirective>(first(
     "ROUTINE" >> pure(AccStandaloneDirective::Directive::Routine),
     "SHUTDOWN" >> pure(AccStandaloneDirective::Directive::Shutdown),
     "UPDATE" >> pure(AccStandaloneDirective::Directive::Update))))
-
-
-// OpenACC combined construct
-TYPE_PARSER(construct<AccCombinedDirective>(first(
-    "KERNELS LOOP" >> pure(AccCombinedDirective::Directive::KernelsLoop),
-    "PARALLEL LOOP" >> pure(AccCombinedDirective::Directive::ParallelLoop),
-    "SERIAL LOOP" >> pure(AccCombinedDirective::Directive::SerialLoop))))
 
 TYPE_PARSER(startAccLine >> construct<AccEndCombinedDirective>(
     sourced("END"_tok >> Parser<AccCombinedDirective>{})))
@@ -188,8 +192,7 @@ TYPE_PARSER(construct<OpenACCCombinedConstruct>(
     maybe(Parser<AccEndCombinedDirective>{} / endAccLine)))
 
 TYPE_PARSER(construct<AccDeclarativeDirective>(first(
-    "DECLARE" >> pure(AccDeclarativeDirective::Directive::Declare)
-    )))
+    "DECLARE" >> pure(AccDeclarativeDirective::Directive::Declare))))
 
 // [Clause, [Clause], ...]
 TYPE_PARSER(sourced(construct<AccClauseList>(
@@ -220,18 +223,15 @@ TYPE_PARSER(construct<OpenACCStandaloneDeclarativeConstruct>(
 TYPE_PARSER(startAccLine >> sourced(construct<OpenACCDeclarativeConstruct>(
     Parser<OpenACCStandaloneDeclarativeConstruct>{})))
 
-TYPE_CONTEXT_PARSER("OpenACC construct"_en_US,
-    startAccLine >>
-        first(construct<OpenACCConstruct>(Parser<OpenACCCombinedConstruct>{}),
-              construct<OpenACCConstruct>(Parser<OpenACCBlockConstruct>{}),
-              construct<OpenACCConstruct>(Parser<OpenACCStandaloneConstruct>{}),
-              construct<OpenACCConstruct>(Parser<OpenACCCacheConstruct>{}),
-              construct<OpenACCConstruct>(Parser<OpenACCWaitConstruct>{})))
+TYPE_CONTEXT_PARSER("OpenACC construct"_en_US, startAccLine >>
+    first(construct<OpenACCConstruct>(Parser<OpenACCBlockConstruct>{}),
+        construct<OpenACCConstruct>(Parser<OpenACCCombinedConstruct>{}),
+        construct<OpenACCConstruct>(Parser<OpenACCStandaloneConstruct>{}),
+        construct<OpenACCConstruct>(Parser<OpenACCCacheConstruct>{}),
+        construct<OpenACCConstruct>(Parser<OpenACCWaitConstruct>{})))
 
 // END ACC Block directives
-TYPE_PARSER(
-    startAccLine >> construct<AccEndBlockDirective>(
-        sourced("END"_tok >> Parser<AccBlockDirective>{}),
-        Parser<AccClauseList>{}))
+TYPE_PARSER(startAccLine >> construct<AccEndBlockDirective>(
+    sourced("END"_tok >> Parser<AccBlockDirective>{}), Parser<AccClauseList>{}))
 
 }
