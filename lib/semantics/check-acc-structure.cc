@@ -47,11 +47,6 @@ void AccStructureChecker::Enter(const parser::OpenACCBlockConstruct &x) {
       CheckMatching<parser::AccBlockDirective>(beginBlockDir, endBlockDir)};
 
   switch (beginDir.v) {
-    case parser::AccBlockDirective::Directive::Atomic: {
-      PushContext(beginDir.source, AccDirective::ATOMIC);
-      SetContextAllowedExclusive({AccClause::CAPTURE, AccClause::READ,
-                                  AccClause::WRITE});
-    } break;
     case parser::AccBlockDirective::Directive::Parallel: {
       PushContext(beginDir.source, AccDirective::PARALLEL);
       SetContextAllowed({AccClause::COPY, AccClause::COPYIN, AccClause::COPYOUT,

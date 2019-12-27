@@ -26,7 +26,9 @@ namespace Fortran::parser {
 constexpr auto startAccLine = skipStuffBeforeStatement >> "!$ACC "_sptok;
 constexpr auto endAccLine = space >> endOfLine;
 
-
+template<typename A> constexpr decltype(auto) verbatim(A x) {
+  return sourced(construct<Verbatim>(x));
+}
 
 TYPE_PARSER(construct<AccBeginBlockDirective>(
     sourced(Parser<AccBlockDirective>{}), Parser<AccClauseList>{}))
@@ -78,6 +80,9 @@ TYPE_PARSER(
         parenthesized(Parser<AccObjectList>{}))) ||
     "DEVICENUM" >> construct<AccClause>(construct<AccClause::DeviceNum>(
         parenthesized(scalarIntConstantExpr))) ||
+    "DEVICE_RESIDENT" >> construct<AccClause>(
+        construct<AccClause::DeviceResident>(
+            parenthesized(Parser<AccObjectList>{}))) ||
     "DEVICE_TYPE" >> construct<AccClause>(construct<AccClause::DeviceType>(
         parenthesized("*" >> maybe(nonemptyList(name))))) ||
     "DTYPE" >> construct<AccClause>(construct<AccClause::DeviceType>(
@@ -165,7 +170,6 @@ TYPE_PARSER(construct<AccCombinedDirective>(first(
     "SERIAL LOOP" >> pure(AccCombinedDirective::Directive::SerialLoop))))
 
 TYPE_PARSER(construct<AccBlockDirective>(first(
-    "ATOMIC" >> pure(AccBlockDirective::Directive::Atomic),
     "DATA" >> pure(AccBlockDirective::Directive::Data),
     "HOST_DATA" >> pure(AccBlockDirective::Directive::HostData),
     "KERNELS" >> pure(AccBlockDirective::Directive::Kernels),
@@ -180,6 +184,36 @@ TYPE_PARSER(construct<AccStandaloneDirective>(first(
     "ROUTINE" >> pure(AccStandaloneDirective::Directive::Routine),
     "SHUTDOWN" >> pure(AccStandaloneDirective::Directive::Shutdown),
     "UPDATE" >> pure(AccStandaloneDirective::Directive::Update))))
+
+// ACC END ATOMIC
+TYPE_PARSER(construct<AccEndAtomic>(startAccLine >> "END ATOMIC"_tok))
+
+// ACC ATOMIC READ
+TYPE_PARSER("ATOMIC" >>
+     construct<AccAtomicRead>(verbatim("READ"_tok) / endAccLine,
+         statement(assignmentStmt), maybe(Parser<AccEndAtomic>{} / endAccLine)))
+
+// ACC ATOMIC WRITE
+TYPE_PARSER("ATOMIC" >>
+    construct<AccAtomicWrite>(verbatim("WRITE"_tok) / endAccLine,
+        statement(assignmentStmt), maybe(Parser<AccEndAtomic>{} / endAccLine)))
+
+// ACC ATOMIC UPDATE
+TYPE_PARSER("ATOMIC" >>
+    construct<AccAtomicUpdate>(maybe(verbatim("UPDATE"_tok)) / endAccLine,
+        statement(assignmentStmt), maybe(Parser<AccEndAtomic>{} / endAccLine)))
+
+// ACC ATOMIC CAPTURE
+TYPE_PARSER("ATOMIC" >>
+    construct<AccAtomicCapture>(verbatim("CAPTURE"_tok) / endAccLine,
+        statement(assignmentStmt), statement(assignmentStmt),
+        Parser<AccEndAtomic>{} / endAccLine))
+
+// Atomic Construct
+TYPE_PARSER(construct<OpenACCAtomicConstruct>(Parser<AccAtomicRead>{}) ||
+    construct<OpenACCAtomicConstruct>(Parser<AccAtomicCapture>{}) ||
+    construct<OpenACCAtomicConstruct>(Parser<AccAtomicWrite>{}) ||
+    construct<OpenACCAtomicConstruct>(Parser<AccAtomicUpdate>{}))
 
 TYPE_PARSER(startAccLine >> construct<AccEndCombinedDirective>(
     sourced("END"_tok >> Parser<AccCombinedDirective>{})))
@@ -228,10 +262,11 @@ TYPE_CONTEXT_PARSER("OpenACC construct"_en_US, startAccLine >>
         construct<OpenACCConstruct>(Parser<OpenACCCombinedConstruct>{}),
         construct<OpenACCConstruct>(Parser<OpenACCStandaloneConstruct>{}),
         construct<OpenACCConstruct>(Parser<OpenACCCacheConstruct>{}),
-        construct<OpenACCConstruct>(Parser<OpenACCWaitConstruct>{})))
+        construct<OpenACCConstruct>(Parser<OpenACCWaitConstruct>{}),
+        construct<OpenACCConstruct>(Parser<OpenACCAtomicConstruct>{})))
 
 // END ACC Block directives
 TYPE_PARSER(startAccLine >> construct<AccEndBlockDirective>(
-    sourced("END"_tok >> Parser<AccBlockDirective>{}), Parser<AccClauseList>{}))
+    sourced("END"_tok >> Parser<AccBlockDirective>{})))
 
 }

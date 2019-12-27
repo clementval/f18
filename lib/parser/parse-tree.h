@@ -422,7 +422,7 @@ struct SpecificationConstruct {
       Statement<OtherSpecificationStmt>,
       Statement<common::Indirection<TypeDeclarationStmt>>,
       common::Indirection<StructureDef>,
-      //common::Indirection<OpenACCDeclarativeConstruct>,
+      common::Indirection<OpenACCDeclarativeConstruct>,
       common::Indirection<OpenMPDeclarativeConstruct>,
       common::Indirection<CompilerDirective>>
       u;
@@ -464,7 +464,7 @@ struct DeclarationConstruct {
 struct SpecificationPart {
   TUPLE_CLASS_BOILERPLATE(SpecificationPart);
 
-  std::tuple</*std::list<OpenACCDeclarativeConstruct>,*/
+  std::tuple<std::list<OpenACCDeclarativeConstruct>,
       std::list<OpenMPDeclarativeConstruct>,
       std::list<Statement<common::Indirection<UseStmt>>>,
       std::list<Statement<common::Indirection<ImportStmt>>>, ImplicitPart,
@@ -4351,7 +4351,7 @@ WRAPPER_CLASS(AccObjectList, std::list<AccObject>);
 
 // OpenACC directive beginning or ending a block
 struct AccBlockDirective {
-  ENUM_CLASS(Directive, Atomic, Data, HostData, Kernels, Parallel, Serial);
+  ENUM_CLASS(Directive, Data, HostData, Kernels, Parallel, Serial);
   WRAPPER_CLASS_BOILERPLATE(AccBlockDirective, Directive);
   CharBlock source;
 };
@@ -4450,6 +4450,7 @@ struct AccClause {
   WRAPPER_CLASS(Device, AccObjectList); // 2.14.4
   WRAPPER_CLASS(DeviceNum, ScalarIntConstantExpr); // TODO
   WRAPPER_CLASS(DevicePtr, AccObjectList); // 2.7.3
+  WRAPPER_CLASS(DeviceResident, AccObjectList); // 2.13
   WRAPPER_CLASS(DeviceType, std::optional<std::list<Name>>); // TODO device-type-list
   WRAPPER_CLASS(FirstPrivate, AccObjectList); // 2.5.12
   WRAPPER_CLASS(Host, AccObjectList); // 2.14.4
@@ -4470,8 +4471,8 @@ struct AccClause {
   std::variant<Auto, Capture, Finalize, Gang, IfPresent, Independent, NoHost,
       Read, Seq, Vector, Worker, Write, Async, Attach, Bind, Collapse, Copy,
       Copyin, Copyout, Create, Default, Delete, Detach, Device, DeviceNum,
-      DevicePtr, DeviceType, Host, If, FirstPrivate, NoCreate, NumGangs,
-      NumWorkers, Present, Private, Tile, UseDevice, Reduction, Self,
+      DeviceResident, DevicePtr, DeviceType, Host, If, FirstPrivate, NoCreate,
+      NumGangs, NumWorkers, Present, Private, Tile, UseDevice, Reduction, Self,
       VectorLength, Wait> u;
 };
 
@@ -4498,8 +4499,46 @@ struct AccBeginBlockDirective {
 };
 
 struct AccEndBlockDirective {
-  TUPLE_CLASS_BOILERPLATE(AccEndBlockDirective);
-  std::tuple<AccBlockDirective, AccClauseList> t;
+  CharBlock source;
+  WRAPPER_CLASS_BOILERPLATE(AccEndBlockDirective, AccBlockDirective);
+};
+
+// ACC END ATOMIC
+EMPTY_CLASS(AccEndAtomic);
+
+// ACC ATOMIC READ
+struct AccAtomicRead {
+  TUPLE_CLASS_BOILERPLATE(AccAtomicRead);
+  std::tuple<Verbatim, Statement<AssignmentStmt>,
+      std::optional<AccEndAtomic>> t;
+};
+
+// ACC ATOMIC WRITE
+struct AccAtomicWrite {
+  TUPLE_CLASS_BOILERPLATE(AccAtomicWrite);
+  std::tuple<Verbatim, Statement<AssignmentStmt>,
+      std::optional<AccEndAtomic>> t;
+};
+
+// ACC ATOMIC UPDATE
+struct AccAtomicUpdate {
+  TUPLE_CLASS_BOILERPLATE(AccAtomicUpdate);
+  std::tuple<std::optional<Verbatim>, Statement<AssignmentStmt>,
+      std::optional<AccEndAtomic>> t;
+};
+
+// ACC ATOMIC CAPTURE
+struct AccAtomicCapture {
+  TUPLE_CLASS_BOILERPLATE(AccAtomicCapture);
+  WRAPPER_CLASS(Stmt1, Statement<AssignmentStmt>);
+  WRAPPER_CLASS(Stmt2, Statement<AssignmentStmt>);
+  std::tuple<Verbatim, Stmt1, Stmt2, AccEndAtomic> t;
+};
+
+struct OpenACCAtomicConstruct {
+  UNION_CLASS_BOILERPLATE(OpenACCAtomicConstruct);
+  std::variant<AccAtomicRead, AccAtomicWrite, AccAtomicCapture,
+      AccAtomicUpdate> u;
 };
 
 struct OpenACCBlockConstruct {
@@ -4519,8 +4558,8 @@ struct AccBeginCombinedDirective {
 };
 
 struct AccEndCombinedDirective {
-  TUPLE_CLASS_BOILERPLATE(AccEndCombinedDirective);
-  std::tuple<AccCombinedDirective> t;
+  WRAPPER_CLASS_BOILERPLATE(AccEndCombinedDirective, AccCombinedDirective);
+  CharBlock source;
 };
 
 struct OpenACCCombinedConstruct {
@@ -4545,7 +4584,8 @@ struct OpenACCStandaloneConstruct {
 struct OpenACCConstruct {
   UNION_CLASS_BOILERPLATE(OpenACCConstruct);
   std::variant<OpenACCBlockConstruct, OpenACCCombinedConstruct,
-  OpenACCStandaloneConstruct, OpenACCCacheConstruct, OpenACCWaitConstruct> u;
+  OpenACCStandaloneConstruct, OpenACCCacheConstruct, OpenACCWaitConstruct,
+  OpenACCAtomicConstruct> u;
 };
 
 }

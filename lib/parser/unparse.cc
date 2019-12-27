@@ -1758,6 +1758,49 @@ public:
     Walk(std::get<Name>(x.t));
   }
 
+  // OpenACC Directives & Clauses
+  void Unparse(const AccAtomicCapture &x) {
+    BeginOpenACC();
+    Word("!$ACC CAPTURE");
+    Put("\n");
+    EndOpenACC();
+    Walk(std::get<AccAtomicCapture::Stmt1>(x.t));
+    Put("\n");
+    Walk(std::get<AccAtomicCapture::Stmt2>(x.t));
+    BeginOpenACC();
+    Word("!$ACC END ATOMIC\n");
+    EndOpenACC();
+  }
+  void Unparse(const AccAtomicRead &x) {
+    BeginOpenACC();
+    Word("!$ACC ATOMIC READ");
+    Put("\n");
+    EndOpenACC();
+    Walk(std::get<Statement<AssignmentStmt>>(x.t));
+    BeginOpenACC();
+    Walk(std::get<std::optional<AccEndAtomic>>(x.t), "!$ACC END ATOMIC\n");
+    EndOpenACC();
+  }
+  void Unparse(const AccAtomicWrite &x) {
+    BeginOpenACC();
+    Word("!$ACC ATOMIC WRITE");
+    Put("\n");
+    EndOpenACC();
+    Walk(std::get<Statement<AssignmentStmt>>(x.t));
+    BeginOpenACC();
+    Walk(std::get<std::optional<AccEndAtomic>>(x.t), "!$ACC END ATOMIC\n");
+    EndOpenACC();
+  }
+  void Unparse(const AccAtomicUpdate &x) {
+    BeginOpenACC();
+    Word("!$ACC ATOMIC UPDATE");
+    Put("\n");
+    EndOpenACC();
+    Walk(std::get<Statement<AssignmentStmt>>(x.t));
+    BeginOpenACC();
+    Walk(std::get<std::optional<AccEndAtomic>>(x.t), "!$ACC END ATOMIC\n");
+    EndOpenACC();
+  }
   void Unparse(const AccCombinedDirective &x) {
     switch(x.v) {
       case AccCombinedDirective::Directive::KernelsLoop:
@@ -1768,11 +1811,8 @@ public:
         Word("SERIAL LOOP"); break;
     }
   }
-
-  // OpenACC Directives & Clauses
   void Unparse(const AccBlockDirective &x) {
     switch (x.v) {
-      case AccBlockDirective::Directive::Atomic: Word("ATOMIC"); break;
       case AccBlockDirective::Directive::Data: Word("DATA"); break;
       case AccBlockDirective::Directive::HostData: Word("HOST_DATA"); break;
       case AccBlockDirective::Directive::Kernels: Word("KERNELS"); break;
@@ -1781,7 +1821,7 @@ public:
     }
   }
   void Unparse(const AccDeclarativeDirective &x) {
-    switch (x.v) {
+    switch(x.v) {
       case AccDeclarativeDirective::Directive::Declare: Word("DECLARE"); break;
     }
   }

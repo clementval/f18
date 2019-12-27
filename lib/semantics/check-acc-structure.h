@@ -199,10 +199,11 @@ private:
   }
 
   void SayNotMatching(const parser::CharBlock &, const parser::CharBlock &);
+
   template<typename A, typename B, typename C>
   const A &CheckMatching(const B &beginDir, const C &endDir) {
     const A &begin{std::get<A>(beginDir.t)};
-    const A &end{std::get<A>(endDir.t)};
+    const A &end = endDir.v;
     if (begin.v != end.v) {
       SayNotMatching(begin.source, end.source);
     }
