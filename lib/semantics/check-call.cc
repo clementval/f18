@@ -1,16 +1,10 @@
-// Copyright (c) 2019, NVIDIA CORPORATION.  All rights reserved.
+//===-- lib/semantics/check-call.cc ---------------------------------------===//
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//----------------------------------------------------------------------------//
 
 #include "check-call.h"
 #include "assignment.h"
@@ -101,6 +95,33 @@ static void PadShortCharacterActual(evaluate::Expr<evaluate::SomeType> &actual,
   }
 }
 
+// Automatic conversion of different-kind INTEGER scalar actual
+// argument expressions (not variables) to INTEGER scalar dummies.
+// We return nonstandard INTEGER(8) results from intrinsic functions
+// like SIZE() by default in order to facilitate the use of large
+// arrays.  Emit a warning when downconverting.
+static void ConvertIntegerActual(evaluate::Expr<evaluate::SomeType> &actual,
+    const characteristics::TypeAndShape &dummyType,
+    characteristics::TypeAndShape &actualType,
+    parser::ContextualMessages &messages) {
+  if (dummyType.type().category() == TypeCategory::Integer &&
+      actualType.type().category() == TypeCategory::Integer &&
+      dummyType.type().kind() != actualType.type().kind() &&
+      GetRank(dummyType.shape()) == 0 && GetRank(actualType.shape()) == 0 &&
+      !evaluate::IsVariable(actual)) {
+    auto converted{
+        evaluate::ConvertToType(dummyType.type(), std::move(actual))};
+    CHECK(converted);
+    actual = std::move(*converted);
+    if (dummyType.type().kind() < actualType.type().kind()) {
+      messages.Say(
+          "Actual argument scalar expression of type INTEGER(%d) was converted to smaller dummy argument type INTEGER(%d)"_en_US,
+          actualType.type().kind(), dummyType.type().kind());
+    }
+    actualType = dummyType;
+  }
+}
+
 static bool DefersSameTypeParameters(
     const DerivedTypeSpec &actual, const DerivedTypeSpec &dummy) {
   for (const auto &pair : actual.parameters()) {
@@ -115,14 +136,40 @@ static bool DefersSameTypeParameters(
 
 static void CheckExplicitDataArg(const characteristics::DummyDataObject &dummy,
     const std::string &dummyName, evaluate::Expr<evaluate::SomeType> &actual,
-    const characteristics::TypeAndShape &actualType, bool isElemental,
-    evaluate::FoldingContext &context, const Scope *scope) {
+    characteristics::TypeAndShape &actualType, bool isElemental,
+    bool actualIsArrayElement, evaluate::FoldingContext &context,
+    const Scope *scope) {
 
   // Basic type & rank checking
   parser::ContextualMessages &messages{context.messages()};
   PadShortCharacterActual(actual, dummy.type, actualType, messages);
-  bool typesCompatible{dummy.type.IsCompatibleWith(
-      messages, actualType, "dummy argument", "actual argument", isElemental)};
+  ConvertIntegerActual(actual, dummy.type, actualType, messages);
+  bool typesCompatible{
+      dummy.type.type().IsTypeCompatibleWith(actualType.type())};
+  if (typesCompatible) {
+    if (isElemental) {
+    } else if (dummy.type.attrs().test(
+                   characteristics::TypeAndShape::Attr::AssumedRank)) {
+    } else if (!dummy.type.attrs().test(
+                   characteristics::TypeAndShape::Attr::AssumedShape) &&
+        (actualType.Rank() > 0 || actualIsArrayElement)) {
+      // Sequence association (15.5.2.11) applies -- rank need not match
+      // if the actual argument is an array or array element designator.
+    } else {
+      CheckConformance(messages, dummy.type.shape(), actualType.shape(),
+          "dummy argument", "actual argument");
+    }
+  } else {
+    std::stringstream lenStr;
+    if (const auto &len{actualType.LEN()}) {
+      len->AsFortran(lenStr);
+    }
+    messages.Say(
+        "Actual argument type '%s' is not compatible with dummy argument type '%s'"_err_en_US,
+        actualType.type().AsFortran(lenStr.str()),
+        dummy.type.type().AsFortran());
+  }
+
   bool actualIsPolymorphic{actualType.type().IsPolymorphic()};
   bool dummyIsPolymorphic{dummy.type.type().IsPolymorphic()};
   bool actualIsCoindexed{ExtractCoarrayRef(actual).has_value()};
@@ -220,7 +267,8 @@ static void CheckExplicitDataArg(const characteristics::DummyDataObject &dummy,
           ? actualLastSymbol->GetUltimate().detailsIf<ObjectEntityDetails>()
           : nullptr};
   int actualRank{evaluate::GetRank(actualType.shape())};
-  bool actualIsPointer{actualLastSymbol && IsPointer(*actualLastSymbol)};
+  bool actualIsPointer{(actualLastSymbol && IsPointer(*actualLastSymbol)) ||
+      evaluate::IsNullPointer(actual)};
   if (dummy.type.attrs().test(
           characteristics::TypeAndShape::Attr::AssumedShape)) {
     // 15.5.2.4(16)
@@ -476,7 +524,7 @@ static void CheckProcedureArg(evaluate::ActualArgument &arg,
           }
         }
         if (!interface.IsPure()) {
-          // 15.5.2.9(1): if dummy is not PURE, actual need not be.
+          // 15.5.2.9(1): if dummy is not pure, actual need not be.
           argInterface.attrs.reset(characteristics::Procedure::Attr::Pure);
         }
         if (interface.HasExplicitInterface()) {
@@ -555,7 +603,7 @@ static void CheckExplicitInterfaceArg(evaluate::ActualArgument &arg,
                       *expr, context)}) {
                 bool isElemental{object.type.Rank() == 0 && proc.IsElemental()};
                 CheckExplicitDataArg(object, dummyName, *expr, *type,
-                    isElemental, context, scope);
+                    isElemental, IsArrayElement(*expr), context, scope);
               } else if (object.type.type().IsTypelessIntrinsicArgument() &&
                   std::holds_alternative<evaluate::BOZLiteralConstant>(
                       expr->u)) {

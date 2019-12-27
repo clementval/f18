@@ -1,16 +1,10 @@
-// Copyright (c) 2018-2019, NVIDIA CORPORATION.  All rights reserved.
+//===-- lib/evaluate/type.cc ----------------------------------------------===//
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//----------------------------------------------------------------------------//
 
 #include "type.h"
 #include "expression.h"
@@ -54,28 +48,38 @@ static bool IsDescriptor(const ProcEntityDetails &details) {
   return details.HasExplicitInterface();
 }
 
-bool IsDescriptor(const Symbol &symbol0) {
-  const Symbol &symbol{evaluate::ResolveAssociations(symbol0)};
-  if (const auto *objectDetails{symbol.detailsIf<ObjectEntityDetails>()}) {
-    return IsAllocatableOrPointer(symbol) || IsDescriptor(*objectDetails);
-  } else if (const auto *procDetails{symbol.detailsIf<ProcEntityDetails>()}) {
-    if (symbol.attrs().test(Attr::POINTER) ||
-        symbol.attrs().test(Attr::EXTERNAL)) {
-      return IsDescriptor(*procDetails);
-    }
-  } else if (const auto *assocDetails{symbol.detailsIf<AssocEntityDetails>()}) {
-    if (const auto &expr{assocDetails->expr()}) {
-      if (expr->Rank() > 0) {
-        return true;
-      }
-      if (const auto dynamicType{expr->GetType()}) {
-        if (dynamicType->RequiresDescriptor()) {
-          return true;
-        }
-      }
-    }
-  }
-  return false;
+bool IsDescriptor(const Symbol &symbol) {
+  return std::visit(
+      common::visitors{
+          [&](const ObjectEntityDetails &d) {
+            return IsAllocatableOrPointer(symbol) || IsDescriptor(d);
+          },
+          [&](const ProcEntityDetails &d) {
+            return (symbol.attrs().test(Attr::POINTER) ||
+                       symbol.attrs().test(Attr::EXTERNAL)) &&
+                IsDescriptor(d);
+          },
+          [](const AssocEntityDetails &d) {
+            if (const auto &expr{d.expr()}) {
+              if (expr->Rank() > 0) {
+                return true;
+              }
+              if (const auto dynamicType{expr->GetType()}) {
+                if (dynamicType->RequiresDescriptor()) {
+                  return true;
+                }
+              }
+            }
+            return false;
+          },
+          [](const SubprogramDetails &d) {
+            return d.isFunction() && IsDescriptor(d.result());
+          },
+          [](const UseDetails &d) { return IsDescriptor(d.symbol()); },
+          [](const HostAssocDetails &d) { return IsDescriptor(d.symbol()); },
+          [](const auto &) { return false; },
+      },
+      symbol.details());
 }
 }
 
@@ -91,9 +95,31 @@ bool DynamicType::operator==(const DynamicType &that) const {
       PointeeComparison(derived_, that.derived_);
 }
 
+std::optional<common::ConstantSubscript> DynamicType::GetCharLength() const {
+  if (category_ == TypeCategory::Character && charLength_ &&
+      charLength_->isExplicit()) {
+    if (const auto &len{charLength_->GetExplicit()}) {
+      return ToInt64(len);
+    }
+  }
+  return std::nullopt;
+}
+
 bool DynamicType::IsAssumedLengthCharacter() const {
   return category_ == TypeCategory::Character && charLength_ &&
       charLength_->isAssumed();
+}
+
+bool DynamicType::IsUnknownLengthCharacter() const {
+  if (category_ != TypeCategory::Character) {
+    return false;
+  } else if (!charLength_) {
+    return true;
+  } else if (const auto &expr{charLength_->GetExplicit()}) {
+    return !IsConstantExpr(*expr);
+  } else {
+    return true;
+  }
 }
 
 bool DynamicType::IsTypelessIntrinsicArgument() const {
@@ -398,7 +424,7 @@ DynamicType DynamicType::ResultTypeForMultiply(const DynamicType &that) const {
 }
 
 bool DynamicType::RequiresDescriptor() const {
-  if (IsPolymorphic() || IsAssumedLengthCharacter()) {
+  if (IsPolymorphic() || IsUnknownLengthCharacter()) {
     return true;
   }
   if (derived_) {

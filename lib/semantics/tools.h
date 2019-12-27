@@ -1,16 +1,10 @@
-// Copyright (c) 2019, NVIDIA CORPORATION.  All rights reserved.
+//===-- lib/semantics/tools.h -----------------------------------*- C++ -*-===//
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//----------------------------------------------------------------------------//
 
 #ifndef FORTRAN_SEMANTICS_TOOLS_H_
 #define FORTRAN_SEMANTICS_TOOLS_H_
@@ -193,7 +187,7 @@ const DeclTypeSpec &FindOrInstantiateDerivedType(Scope &, DerivedTypeSpec &&,
     SemanticsContext &, DeclTypeSpec::Category = DeclTypeSpec::TypeDerived);
 
 // Determines whether an object might be visible outside a
-// PURE function (C1594); returns a non-null Symbol pointer for
+// pure function (C1594); returns a non-null Symbol pointer for
 // diagnostic purposes if so.
 const Symbol *FindExternallyVisibleObject(const Symbol &, const Scope &);
 
@@ -233,7 +227,7 @@ bool ExprTypeKindIsDefault(
 struct GetExprHelper {
   const SomeExpr *Get(const parser::Expr::TypedExpr &x) {
     CHECK(x);
-    return x->v ? &*x->v : nullptr;
+    return x && x->v ? &*x->v : nullptr;
   }
   const SomeExpr *Get(const parser::Expr &x) { return Get(x.typedExpr); }
   const SomeExpr *Get(const parser::Variable &x) { return Get(x.typedExpr); }

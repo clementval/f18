@@ -1,16 +1,10 @@
-// Copyright (c) 2018-2019, NVIDIA CORPORATION.  All rights reserved.
+//===-- lib/parser/unparse.cc ---------------------------------------------===//
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//----------------------------------------------------------------------------//
 
 // Generates Fortran from the content of a parse tree, using the
 // traversal templates in parse-tree-visitor.h.
@@ -33,10 +27,10 @@ class UnparseVisitor {
 public:
   UnparseVisitor(std::ostream &out, int indentationAmount, Encoding encoding,
       bool capitalize, bool backslashEscapes, preStatementType *preStatement,
-      TypedExprAsFortran *expr)
+      AnalyzedObjectsAsFortran *asFortran)
     : out_{out}, indentationAmount_{indentationAmount}, encoding_{encoding},
       capitalizeKeywords_{capitalize}, backslashEscapes_{backslashEscapes},
-      preStatement_{preStatement}, typedExprAsFortran_{expr} {}
+      preStatement_{preStatement}, asFortran_{asFortran} {}
 
   // In nearly all cases, this code avoids defining Boolean-valued Pre()
   // callbacks for the parse tree walking framework in favor of two void
@@ -803,9 +797,9 @@ public:
 
   // R1001 - R1022
   bool Pre(const Expr &x) {
-    if (typedExprAsFortran_ && x.typedExpr.get()) {
+    if (asFortran_ && x.typedExpr) {
       // Format the expression representation from semantics
-      (*typedExprAsFortran_)(out_, *x.typedExpr);
+      asFortran_->expr(out_, *x.typedExpr);
       return false;
     } else {
       return true;
@@ -846,7 +840,13 @@ public:
     Walk(x.v);
   }
   void Unparse(const AssignmentStmt &x) {  // R1032
-    Walk(x.t, " = ");
+    if (asFortran_ && x.typedAssignment.get()) {
+      Put(' ');
+      asFortran_->assignment(out_, *x.typedAssignment);
+      Put('\n');
+    } else {
+      Walk(x.t, " = ");
+    }
   }
   void Unparse(const PointerAssignmentStmt &x) {  // R1033, R1034, R1038
     Walk(std::get<DataRef>(x.t));
@@ -1639,15 +1639,21 @@ public:
     Put('('), Walk(std::get<std::list<ActualArgSpec>>(x.v.t), ", "), Put(')');
   }
   void Unparse(const CallStmt &x) {  // R1521
-    const auto &pd{std::get<ProcedureDesignator>(x.v.t)};
-    const auto &args{std::get<std::list<ActualArgSpec>>(x.v.t)};
-    Word("CALL "), Walk(pd);
-    if (args.empty()) {
-      if (std::holds_alternative<ProcComponentRef>(pd.u)) {
-        Put("()");  // pgf90 crashes on CALL to tbp without parentheses
-      }
+    if (asFortran_ && x.typedCall.get()) {
+      Put(' ');
+      asFortran_->call(out_, *x.typedCall);
+      Put('\n');
     } else {
-      Walk("(", args, ", ", ")");
+      const auto &pd{std::get<ProcedureDesignator>(x.v.t)};
+      const auto &args{std::get<std::list<ActualArgSpec>>(x.v.t)};
+      Word("CALL "), Walk(pd);
+      if (args.empty()) {
+        if (std::holds_alternative<ProcComponentRef>(pd.u)) {
+          Put("()");  // pgf90 crashes on CALL to tbp without parentheses
+        }
+      } else {
+        Walk("(", args, ", ", ")");
+      }
     }
   }
   void Unparse(const ActualArgSpec &x) {  // R1523
@@ -2715,7 +2721,7 @@ private:
   bool openmpDirective_{false};
   bool backslashEscapes_{false};
   preStatementType *preStatement_{nullptr};
-  TypedExprAsFortran *typedExprAsFortran_{nullptr};
+  AnalyzedObjectsAsFortran *asFortran_{nullptr};
 };
 
 void UnparseVisitor::Put(char ch) {
@@ -2791,9 +2797,9 @@ void UnparseVisitor::Word(const std::string &str) { Word(str.c_str()); }
 
 void Unparse(std::ostream &out, const Program &program, Encoding encoding,
     bool capitalizeKeywords, bool backslashEscapes,
-    preStatementType *preStatement, TypedExprAsFortran *expr) {
+    preStatementType *preStatement, AnalyzedObjectsAsFortran *asFortran) {
   UnparseVisitor visitor{out, 1, encoding, capitalizeKeywords, backslashEscapes,
-      preStatement, expr};
+      preStatement, asFortran};
   Walk(program, visitor);
   visitor.Done();
 }

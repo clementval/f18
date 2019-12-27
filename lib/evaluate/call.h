@@ -1,16 +1,10 @@
-// Copyright (c) 2018-2019, NVIDIA CORPORATION.  All rights reserved.
+//===-- lib/evaluate/call.h -------------------------------------*- C++ -*-===//
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//----------------------------------------------------------------------------//
 
 #ifndef FORTRAN_EVALUATE_CALL_H_
 #define FORTRAN_EVALUATE_CALL_H_
@@ -72,6 +66,7 @@ public:
     SymbolRef symbol_;
   };
 
+  DECLARE_CONSTRUCTORS_AND_ASSIGNMENTS(ActualArgument)
   explicit ActualArgument(Expr<SomeType> &&);
   explicit ActualArgument(common::CopyableIndirection<Expr<SomeType>> &&);
   explicit ActualArgument(AssumedType);
@@ -188,6 +183,7 @@ public:
   CLASS_BOILERPLATE(ProcedureRef)
   ProcedureRef(ProcedureDesignator &&p, ActualArguments &&a)
     : proc_{std::move(p)}, arguments_(std::move(a)) {}
+  ~ProcedureRef();
 
   ProcedureDesignator &proc() { return proc_; }
   const ProcedureDesignator &proc() const { return proc_; }
@@ -209,7 +205,7 @@ template<typename A> class FunctionRef : public ProcedureRef {
 public:
   using Result = A;
   CLASS_BOILERPLATE(FunctionRef)
-  FunctionRef(ProcedureRef &&pr) : ProcedureRef{std::move(pr)} {}
+  explicit FunctionRef(ProcedureRef &&pr) : ProcedureRef{std::move(pr)} {}
   FunctionRef(ProcedureDesignator &&p, ActualArguments &&a)
     : ProcedureRef{std::move(p), std::move(a)} {}
 

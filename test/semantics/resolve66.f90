@@ -1,17 +1,3 @@
-! Copyright (c) 2019, NVIDIA CORPORATION.  All rights reserved.
-!
-! Licensed under the Apache License, Version 2.0 (the "License");
-! you may not use this file except in compliance with the License.
-! You may obtain a copy of the License at
-!
-!     http://www.apache.org/licenses/LICENSE-2.0
-!
-! Unless required by applicable law or agreed to in writing, software
-! distributed under the License is distributed on an "AS IS" BASIS,
-! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-! See the License for the specific language governing permissions and
-! limitations under the License.
-
 ! Test that user-defined assignment is used in the right places
 
 module m1
@@ -88,17 +74,17 @@ contains
     logical :: l
     complex :: z
     real :: r, r5(5)
-    !ERROR: Procedure 'assign_tt' referenced in PURE subprogram 'test3' must be PURE too
+    !ERROR: Procedure 'assign_tt' referenced in pure subprogram 'test3' must be pure too
     a = b
-    !ERROR: Procedure 'assign_il' referenced in PURE subprogram 'test3' must be PURE too
+    !ERROR: Procedure 'assign_il' referenced in pure subprogram 'test3' must be pure too
     i = l
-    !ERROR: Procedure 'assign_li' referenced in PURE subprogram 'test3' must be PURE too
+    !ERROR: Procedure 'assign_li' referenced in pure subprogram 'test3' must be pure too
     l = i
-    !ERROR: Procedure 'assign_il' referenced in PURE subprogram 'test3' must be PURE too
+    !ERROR: Procedure 'assign_il' referenced in pure subprogram 'test3' must be pure too
     i = .true.
-    !ERROR: Procedure 'assign_tz' referenced in PURE subprogram 'test3' must be PURE too
+    !ERROR: Procedure 'assign_tz' referenced in pure subprogram 'test3' must be pure too
     a = z
-    !ERROR: Procedure 'assign_01' referenced in PURE subprogram 'test3' must be PURE too
+    !ERROR: Procedure 'assign_01' referenced in pure subprogram 'test3' must be pure too
     r = r5
   end
 

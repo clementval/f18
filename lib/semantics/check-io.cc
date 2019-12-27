@@ -1,16 +1,10 @@
-// Copyright (c) 2019, NVIDIA CORPORATION.  All rights reserved.
+//===-- lib/semantics/check-io.cc -----------------------------------------===//
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//----------------------------------------------------------------------------//
 
 #include "check-io.h"
 #include "expression.h"
@@ -425,35 +419,39 @@ void IoChecker::Enter(const parser::StatusExpr &spec) {
 }
 
 void IoChecker::Enter(const parser::StatVariable &) {
-  SetSpecifier(IoSpecKind::Iostat);
+  if (stmt_ == IoStmtKind::None) {
+    // ALLOCATE & DEALLOCATE
+  } else {
+    SetSpecifier(IoSpecKind::Iostat);
+  }
 }
 
 void IoChecker::Leave(const parser::BackspaceStmt &) {
   CheckForPureSubprogram();
   CheckForRequiredSpecifier(
       flags_.test(Flag::NumberUnit), "UNIT number");  // C1240
-  stmt_ = IoStmtKind::None;
+  Done();
 }
 
 void IoChecker::Leave(const parser::CloseStmt &) {
   CheckForPureSubprogram();
   CheckForRequiredSpecifier(
       flags_.test(Flag::NumberUnit), "UNIT number");  // C1208
-  stmt_ = IoStmtKind::None;
+  Done();
 }
 
 void IoChecker::Leave(const parser::EndfileStmt &) {
   CheckForPureSubprogram();
   CheckForRequiredSpecifier(
       flags_.test(Flag::NumberUnit), "UNIT number");  // C1240
-  stmt_ = IoStmtKind::None;
+  Done();
 }
 
 void IoChecker::Leave(const parser::FlushStmt &) {
   CheckForPureSubprogram();
   CheckForRequiredSpecifier(
       flags_.test(Flag::NumberUnit), "UNIT number");  // C1243
-  stmt_ = IoStmtKind::None;
+  Done();
 }
 
 void IoChecker::Leave(const parser::InquireStmt &stmt) {
@@ -466,7 +464,7 @@ void IoChecker::Leave(const parser::InquireStmt &stmt) {
     CheckForProhibitedSpecifier(IoSpecKind::File, IoSpecKind::Unit);  // C1246
     CheckForRequiredSpecifier(IoSpecKind::Id, IoSpecKind::Pending);  // C1248
   }
-  stmt_ = IoStmtKind::None;
+  Done();
 }
 
 void IoChecker::Leave(const parser::OpenStmt &) {
@@ -499,19 +497,53 @@ void IoChecker::Leave(const parser::OpenStmt &) {
     CheckForProhibitedSpecifier(flags_.test(Flag::AccessStream),
         "STATUS='STREAM'", IoSpecKind::Recl);  // 12.5.6.15
   }
-  stmt_ = IoStmtKind::None;
+  Done();
 }
 
 void IoChecker::Leave(const parser::PrintStmt &) {
   CheckForPureSubprogram();
-  stmt_ = IoStmtKind::None;
+  Done();
 }
 
-void IoChecker::Leave(const parser::ReadStmt &) {
+static void CheckForDoVariableInNamelist(const Symbol &namelist,
+    SemanticsContext &context, parser::CharBlock namelistLocation) {
+  const auto &details{namelist.GetUltimate().get<NamelistDetails>()};
+  for (const Symbol &object : details.objects()) {
+    context.CheckDoVarRedefine(object, namelistLocation);
+  }
+}
+
+static void CheckForDoVariableInNamelistSpec(
+    const parser::ReadStmt &readStmt, SemanticsContext &context) {
+  const std::list<parser::IoControlSpec> &controls{readStmt.controls};
+  for (const auto &control : controls) {
+    if (const auto *namelist{std::get_if<parser::Name>(&control.u)}) {
+      if (const Symbol * symbol{namelist->symbol}) {
+        CheckForDoVariableInNamelist(*symbol, context, namelist->source);
+      }
+    }
+  }
+}
+
+static void CheckForDoVariable(
+    const parser::ReadStmt &readStmt, SemanticsContext &context) {
+  CheckForDoVariableInNamelistSpec(readStmt, context);
+  const std::list<parser::InputItem> &items{readStmt.items};
+  for (const auto &item : items) {
+    if (const parser::Variable *
+        variable{std::get_if<parser::Variable>(&item.u)}) {
+      context.CheckDoVarRedefine(*variable);
+    }
+  }
+}
+
+void IoChecker::Leave(const parser::ReadStmt &readStmt) {
   if (!flags_.test(Flag::InternalUnit)) {
     CheckForPureSubprogram();
   }
+  CheckForDoVariable(readStmt, context_);
   if (!flags_.test(Flag::IoControlList)) {
+    Done();
     return;
   }
   LeaveReadWrite();
@@ -525,21 +557,21 @@ void IoChecker::Leave(const parser::ReadStmt &) {
       "FMT or NML");  // C1227
   CheckForRequiredSpecifier(
       IoSpecKind::Pad, flags_.test(Flag::FmtOrNml), "FMT or NML");  // C1227
-  stmt_ = IoStmtKind::None;
+  Done();
 }
 
 void IoChecker::Leave(const parser::RewindStmt &) {
   CheckForRequiredSpecifier(
       flags_.test(Flag::NumberUnit), "UNIT number");  // C1240
   CheckForPureSubprogram();
-  stmt_ = IoStmtKind::None;
+  Done();
 }
 
 void IoChecker::Leave(const parser::WaitStmt &) {
   CheckForRequiredSpecifier(
       flags_.test(Flag::NumberUnit), "UNIT number");  // C1237
   CheckForPureSubprogram();
-  stmt_ = IoStmtKind::None;
+  Done();
 }
 
 void IoChecker::Leave(const parser::WriteStmt &) {
@@ -557,7 +589,7 @@ void IoChecker::Leave(const parser::WriteStmt &) {
   CheckForRequiredSpecifier(IoSpecKind::Delim,
       flags_.test(Flag::StarFmt) || specifierSet_.test(IoSpecKind::Nml),
       "FMT=* or NML");  // C1228
-  stmt_ = IoStmtKind::None;
+  Done();
 }
 
 void IoChecker::LeaveReadWrite() const {
@@ -726,7 +758,7 @@ void IoChecker::CheckForProhibitedSpecifier(
 void IoChecker::CheckForPureSubprogram() const {  // C1597
   CHECK(context_.location());
   if (FindPureProcedureContaining(context_.FindScope(*context_.location()))) {
-    context_.Say("External I/O is not allowed in a PURE subprogram"_err_en_US);
+    context_.Say("External I/O is not allowed in a pure subprogram"_err_en_US);
   }
 }
 

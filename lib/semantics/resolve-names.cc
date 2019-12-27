@@ -1,16 +1,10 @@
-// Copyright (c) 2018-2019, NVIDIA CORPORATION.  All rights reserved.
+//===-- lib/semantics/resolve-names.cc ------------------------------------===//
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//----------------------------------------------------------------------------//
 
 #include "resolve-names.h"
 #include "assignment.h"
@@ -5916,7 +5910,7 @@ bool ResolveNamesVisitor::BeginScope(const ProgramTree &node) {
 }
 
 // Some analyses and checks, such as the processing of initializers of
-// pointers, is deferred until all of the pertinent specification parts
+// pointers, are deferred until all of the pertinent specification parts
 // have been visited.  This deferred processing enables the use of forward
 // references in these circumstances.
 class DeferredCheckVisitor {
@@ -6020,7 +6014,8 @@ void ResolveNamesVisitor::FinishSpecificationParts(const ProgramTree &node) {
 // type parameter values of a particular instantiation.
 void ResolveNamesVisitor::FinishDerivedTypeInstantiation(Scope &scope) {
   CHECK(scope.IsDerivedType() && !scope.symbol());
-  if (const DerivedTypeSpec * spec{scope.derivedTypeSpec()}) {
+  if (DerivedTypeSpec * spec{scope.derivedTypeSpec()}) {
+    spec->Instantiate(currScope(), context());
     const Symbol &origTypeSymbol{spec->typeSymbol()};
     if (const Scope * origTypeScope{origTypeSymbol.scope()}) {
       CHECK(origTypeScope->IsDerivedType() &&

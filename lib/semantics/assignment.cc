@@ -1,16 +1,10 @@
-// Copyright (c) 2018-2019, NVIDIA CORPORATION.  All rights reserved.
+//===-- lib/semantics/assignment.cc ---------------------------------------===//
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//----------------------------------------------------------------------------//
 
 #include "assignment.h"
 #include "expression.h"
@@ -359,19 +353,21 @@ private:
 };
 
 void AssignmentContext::Analyze(const parser::AssignmentStmt &stmt) {
-  const auto &lhs{std::get<parser::Variable>(stmt.t)};
-  const auto &rhs{std::get<parser::Expr>(stmt.t)};
-  auto lhsExpr{AnalyzeExpr(context_, lhs)};
-  auto rhsExpr{AnalyzeExpr(context_, rhs)};
-  CheckForImpureCall(lhsExpr);
-  CheckForImpureCall(rhsExpr);
-  // TODO: preserve analyzed typed expressions
-  if (forall_) {
-    // TODO: Warn if some name in forall_->activeNames or its outer
-    // contexts does not appear on LHS
-  }
-  if (lhsExpr && rhsExpr) {
-    CheckForPureContext(*lhsExpr, *rhsExpr, rhs.source, false /* not => */);
+  // Assignment statement analysis is in expression.cc where user-defined
+  // assignments can be recognized and replaced.
+  if (const evaluate::Assignment *
+      asst{AnalyzeAssignmentStmt(context_, stmt)}) {
+    if (const auto *intrinsicAsst{
+            std::get_if<evaluate::Assignment::IntrinsicAssignment>(&asst->u)}) {
+      CheckForImpureCall(intrinsicAsst->lhs);
+      CheckForImpureCall(intrinsicAsst->rhs);
+      if (forall_) {
+        // TODO: Warn if some name in forall_->activeNames or its outer
+        // contexts does not appear on LHS
+      }
+      CheckForPureContext(intrinsicAsst->lhs, intrinsicAsst->rhs,
+          std::get<parser::Expr>(stmt.t).source, false /* not => */);
+    }
   }
   // TODO: Fortran 2003 ALLOCATABLE assignment semantics (automatic
   // (re)allocation of LHS array when unallocated or nonconformable)
@@ -381,8 +377,9 @@ void AssignmentContext::Analyze(const parser::PointerAssignmentStmt &stmt) {
   CHECK(!where_);
   const auto &lhs{std::get<parser::DataRef>(stmt.t)};
   const auto &rhs{std::get<parser::Expr>(stmt.t)};
-  auto lhsExpr{AnalyzeExpr(context_, lhs)};
-  auto rhsExpr{AnalyzeExpr(context_, rhs)};
+  auto &foldingContext{context_.foldingContext()};
+  auto lhsExpr{evaluate::Fold(foldingContext, AnalyzeExpr(context_, lhs))};
+  auto rhsExpr{evaluate::Fold(foldingContext, AnalyzeExpr(context_, rhs))};
   CheckForImpureCall(lhsExpr);
   CheckForImpureCall(rhsExpr);
   // TODO: CheckForImpureCall() in the bounds / bounds remappings
@@ -571,7 +568,7 @@ static const char *WhyBaseObjectIsSuspicious(
   } else if (IsUseAssociated(x, scope)) {
     return "USE-associated";
   } else if (IsPointerDummyOfPureFunction(x)) {
-    return "a POINTER dummy argument of a PURE function";
+    return "a POINTER dummy argument of a pure function";
   } else if (IsIntentIn(x)) {
     return "an INTENT(IN) dummy argument";
   } else if (FindCommonBlockContaining(x)) {
@@ -583,11 +580,13 @@ static const char *WhyBaseObjectIsSuspicious(
 
 // Checks C1594(1,2)
 void CheckDefinabilityInPureScope(parser::ContextualMessages &messages,
-    const Symbol &lhs, const Scope &scope) {
-  if (const char *why{WhyBaseObjectIsSuspicious(lhs, scope)}) {
-    evaluate::SayWithDeclaration(messages, lhs,
-        "A PURE subprogram may not define '%s' because it is %s"_err_en_US,
-        lhs.name(), why);
+    const Symbol &lhs, const Scope &context, const Scope &pure) {
+  if (pure.symbol()) {
+    if (const char *why{WhyBaseObjectIsSuspicious(lhs, context)}) {
+      evaluate::SayWithDeclaration(messages, lhs,
+          "Pure subprogram '%s' may not define '%s' because it is %s"_err_en_US,
+          pure.symbol()->name(), lhs.name(), why);
+    }
   }
 }
 
@@ -611,7 +610,7 @@ void CheckCopyabilityInPureScope(parser::ContextualMessages &messages,
     if (const char *why{WhyBaseObjectIsSuspicious(*base, scope)}) {
       if (auto pointer{GetPointerComponentDesignatorName(expr)}) {
         evaluate::SayWithDeclaration(messages, *base,
-            "A PURE subprogram may not copy the value of '%s' because it is %s and has the POINTER component '%s'"_err_en_US,
+            "A pure subprogram may not copy the value of '%s' because it is %s and has the POINTER component '%s'"_err_en_US,
             base->name(), why, *pointer);
       }
     }
@@ -621,36 +620,44 @@ void CheckCopyabilityInPureScope(parser::ContextualMessages &messages,
 void AssignmentContext::CheckForPureContext(const SomeExpr &lhs,
     const SomeExpr &rhs, parser::CharBlock source, bool isPointerAssignment) {
   const Scope &scope{context_.FindScope(source)};
-  if (FindPureProcedureContaining(scope)) {
+  if (const Scope * pure{FindPureProcedureContaining(scope)}) {
     parser::ContextualMessages messages{at_, &context_.messages()};
     if (evaluate::ExtractCoarrayRef(lhs)) {
       messages.Say(
-          "A PURE subprogram may not define a coindexed object"_err_en_US);
+          "A pure subprogram may not define a coindexed object"_err_en_US);
     } else if (const Symbol * base{GetFirstSymbol(lhs)}) {
-      CheckDefinabilityInPureScope(messages, *base, scope);
+      if (const auto *assoc{base->detailsIf<AssocEntityDetails>()}) {
+        if (auto dataRef{ExtractDataRef(assoc->expr())}) {
+          // ASSOCIATE(a=>x) -- check x, not a, for "a=..."
+          CheckDefinabilityInPureScope(
+              messages, dataRef->GetFirstSymbol(), scope, *pure);
+        }
+      } else {
+        CheckDefinabilityInPureScope(messages, *base, scope, *pure);
+      }
     }
     if (isPointerAssignment) {
       if (const Symbol * base{GetFirstSymbol(rhs)}) {
         if (const char *why{
                 WhyBaseObjectIsSuspicious(*base, scope)}) {  // C1594(3)
           evaluate::SayWithDeclaration(messages, *base,
-              "A PURE subprogram may not use '%s' as the target of pointer assignment because it is %s"_err_en_US,
+              "A pure subprogram may not use '%s' as the target of pointer assignment because it is %s"_err_en_US,
               base->name(), why);
         }
       }
     } else {
       if (auto type{evaluate::DynamicType::From(lhs)}) {
-        // C1596 checks for polymorphic deallocation in a PURE subprogram
+        // C1596 checks for polymorphic deallocation in a pure subprogram
         // due to automatic reallocation on assignment
         if (type->IsPolymorphic()) {
           Say(at_,
-              "Deallocation of polymorphic object is not permitted in a PURE subprogram"_err_en_US);
+              "Deallocation of polymorphic object is not permitted in a pure subprogram"_err_en_US);
         }
         if (const DerivedTypeSpec * derived{GetDerivedTypeSpec(type)}) {
           if (auto bad{FindPolymorphicAllocatableNonCoarrayUltimateComponent(
                   *derived)}) {
             evaluate::SayWithDeclaration(messages, *bad,
-                "Deallocation of polymorphic non-coarray component '%s' is not permitted in a PURE subprogram"_err_en_US,
+                "Deallocation of polymorphic non-coarray component '%s' is not permitted in a pure subprogram"_err_en_US,
                 bad.BuildResultDesignatorName());
           } else {
             CheckCopyabilityInPureScope(messages, rhs, scope);

@@ -1,16 +1,10 @@
-// Copyright (c) 2018-2019, NVIDIA CORPORATION.  All rights reserved.
+//===-- lib/evaluate/fold.cc ----------------------------------------------===//
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//----------------------------------------------------------------------------//
 
 #include "fold.h"
 #include "character.h"
@@ -818,6 +812,30 @@ Expr<Type<TypeCategory::Integer, KIND>> FoldIntrinsicFunction(
     }
   } else if (name == "min") {
     return FoldMINorMAX(context, std::move(funcRef), Ordering::Less);
+  } else if (name == "mod") {
+    return FoldElementalIntrinsic<T, T, T>(context, std::move(funcRef),
+        ScalarFuncWithContext<T, T, T>(
+            [](FoldingContext &context, const Scalar<T> &x,
+                const Scalar<T> &y) -> Scalar<T> {
+              auto quotRem{x.DivideSigned(y)};
+              if (quotRem.divisionByZero) {
+                context.messages().Say("mod() by zero"_en_US);
+              } else if (quotRem.overflow) {
+                context.messages().Say("mod() folding overflowed"_en_US);
+              }
+              return quotRem.remainder;
+            }));
+  } else if (name == "modulo") {
+    return FoldElementalIntrinsic<T, T, T>(context, std::move(funcRef),
+        ScalarFuncWithContext<T, T, T>(
+            [](FoldingContext &context, const Scalar<T> &x,
+                const Scalar<T> &y) -> Scalar<T> {
+              auto result{x.MODULO(y)};
+              if (result.overflow) {
+                context.messages().Say("modulo() folding overflowed"_en_US);
+              }
+              return result.value;
+            }));
   } else if (name == "precision") {
     if (const auto *cx{UnwrapExpr<Expr<SomeReal>>(args[0])}) {
       return Expr<T>{std::visit(
@@ -925,7 +943,7 @@ Expr<Type<TypeCategory::Integer, KIND>> FoldIntrinsicFunction(
   // ceiling, cshift, dot_product, eoshift,
   // findloc, floor, iall, iany, iparity, ibits, image_status, index, ishftc,
   // len_trim, matmul, maxloc, maxval,
-  // minloc, minval, mod, modulo, nint, not, pack, product, reduce,
+  // minloc, minval, nint, not, pack, product, reduce,
   // scan, sign, spread, sum, transfer, transpose, unpack, verify
   return Expr<T>{std::move(funcRef)};
 }
@@ -987,8 +1005,8 @@ Expr<Type<TypeCategory::Real, KIND>> FoldIntrinsicFunction(
       context.messages().Say(
           "%s(real(kind=%d)) cannot be folded on host"_en_US, name, KIND);
     }
-  }
-  if (name == "atan" || name == "atan2" || name == "hypot" || name == "mod") {
+  } else if (name == "atan" || name == "atan2" || name == "hypot" ||
+      name == "mod") {
     std::string localName{name == "atan2" ? "atan" : name};
     CHECK(args.size() == 2);
     if (auto callable{
@@ -2130,6 +2148,9 @@ Expr<TO> FoldOperation(
               Operand::category == TypeCategory::Logical) {
             return Expr<TO>{value->IsTrue()};
           }
+        } else if constexpr (std::is_same_v<Operand, TO> &&
+            FROMCAT != TypeCategory::Character) {
+          return std::move(kindExpr);  // remove needless conversion
         }
         return Expr<TO>{std::move(convert)};
       },
@@ -2143,8 +2164,12 @@ Expr<T> FoldOperation(FoldingContext &context, Parentheses<T> &&x) {
   if (auto value{GetScalarConstantValue<T>(operand)}) {
     // Preserve parentheses, even around constants.
     return Expr<T>{Parentheses<T>{Expr<T>{Constant<T>{*value}}}};
+  } else if (std::holds_alternative<Parentheses<T>>(operand.u)) {
+    // ((x)) -> (x)
+    return std::move(operand);
+  } else {
+    return Expr<T>{Parentheses<T>{std::move(operand)}};
   }
-  return Expr<T>{Parentheses<T>{std::move(operand)}};
 }
 
 template<typename T>

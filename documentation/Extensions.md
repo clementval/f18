@@ -1,5 +1,9 @@
-<!--
-Copyright (c) 2018-2019, NVIDIA CORPORATION.  All rights reserved.
+<!--===- documentation/Extensions.md 
+  
+   Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+   See https://llvm.org/LICENSE.txt for license information.
+   SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+  
 -->
 
 As a general principle, this compiler will accept by default and
@@ -23,6 +27,13 @@ Intentional violations of the standard
   `SIZE`, `LBOUND`, `UBOUND`, `SHAPE`, and the location reductions
   `FINDLOC`, `MAXLOC`, and `MINLOC`.  We return `INTEGER(KIND=8)` by
   default in these cases.
+* Scalar `INTEGER` actual argument expressions (not variables!)
+  are converted to the kinds of scalar `INTEGER` dummy arguments
+  when the interface is explicit and the kinds differ.
+  This conversion allows the results of the intrinsics like
+  `SIZE` that (as mentioned above) no longer return default
+  `INTEGER` results by default to be passed.  A warning is
+  emitted when truncation is possible.
 
 Extensions, deletions, and legacy features supported by default
 ===============================================================

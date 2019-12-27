@@ -1,16 +1,10 @@
-// Copyright (c) 2018-2019, NVIDIA CORPORATION.  All rights reserved.
+//===-- tools/f18/f18.cc --------------------------------------------------===//
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//----------------------------------------------------------------------------//
 
 // Temporary Fortran front end driver main program for development scaffolding.
 
@@ -169,6 +163,31 @@ std::string RelocatableName(const DriverOptions &driver, std::string path) {
 
 int exitStatus{EXIT_SUCCESS};
 
+static Fortran::parser::AnalyzedObjectsAsFortran asFortran{
+    [](std::ostream &o, const Fortran::evaluate::GenericExprWrapper &x) {
+      if (x.v) {
+        x.v->AsFortran(o);
+      } else {
+        o << "(bad expression)";
+      }
+    },
+    [](std::ostream &o, const Fortran::evaluate::GenericAssignmentWrapper &x) {
+      std::visit(
+          Fortran::common::visitors{
+              [&](const Fortran::evaluate::Assignment::IntrinsicAssignment &y) {
+                y.rhs.AsFortran(y.lhs.AsFortran(o) << '=');
+              },
+              [&](const Fortran::evaluate::ProcedureRef &y) {
+                y.AsFortran(o << "CALL ");
+              },
+          },
+          x.v.u);
+    },
+    [](std::ostream &o, const Fortran::evaluate::ProcedureRef &x) {
+      x.AsFortran(o << "CALL ");
+    },
+};
+
 std::string CompileFortran(std::string path, Fortran::parser::Options options,
     DriverOptions &driver,
     const Fortran::common::IntrinsicTypeDefaultKinds &defaultKinds) {
@@ -246,7 +265,7 @@ std::string CompileFortran(std::string path, Fortran::parser::Options options,
       std::cerr << driver.prefix << "semantic errors in " << path << '\n';
       exitStatus = EXIT_FAILURE;
       if (driver.dumpParseTree) {
-        Fortran::parser::DumpTree(std::cout, parseTree);
+        Fortran::parser::DumpTree(std::cout, parseTree, &asFortran);
       }
       return {};
     }
@@ -286,23 +305,13 @@ std::string CompileFortran(std::string path, Fortran::parser::Options options,
     }
   }
   if (driver.dumpParseTree) {
-    Fortran::parser::DumpTree(std::cout, parseTree);
+    Fortran::parser::DumpTree(std::cout, parseTree, &asFortran);
   }
-
-  Fortran::parser::TypedExprAsFortran unparseExpression{
-      [](std::ostream &o, const Fortran::evaluate::GenericExprWrapper &x) {
-        if (x.v) {
-          o << *x.v;
-        } else {
-          o << "(bad expression)";
-        }
-      }};
-
   if (driver.dumpUnparse) {
     Unparse(std::cout, parseTree, driver.encoding, true /*capitalize*/,
         options.features.IsEnabled(
             Fortran::common::LanguageFeature::BackslashEscapes),
-        nullptr /* action before each statement */, &unparseExpression);
+        nullptr /* action before each statement */, &asFortran);
     return {};
   }
   if (driver.parseOnly) {
@@ -322,7 +331,7 @@ std::string CompileFortran(std::string path, Fortran::parser::Options options,
         options.features.IsEnabled(
             Fortran::common::LanguageFeature::BackslashEscapes),
         nullptr /* action before each statement */,
-        driver.unparseTypedExprsToPGF90 ? &unparseExpression : nullptr);
+        driver.unparseTypedExprsToPGF90 ? &asFortran : nullptr);
     Fortran::evaluate::formatForPGF90 = false;
   }
 
@@ -435,6 +444,9 @@ int main(int argc, char *const argv[]) {
       options.isFixedForm = false;
     } else if (arg == "-Mextend") {
       options.fixedFormColumns = 132;
+    } else if (arg == "-Munlimited") {
+      // For reparsing f18's -E output of fixed-form cooked character stream
+      options.fixedFormColumns = 1000000;
     } else if (arg == "-Mbackslash") {
       options.features.Enable(
           Fortran::common::LanguageFeature::BackslashEscapes, false);
@@ -511,6 +523,11 @@ int main(int argc, char *const argv[]) {
       defaultKinds.set_defaultRealKind(8);
     } else if (arg == "-i8" || arg == "-fdefault-integer-8") {
       defaultKinds.set_defaultIntegerKind(8);
+      defaultKinds.set_subscriptIntegerKind(8);
+    } else if (arg == "-Mlargearray") {
+      defaultKinds.set_subscriptIntegerKind(8);
+    } else if (arg == "-Mnolargearray") {
+      defaultKinds.set_subscriptIntegerKind(4);
     } else if (arg == "-module") {
       driver.moduleDirectory = args.front();
       args.pop_front();

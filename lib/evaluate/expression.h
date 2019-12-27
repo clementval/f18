@@ -1,16 +1,10 @@
-// Copyright (c) 2018-2019, NVIDIA CORPORATION.  All rights reserved.
+//===-- lib/evaluate/expression.h -------------------------------*- C++ -*-===//
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//----------------------------------------------------------------------------//
 
 #ifndef FORTRAN_EVALUATE_EXPRESSION_H_
 #define FORTRAN_EVALUATE_EXPRESSION_H_
@@ -192,12 +186,6 @@ public:
 
   std::ostream &AsFortran(std::ostream &) const;
 
-protected:
-  // Overridable functions for AsFortran()
-  static const char *Prefix() { return ""; }
-  static const char *Infix() { return ""; }
-  static const char *Suffix() { return ""; }
-
 private:
   Container operand_;
 };
@@ -232,8 +220,6 @@ struct Parentheses : public Operation<Parentheses<A>, A, A> {
   using Operand = A;
   using Base = Operation<Parentheses, A, A>;
   using Base::Base;
-  static const char *Prefix() { return "("; }
-  static const char *Suffix() { return ")"; }
 };
 
 template<typename A> struct Negate : public Operation<Negate<A>, A, A> {
@@ -241,7 +227,6 @@ template<typename A> struct Negate : public Operation<Negate<A>, A, A> {
   using Operand = A;
   using Base = Operation<Negate, A, A>;
   using Base::Base;
-  static const char *Prefix() { return "-"; }
 };
 
 template<int KIND>
@@ -257,9 +242,6 @@ struct ComplexComponent
   ComplexComponent(bool isImaginary, Expr<Operand> &&x)
     : Base{std::move(x)}, isImaginaryPart{isImaginary} {}
 
-  const char *Prefix() const { return isImaginaryPart ? "IMAG(" : "REAL("; }
-  const char *Suffix() const { return ")"; }
-
   bool isImaginaryPart{true};
 };
 
@@ -270,7 +252,6 @@ struct Not : public Operation<Not<KIND>, Type<TypeCategory::Logical, KIND>,
   using Operand = Result;
   using Base = Operation<Not, Result, Operand>;
   using Base::Base;
-  static const char *Prefix() { return ".NOT."; }
 };
 
 // Character lengths are determined by context in Fortran and do not
@@ -286,9 +267,6 @@ struct SetLength
   using LengthOperand = SubscriptInteger;
   using Base = Operation<SetLength, Result, CharacterOperand, LengthOperand>;
   using Base::Base;
-  static const char *Prefix() { return "%SET_LENGTH("; }
-  static const char *Infix() { return ","; }
-  static const char *Suffix() { return ")"; }
 };
 
 // Binary operations
@@ -298,7 +276,6 @@ template<typename A> struct Add : public Operation<Add<A>, A, A, A> {
   using Operand = A;
   using Base = Operation<Add, A, A, A>;
   using Base::Base;
-  static const char *Infix() { return "+"; }
 };
 
 template<typename A> struct Subtract : public Operation<Subtract<A>, A, A, A> {
@@ -306,7 +283,6 @@ template<typename A> struct Subtract : public Operation<Subtract<A>, A, A, A> {
   using Operand = A;
   using Base = Operation<Subtract, A, A, A>;
   using Base::Base;
-  static const char *Infix() { return "-"; }
 };
 
 template<typename A> struct Multiply : public Operation<Multiply<A>, A, A, A> {
@@ -314,7 +290,6 @@ template<typename A> struct Multiply : public Operation<Multiply<A>, A, A, A> {
   using Operand = A;
   using Base = Operation<Multiply, A, A, A>;
   using Base::Base;
-  static const char *Infix() { return "*"; }
 };
 
 template<typename A> struct Divide : public Operation<Divide<A>, A, A, A> {
@@ -322,7 +297,6 @@ template<typename A> struct Divide : public Operation<Divide<A>, A, A, A> {
   using Operand = A;
   using Base = Operation<Divide, A, A, A>;
   using Base::Base;
-  static const char *Infix() { return "/"; }
 };
 
 template<typename A> struct Power : public Operation<Power<A>, A, A, A> {
@@ -330,7 +304,6 @@ template<typename A> struct Power : public Operation<Power<A>, A, A, A> {
   using Operand = A;
   using Base = Operation<Power, A, A, A>;
   using Base::Base;
-  static const char *Infix() { return "**"; }
 };
 
 template<typename A>
@@ -340,7 +313,6 @@ struct RealToIntPower : public Operation<RealToIntPower<A>, A, A, SomeInteger> {
   using BaseOperand = A;
   using ExponentOperand = SomeInteger;
   using Base::Base;
-  static const char *Infix() { return "**"; }
 };
 
 template<typename A> struct Extremum : public Operation<Extremum<A>, A, A, A> {
@@ -352,13 +324,6 @@ template<typename A> struct Extremum : public Operation<Extremum<A>, A, A, A> {
     : Base{x, y}, ordering{ord} {}
   Extremum(Ordering ord, Expr<Operand> &&x, Expr<Operand> &&y)
     : Base{std::move(x), std::move(y)}, ordering{ord} {}
-
-  const char *Prefix() const {
-    return ordering == Ordering::Less ? "MIN(" : "MAX(";
-  }
-  static const char *Infix() { return ","; }
-  static const char *Suffix() { return ")"; }
-
   Ordering ordering{Ordering::Greater};
 };
 
@@ -371,9 +336,6 @@ struct ComplexConstructor
   using Operand = Type<TypeCategory::Real, KIND>;
   using Base = Operation<ComplexConstructor, Result, Operand, Operand>;
   using Base::Base;
-  static const char *Prefix() { return "("; }
-  static const char *Infix() { return ","; }
-  static const char *Suffix() { return ")"; }
 };
 
 template<int KIND>
@@ -385,7 +347,6 @@ struct Concat
   using Operand = Result;
   using Base = Operation<Concat, Result, Operand, Operand>;
   using Base::Base;
-  static const char *Infix() { return "//"; }
 };
 
 template<int KIND>
@@ -401,9 +362,6 @@ struct LogicalOperation
     : Base{x, y}, logicalOperator{opr} {}
   LogicalOperation(LogicalOperator opr, Expr<Operand> &&x, Expr<Operand> &&y)
     : Base{std::move(x), std::move(y)}, logicalOperator{opr} {}
-
-  const char *Infix() const;
-
   LogicalOperator logicalOperator;
 };
 
@@ -655,9 +613,6 @@ struct Relational : public Operation<Relational<T>, LogicalResult, T, T> {
     : Base{a, b}, opr{r} {}
   Relational(RelationalOperator r, Expr<Operand> &&a, Expr<Operand> &&b)
     : Base{std::move(a), std::move(b)}, opr{r} {}
-
-  const char *Infix() const;
-
   RelationalOperator opr;
 };
 
@@ -872,19 +827,19 @@ public:
 
 // This wrapper class is used, by means of a forward reference with
 // an owning pointer, to cache analyzed expressions in parse tree nodes.
-// v is nullopt if an error occurred during expression analysis.
 struct GenericExprWrapper {
-  GenericExprWrapper(std::optional<Expr<SomeType>> &&x) : v{std::move(x)} {}
+  GenericExprWrapper() {}
+  explicit GenericExprWrapper(std::optional<Expr<SomeType>> &&x)
+    : v{std::move(x)} {}
   ~GenericExprWrapper();
-  bool operator==(const GenericExprWrapper &) const;
-  std::optional<Expr<SomeType>> v;
+  std::optional<Expr<SomeType>> v;  // vacant if error
 };
 
 // Like GenericExprWrapper but for analyzed assignments
 struct GenericAssignmentWrapper {
-  GenericAssignmentWrapper(std::optional<Assignment> &&x) : v{std::move(x)} {}
+  explicit GenericAssignmentWrapper(Assignment &&x) : v{std::move(x)} {}
   ~GenericAssignmentWrapper();
-  std::optional<Assignment> v;
+  Assignment v;
 };
 
 FOR_EACH_CATEGORY_TYPE(extern template class Expr, )

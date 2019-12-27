@@ -1,17 +1,3 @@
-! Copyright (c) 2019, NVIDIA CORPORATION.  All rights reserved.
-!
-! Licensed under the Apache License, Version 2.0 (the "License");
-! you may not use this file except in compliance with the License.
-! You may obtain a copy of the License at
-!
-!     http://www.apache.org/licenses/LICENSE-2.0
-!
-! Unless required by applicable law or agreed to in writing, software
-! distributed under the License is distributed on an "AS IS" BASIS,
-! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-! See the License for the specific language governing permissions and
-! limitations under the License.
-
 ! Test 15.5.2.5 constraints and restrictions for POINTER & ALLOCATABLE
 ! arguments when both sides of the call have the same attributes.
 
@@ -98,9 +84,9 @@ module m
     call sup(pp)
     !ERROR: If a POINTER or ALLOCATABLE dummy or actual argument is unlimited polymorphic, both must be so
     call sua(pa)
-    !ERROR: actual argument type 'CLASS(*)' is not compatible with dummy argument type 't'
+    !ERROR: Actual argument type 'CLASS(*)' is not compatible with dummy argument type 't'
     call spp(up)
-    !ERROR: actual argument type 'CLASS(*)' is not compatible with dummy argument type 't'
+    !ERROR: Actual argument type 'CLASS(*)' is not compatible with dummy argument type 't'
     call spa(ua)
     !ERROR: POINTER or ALLOCATABLE dummy and actual arguments must have the same declared type
     call spp(pp2)

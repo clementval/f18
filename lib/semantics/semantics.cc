@@ -1,16 +1,10 @@
-// Copyright (c) 2018-2019, NVIDIA CORPORATION.  All rights reserved.
+//===-- lib/semantics/semantics.cc ----------------------------------------===//
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//----------------------------------------------------------------------------//
 
 #include "semantics.h"
 #include "assignment.h"
@@ -39,6 +33,7 @@
 #include "symbol.h"
 #include "../common/default-kinds.h"
 #include "../parser/parse-tree-visitor.h"
+#include "../parser/tools.h"
 
 namespace Fortran::semantics {
 
@@ -207,6 +202,71 @@ Scope &SemanticsContext::FindScope(parser::CharBlock source) {
 void SemanticsContext::PopConstruct() {
   CHECK(!constructStack_.empty());
   constructStack_.pop_back();
+}
+
+void SemanticsContext::SayDoVarRedefine(
+    const parser::CharBlock &location, const Symbol &variable) {
+  const parser::CharBlock doLoc{GetDoVariableLocation(variable)};
+  CHECK(doLoc != parser::CharBlock{});
+  Say(location, "Cannot redefine DO variable '%s'"_err_en_US, variable.name())
+      .Attach(doLoc, "Enclosing DO construct"_en_US);
+}
+
+void SemanticsContext::CheckDoVarRedefine(
+    const Symbol &variable, const parser::CharBlock &location) {
+  if (const Symbol * root{GetAssociationRoot(variable)}) {
+    if (IsActiveDoVariable(*root)) {
+      SayDoVarRedefine(location, *root);
+    }
+  }
+}
+
+void SemanticsContext::CheckDoVarRedefine(const parser::Variable &variable) {
+  if (const Symbol * entity{GetLastName(variable).symbol}) {
+    const parser::CharBlock &sourceLocation{variable.GetSource()};
+    CheckDoVarRedefine(*entity, sourceLocation);
+  }
+}
+
+void SemanticsContext::CheckDoVarRedefine(const parser::Name &name) {
+  const parser::CharBlock &sourceLocation{name.source};
+  if (const Symbol * entity{name.symbol}) {
+    CheckDoVarRedefine(*entity, sourceLocation);
+  }
+}
+
+void SemanticsContext::ActivateDoVariable(const parser::Name &name) {
+  CheckDoVarRedefine(name);
+  if (const Symbol * doVariable{name.symbol}) {
+    if (const Symbol * root{GetAssociationRoot(*doVariable)}) {
+      if (!IsActiveDoVariable(*root)) {
+        activeDoVariables_.emplace(*root, name.source);
+      }
+    }
+  }
+}
+
+void SemanticsContext::DeactivateDoVariable(const parser::Name &name) {
+  if (Symbol * doVariable{name.symbol}) {
+    if (const Symbol * root{GetAssociationRoot(*doVariable)}) {
+      if (name.source == GetDoVariableLocation(*root)) {
+        activeDoVariables_.erase(*root);
+      }
+    }
+  }
+}
+
+bool SemanticsContext::IsActiveDoVariable(const Symbol &variable) {
+  return activeDoVariables_.find(variable) != activeDoVariables_.end();
+}
+
+parser::CharBlock SemanticsContext::GetDoVariableLocation(
+    const Symbol &variable) {
+  if (IsActiveDoVariable(variable)) {
+    return activeDoVariables_[variable];
+  } else {
+    return parser::CharBlock{};
+  }
 }
 
 bool Semantics::Perform() {

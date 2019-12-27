@@ -1,16 +1,10 @@
-// Copyright (c) 2018-2019, NVIDIA CORPORATION.  All rights reserved.
+//===-- lib/common/default-kinds.h ------------------------------*- C++ -*-===//
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//----------------------------------------------------------------------------//
 
 #ifndef FORTRAN_COMMON_DEFAULT_KINDS_H_
 #define FORTRAN_COMMON_DEFAULT_KINDS_H_
@@ -28,17 +22,16 @@ using ConstantSubscript = std::int64_t;
 
 // Represent the default values of the kind parameters of the
 // various intrinsic types.  Most of these can be configured by
-// means of the compiler command line; subscriptIntegerKind,
-// however, is fixed at 8 because all address calculations are
-// 64-bit safe.
+// means of the compiler command line.
 class IntrinsicTypeDefaultKinds {
 public:
   IntrinsicTypeDefaultKinds();
-  static constexpr int subscriptIntegerKind() { return 8; }
+  int subscriptIntegerKind() const { return subscriptIntegerKind_; }
   int doublePrecisionKind() const { return doublePrecisionKind_; }
   int quadPrecisionKind() const { return quadPrecisionKind_; }
 
   IntrinsicTypeDefaultKinds &set_defaultIntegerKind(int);
+  IntrinsicTypeDefaultKinds &set_subscriptIntegerKind(int);
   IntrinsicTypeDefaultKinds &set_defaultRealKind(int);
   IntrinsicTypeDefaultKinds &set_doublePrecisionKind(int);
   IntrinsicTypeDefaultKinds &set_quadPrecisionKind(int);
@@ -54,6 +47,7 @@ private:
   // storage unit, so their kinds are also forced.  Default COMPLEX must always
   // comprise two default REAL components.
   int defaultIntegerKind_{4};
+  int subscriptIntegerKind_{8};
   int defaultRealKind_{defaultIntegerKind_};
   int doublePrecisionKind_{2 * defaultRealKind_};
   int quadPrecisionKind_{2 * doublePrecisionKind_};

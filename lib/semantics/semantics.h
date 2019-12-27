@@ -1,16 +1,10 @@
-// Copyright (c) 2018-2019, NVIDIA CORPORATION.  All rights reserved.
+//===-- lib/semantics/semantics.h -------------------------------*- C++ -*-===//
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//----------------------------------------------------------------------------//
 
 #ifndef FORTRAN_SEMANTICS_SEMANTICS_H_
 #define FORTRAN_SEMANTICS_SEMANTICS_H_
@@ -43,6 +37,7 @@ struct ForallConstruct;
 struct IfConstruct;
 struct SelectRankConstruct;
 struct SelectTypeConstruct;
+struct Variable;
 struct WhereConstruct;
 }
 
@@ -155,7 +150,18 @@ public:
   }
   void PopConstruct();
 
+  // Check to see if a variable being redefined is a DO variable.  If so, emit
+  // a message
+  void CheckDoVarRedefine(const Symbol &, const parser::CharBlock &);
+  void CheckDoVarRedefine(const parser::Variable &);
+  void CheckDoVarRedefine(const parser::Name &);
+  void ActivateDoVariable(const parser::Name &);
+  void DeactivateDoVariable(const parser::Name &);
+  bool IsActiveDoVariable(const Symbol &);
+
 private:
+  parser::CharBlock GetDoVariableLocation(const Symbol &);
+  void SayDoVarRedefine(const parser::CharBlock &, const Symbol &);
   const common::IntrinsicTypeDefaultKinds &defaultKinds_;
   const common::LanguageFeatureControl languageFeatures_;
   parser::AllSources &allSources_;
@@ -172,6 +178,7 @@ private:
 
   bool CheckError(bool);
   ConstructStack constructStack_;
+  std::map<SymbolRef, const parser::CharBlock> activeDoVariables_;
 };
 
 class Semantics {

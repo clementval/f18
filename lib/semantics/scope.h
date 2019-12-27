@@ -1,16 +1,10 @@
-// Copyright (c) 2018-2019, NVIDIA CORPORATION.  All rights reserved.
+//===-- lib/semantics/scope.h -----------------------------------*- C++ -*-===//
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//----------------------------------------------------------------------------//
 
 #ifndef FORTRAN_SEMANTICS_SCOPE_H_
 #define FORTRAN_SEMANTICS_SCOPE_H_
@@ -197,9 +191,8 @@ public:
   void add_importName(const SourceName &);
 
   const DerivedTypeSpec *derivedTypeSpec() const { return derivedTypeSpec_; }
-  void set_derivedTypeSpec(const DerivedTypeSpec &spec) {
-    derivedTypeSpec_ = &spec;
-  }
+  DerivedTypeSpec *derivedTypeSpec() { return derivedTypeSpec_; }
+  void set_derivedTypeSpec(DerivedTypeSpec &spec) { derivedTypeSpec_ = &spec; }
 
   // The range of the source of this and nested scopes.
   const parser::CharBlock &sourceRange() const { return sourceRange_; }
@@ -234,7 +227,7 @@ private:
   std::string chars_;
   std::optional<ImportKind> importKind_;
   std::set<SourceName> importNames_;
-  const DerivedTypeSpec *derivedTypeSpec_{nullptr};  // dTS->scope() == this
+  DerivedTypeSpec *derivedTypeSpec_{nullptr};  // dTS->scope() == this
   // When additional data members are added to Scope, remember to
   // copy them, if appropriate, in InstantiateDerivedType().
 

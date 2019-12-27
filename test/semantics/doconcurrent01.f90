@@ -1,17 +1,3 @@
-! Copyright (c) 2018-2019, NVIDIA CORPORATION.  All rights reserved.
-!
-! Licensed under the Apache License, Version 2.0 (the "License");
-! you may not use this file except in compliance with the License.
-! You may obtain a copy of the License at
-!
-!     http://www.apache.org/licenses/LICENSE-2.0
-!
-! Unless required by applicable law or agreed to in writing, software
-! distributed under the License is distributed on an "AS IS" BASIS,
-! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-! See the License for the specific language governing permissions and
-! limitations under the License.
-!
 ! C1141
 ! A reference to the procedure IEEE_SET_HALTING_MODE ! from the intrinsic 
 ! module IEEE_EXCEPTIONS, shall not ! appear within a DO CONCURRENT construct.
@@ -48,6 +34,7 @@ subroutine do_concurrent_test2(i,j,n,flag)
   type(ieee_flag_type) :: flag
   logical :: flagValue, halting
   type(team_type) :: j
+  type(ieee_status_type) :: status
   do concurrent (i = 1:n)
 !ERROR: An image control statement is not allowed in DO CONCURRENT
     sync team (j)
@@ -56,9 +43,7 @@ subroutine do_concurrent_test2(i,j,n,flag)
 !ERROR: An image control statement is not allowed in DO CONCURRENT
       critical
 !ERROR: Call to an impure procedure is not allowed in DO CONCURRENT
-        call ieee_get_flag(flag, flagValue)
-!ERROR: Call to an impure procedure is not allowed in DO CONCURRENT
-        call ieee_get_halting_mode(flag, halting)
+        call ieee_get_status(status)
 !ERROR: IEEE_SET_HALTING_MODE is not allowed in DO CONCURRENT
         call ieee_set_halting_mode(flag, halting)
       end critical

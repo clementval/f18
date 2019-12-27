@@ -1,16 +1,10 @@
-// Copyright (c) 2018-2019, NVIDIA CORPORATION.  All rights reserved.
+//===-- lib/evaluate/call.cc ----------------------------------------------===//
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//----------------------------------------------------------------------------//
 
 #include "call.h"
 #include "characteristics.h"
@@ -21,6 +15,7 @@
 
 namespace Fortran::evaluate {
 
+DEFINE_DEFAULT_CONSTRUCTORS_AND_ASSIGNMENTS(ActualArgument)
 ActualArgument::ActualArgument(Expr<SomeType> &&x) : u_{std::move(x)} {}
 ActualArgument::ActualArgument(common::CopyableIndirection<Expr<SomeType>> &&v)
   : u_{std::move(v)} {}
@@ -196,5 +191,8 @@ std::optional<Expr<SubscriptInteger>> ProcedureRef::LEN() const {
   return proc_.LEN();
 }
 
+ProcedureRef::~ProcedureRef() {}
+
 FOR_EACH_SPECIFIC_TYPE(template class FunctionRef, )
 }
+DEFINE_DELETER(Fortran::evaluate::ProcedureRef)

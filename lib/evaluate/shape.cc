@@ -1,20 +1,15 @@
-// Copyright (c) 2019, NVIDIA CORPORATION.  All rights reserved.
+//===-- lib/evaluate/shape.cc ---------------------------------------------===//
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//----------------------------------------------------------------------------//
 
 #include "shape.h"
 #include "characteristics.h"
 #include "fold.h"
+#include "intrinsics.h"
 #include "tools.h"
 #include "type.h"
 #include "../common/idioms.h"
@@ -507,6 +502,41 @@ auto GetShapeHelper::operator()(const ProcedureRef &call) const -> Result {
                 call.arguments().at(1).value().UnwrapExpr()}) {
           auto shape{std::get<Expr<SomeInteger>>(shapeExpr->u)};
           return AsShape(context_, ConvertToType<ExtentType>(std::move(shape)));
+        }
+      }
+    } else if (intrinsic->name == "pack") {
+      if (call.arguments().size() >= 3 && call.arguments().at(2)) {
+        // SHAPE(PACK(,,VECTOR=v)) -> SHAPE(v)
+        return (*this)(call.arguments().at(2));
+      } else if (call.arguments().size() >= 2) {
+        if (auto maskShape{(*this)(call.arguments().at(1))}) {
+          if (maskShape->size() == 0) {
+            // Scalar MASK= -> [MERGE(SIZE(ARRAY=), 0, mask)]
+            if (auto arrayShape{(*this)(call.arguments().at(0))}) {
+              auto arraySize{GetSize(std::move(*arrayShape))};
+              CHECK(arraySize);
+              ActualArguments toMerge{
+                  ActualArgument{AsGenericExpr(std::move(*arraySize))},
+                  ActualArgument{AsGenericExpr(ExtentExpr{0})},
+                  common::Clone(call.arguments().at(1))};
+              auto specific{context_.intrinsics().Probe(
+                  CallCharacteristics{"merge"}, toMerge, context_)};
+              CHECK(specific);
+              return Shape{ExtentExpr{FunctionRef<ExtentType>{
+                  ProcedureDesignator{std::move(specific->specificIntrinsic)},
+                  std::move(specific->arguments)}}};
+            }
+          } else {
+            // Non-scalar MASK= -> [COUNT(mask)]
+            ActualArguments toCount{ActualArgument{common::Clone(
+                DEREF(call.arguments().at(1).value().UnwrapExpr()))}};
+            auto specific{context_.intrinsics().Probe(
+                CallCharacteristics{"count"}, toCount, context_)};
+            CHECK(specific);
+            return Shape{ExtentExpr{FunctionRef<ExtentType>{
+                ProcedureDesignator{std::move(specific->specificIntrinsic)},
+                std::move(specific->arguments)}}};
+          }
         }
       }
     } else if (intrinsic->name == "spread") {

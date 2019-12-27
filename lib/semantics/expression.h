@@ -1,16 +1,10 @@
-// Copyright (c) 2018-2019, NVIDIA CORPORATION.  All rights reserved.
+//===-- lib/semantics/expression.h ------------------------------*- C++ -*-===//
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//----------------------------------------------------------------------------//
 
 #ifndef FORTRAN_SEMANTICS_EXPRESSION_H_
 #define FORTRAN_SEMANTICS_EXPRESSION_H_
@@ -89,8 +83,10 @@ namespace Fortran::evaluate {
 class IntrinsicProcTable;
 
 struct SetExprHelper {
-  SetExprHelper(GenericExprWrapper &&expr) : expr_{std::move(expr)} {}
-  void Set(parser::Expr::TypedExpr &x) { x->v = std::move(expr_.v); }
+  explicit SetExprHelper(GenericExprWrapper &&expr) : expr_{std::move(expr)} {}
+  void Set(parser::Expr::TypedExpr &x) {
+    x.reset(new GenericExprWrapper{std::move(expr_)});
+  }
   void Set(const parser::Expr &x) { Set(x.typedExpr); }
   void Set(const parser::Variable &x) { Set(x.typedExpr); }
   template<typename T> void Set(const common::Indirection<T> &x) {
@@ -99,21 +95,20 @@ struct SetExprHelper {
   template<typename T> void Set(const T &x) {
     if constexpr (ConstraintTrait<T>) {
       Set(x.thing);
-    } else {
-      static_assert("bad type");
+    } else if constexpr (WrapperTrait<T>) {
+      Set(x.v);
     }
   }
 
   GenericExprWrapper expr_;
 };
 
-// Set the typedExpr data member to std::nullopt to indicate an error
 template<typename T> void ResetExpr(const T &x) {
-  SetExprHelper{GenericExprWrapper{std::nullopt}}.Set(x);
+  SetExprHelper{GenericExprWrapper{/* error indicator */}}.Set(x);
 }
 
-template<typename T> void SetExpr(const T &x, GenericExprWrapper &&expr) {
-  SetExprHelper{std::move(expr)}.Set(x);
+template<typename T> void SetExpr(const T &x, Expr<SomeType> &&expr) {
+  SetExprHelper{GenericExprWrapper{std::move(expr)}}.Set(x);
 }
 
 class ExpressionAnalyzer {
@@ -197,7 +192,7 @@ public:
         return std::nullopt;
       } else {
         // Save folded expression for later use
-        SetExpr(x, common::Clone(result));
+        SetExpr(x, common::Clone(*result));
       }
     }
     return result;
@@ -237,7 +232,7 @@ public:
   MaybeExpr Analyze(const parser::StructureComponent &);
 
   void Analyze(const parser::CallStmt &);
-  void Analyze(const parser::AssignmentStmt &);
+  const Assignment *Analyze(const parser::AssignmentStmt &);
 
 protected:
   int IntegerTypeSpecKind(const parser::IntegerTypeSpec &);
@@ -260,7 +255,8 @@ private:
   MaybeExpr Analyze(const parser::CharLiteralConstantSubstring &);
   MaybeExpr Analyze(const parser::ArrayConstructor &);
   MaybeExpr Analyze(const parser::StructureConstructor &);
-  MaybeExpr Analyze(const parser::FunctionReference &);
+  MaybeExpr Analyze(const parser::FunctionReference &,
+      std::optional<parser::StructureConstructor> * = nullptr);
   MaybeExpr Analyze(const parser::Expr::Parentheses &);
   MaybeExpr Analyze(const parser::Expr::UnaryPlus &);
   MaybeExpr Analyze(const parser::Expr::Negate &);
@@ -289,7 +285,35 @@ private:
     return Analyze(x.u);  // default case
   }
   template<typename... As> MaybeExpr Analyze(const std::variant<As...> &u) {
-    return std::visit([&](const auto &x) { return Analyze(x); }, u);
+    return std::visit(
+        [&](const auto &x) {
+          using Ty = std::decay_t<decltype(x)>;
+          // Function references might turn out to be misparsed structure
+          // constructors; we have to try generic procedure resolution
+          // first to be sure.
+          if constexpr (common::IsTypeInList<parser::StructureConstructor,
+                            As...>) {
+            std::optional<parser::StructureConstructor> ctor;
+            MaybeExpr result;
+            if constexpr (std::is_same_v<Ty,
+                              common::Indirection<parser::FunctionReference>>) {
+              result = Analyze(x.value(), &ctor);
+            } else if constexpr (std::is_same_v<Ty,
+                                     parser::FunctionReference>) {
+              result = Analyze(x, &ctor);
+            } else {
+              return Analyze(x);
+            }
+            if (ctor) {
+              // A misparsed function reference is really a structure
+              // constructor.  Repair the parse tree in situ.
+              const_cast<std::variant<As...> &>(u) = std::move(*ctor);
+            }
+            return result;
+          }
+          return Analyze(x);
+        },
+        u);
   }
 
   // Analysis subroutines
@@ -314,7 +338,10 @@ private:
   MaybeExpr AnalyzeDefinedOp(const parser::Name &, ActualArguments &&);
 
   struct CalleeAndArguments {
-    ProcedureDesignator procedureDesignator;
+    // A non-component function reference may constitute a misparsed
+    // structure constructor, in which case its derived type's Symbol
+    // will appear here.
+    std::variant<ProcedureDesignator, SymbolRef> u;
     ActualArguments arguments;
   };
 
@@ -322,20 +349,21 @@ private:
       const parser::ProcComponentRef &, ActualArguments &&);
   std::optional<ActualArgument> AnalyzeActualArgument(const parser::Expr &);
 
-  MaybeExpr AnalyzeCall(const parser::Call &, bool isSubroutine);
   std::optional<ActualArguments> AnalyzeArguments(
       const parser::Call &, bool isSubroutine);
   std::optional<characteristics::Procedure> CheckCall(
       parser::CharBlock, const ProcedureDesignator &, ActualArguments &);
   using AdjustActuals =
       std::optional<std::function<bool(const Symbol &, ActualArguments &)>>;
-  const Symbol *ResolveGeneric(
-      const Symbol &, const ActualArguments &, AdjustActuals = std::nullopt);
-  std::optional<CalleeAndArguments> GetCalleeAndArguments(
-      const parser::Name &, ActualArguments &&, bool isSubroutine = false);
+  const Symbol *ResolveGeneric(const Symbol &, const ActualArguments &,
+      const AdjustActuals &, bool mightBeStructureConstructor = false);
+  void EmitGenericResolutionError(const Symbol &);
+  std::optional<CalleeAndArguments> GetCalleeAndArguments(const parser::Name &,
+      ActualArguments &&, bool isSubroutine = false,
+      bool mightBeStructureConstructor = false);
   std::optional<CalleeAndArguments> GetCalleeAndArguments(
       const parser::ProcedureDesignator &, ActualArguments &&,
-      bool isSubroutine);
+      bool isSubroutine, bool mightBeStructureConstructor = false);
 
   void CheckForBadRecursion(parser::CharBlock, const semantics::Symbol &);
   bool EnforceTypeConstraint(parser::CharBlock, const MaybeExpr &, TypeCategory,
@@ -385,7 +413,8 @@ evaluate::Expr<evaluate::SubscriptInteger> AnalyzeKindSelector(
     const std::optional<parser::KindSelector> &);
 
 void AnalyzeCallStmt(SemanticsContext &, const parser::CallStmt &);
-void AnalyzeAssignmentStmt(SemanticsContext &, const parser::AssignmentStmt &);
+const evaluate::Assignment *AnalyzeAssignmentStmt(
+    SemanticsContext &, const parser::AssignmentStmt &);
 
 // Semantic analysis of all expressions in a parse tree, which becomes
 // decorated with typed representations for top-level expressions.

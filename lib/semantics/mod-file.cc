@@ -1,16 +1,10 @@
-// Copyright (c) 2018-2019, NVIDIA CORPORATION.  All rights reserved.
+//===-- lib/semantics/mod-file.cc -----------------------------------------===//
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//----------------------------------------------------------------------------//
 
 #include "mod-file.h"
 #include "resolve-names.h"
@@ -951,8 +945,10 @@ bool SubprogramSymbolCollector::NeedImport(
     return false;
   } else if (symbol.owner() != scope_.parent()) {
     // detect import from parent of use-associated symbol
+    // can be null in the case of a use-associated derived type's parent type
     const auto *found{scope_.FindSymbol(name)};
-    return DEREF(found).has<UseDetails>() && found->owner() != scope_;
+    CHECK(found || symbol.has<DerivedTypeDetails>());
+    return found && found->has<UseDetails>() && found->owner() != scope_;
   } else {
     return true;
   }

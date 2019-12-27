@@ -1,16 +1,10 @@
-! Copyright (c) 2019, NVIDIA CORPORATION.  All rights reserved.
+!===-- module/ieee_exceptions.f90 ------------------------------------------===!
 !
-! Licensed under the Apache License, Version 2.0 (the "License");
-! you may not use this file except in compliance with the License.
-! You may obtain a copy of the License at
+! Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+! See https://llvm.org/LICENSE.txt for license information.
+! SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 !
-!     http://www.apache.org/licenses/LICENSE-2.0
-!
-! Unless required by applicable law or agreed to in writing, software
-! distributed under the License is distributed on an "AS IS" BASIS,
-! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-! See the License for the specific language governing permissions and
-! limitations under the License.
+!------------------------------------------------------------------------------!
 
 ! See Fortran 2018, clause 17
 module ieee_exceptions
@@ -53,12 +47,12 @@ module ieee_exceptions
   end interface
 
  contains
-  subroutine ieee_get_flag(flag, flag_value)
+  elemental subroutine ieee_get_flag(flag, flag_value)
     type(ieee_flag_type), intent(in) :: flag
     logical, intent(out) :: flag_value
   end subroutine ieee_get_flag
 
-  subroutine ieee_get_halting_mode(flag, halting)
+  elemental subroutine ieee_get_halting_mode(flag, halting)
     type(ieee_flag_type), intent(in) :: flag
     logical, intent(out) :: halting
   end subroutine ieee_get_halting_mode

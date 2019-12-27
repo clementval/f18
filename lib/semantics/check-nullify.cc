@@ -1,16 +1,10 @@
-// Copyright (c) 2019, NVIDIA CORPORATION.  All rights reserved.
+//===-- lib/semantics/check-nullify.cc ------------------------------------===//
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//----------------------------------------------------------------------------//
 
 #include "check-nullify.h"
 #include "assignment.h"
@@ -25,7 +19,7 @@ namespace Fortran::semantics {
 void NullifyChecker::Leave(const parser::NullifyStmt &nullifyStmt) {
   CHECK(context_.location());
   const Scope &scope{context_.FindScope(*context_.location())};
-  bool isPure{FindPureProcedureContaining(scope)};
+  const Scope *pure{FindPureProcedureContaining(scope)};
   parser::ContextualMessages messages{
       *context_.location(), &context_.messages()};
   for (const parser::PointerObject &pointerObject : nullifyStmt.v) {
@@ -41,8 +35,8 @@ void NullifyChecker::Leave(const parser::NullifyStmt &nullifyStmt) {
               } else if (!IsPointer(symbol)) {  // C951
                 messages.Say(name.source,
                     "name in NULLIFY statement must have the POINTER attribute"_err_en_US);
-              } else if (isPure) {
-                CheckDefinabilityInPureScope(messages, symbol, scope);
+              } else if (pure) {
+                CheckDefinabilityInPureScope(messages, symbol, scope, *pure);
               }
             },
             [&](const parser::StructureComponent &structureComponent) {
@@ -51,8 +45,11 @@ void NullifyChecker::Leave(const parser::NullifyStmt &nullifyStmt) {
                 if (!IsPointer(*structureComponent.component.symbol)) {  // C951
                   messages.Say(structureComponent.component.source,
                       "component in NULLIFY statement must have the POINTER attribute"_err_en_US);
-                } else if (const Symbol * symbol{GetFirstSymbol(checked)}) {
-                  CheckDefinabilityInPureScope(messages, *symbol, scope);
+                } else if (pure) {
+                  if (const Symbol * symbol{GetFirstSymbol(checked)}) {
+                    CheckDefinabilityInPureScope(
+                        messages, *symbol, scope, *pure);
+                  }
                 }
               }
             },
@@ -67,4 +64,4 @@ void NullifyChecker::Leave(const parser::NullifyStmt &nullifyStmt) {
   // Some dependencies can be found compile time or at
   // runtime, but for now we choose to skip such checks.
 }
-}  // namespace Fortran::semantics
+}
