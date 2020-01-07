@@ -68,6 +68,8 @@ TYPE_PARSER(
         parenthesized(Parser<AccObjectListWithModifier>{}))) ||
     "DEFAULT" >> construct<AccClause>(construct<AccClause::Default>(
         Parser<AccDefaultClause>{})) ||
+    "DEFAULT_ASYNC" >> construct<AccClause>(construct<AccClause::DefaultAsync>(
+        parenthesized(scalarIntExpr))) ||
     "DELETE" >> construct<AccClause>(construct<AccClause::Delete>(
         parenthesized(Parser<AccObjectList>{}))) ||
     "DETACH" >> construct<AccClause>(construct<AccClause::Detach>(
@@ -101,6 +103,8 @@ TYPE_PARSER(
     "IF_PRESENT" >> construct<AccClause>(construct<AccClause::IfPresent>()) ||
     "INDEPENDENT" >> construct<AccClause>(
         construct<AccClause::Independent>()) ||
+    "LINK" >> construct<AccClause>(construct<AccClause::Link>(parenthesized(
+        Parser<AccObjectList>{}))) ||
     "NO_CREATE" >> construct<AccClause>(construct<AccClause::NoCreate>(
         parenthesized(Parser<AccObjectList>{}))) ||
     "NOHOST" >> construct<AccClause>(construct<AccClause::NoHost>()) ||

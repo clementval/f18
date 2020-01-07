@@ -3895,6 +3895,7 @@ struct AccClause {
   WRAPPER_CLASS(Copyout, AccObjectListWithModifier); // 2.7.7
   WRAPPER_CLASS(Create, AccObjectListWithModifier); // 2.7.8
   WRAPPER_CLASS(Default, AccDefaultClause); // 2.5.14
+  WRAPPER_CLASS(DefaultAsync, ScalarIntExpr); // 2.4.12
   WRAPPER_CLASS(Delete, AccObjectList); // 2.7.10
   WRAPPER_CLASS(Detach, AccObjectList); // 2.7.12
   WRAPPER_CLASS(Device, AccObjectList); // 2.14.4
@@ -3906,6 +3907,7 @@ struct AccClause {
   WRAPPER_CLASS(Gang, std::optional<AccGangArgument>); // 2.9.2
   WRAPPER_CLASS(Host, AccObjectList); // 2.14.4
   WRAPPER_CLASS(If, ScalarLogicalExpr); // 2.5.4
+  WRAPPER_CLASS(Link, AccObjectList); // 2.13
   WRAPPER_CLASS(NoCreate, AccObjectList); // 2.7.9
   WRAPPER_CLASS(NumGangs, ScalarIntExpr); // 2.5.8
   WRAPPER_CLASS(NumWorkers, ScalarIntExpr); // 2.5.9
@@ -3923,10 +3925,10 @@ struct AccClause {
 
   std::variant<Auto, Capture, Finalize, Gang, IfPresent, Independent, NoHost,
       Read, Seq, Vector, Worker, Write, Async, Attach, Bind, Collapse, Copy,
-      Copyin, Copyout, Create, Default, Delete, Detach, Device, DeviceNum,
-      DeviceResident, DevicePtr, DeviceType, Host, If, FirstPrivate, NoCreate,
-      NumGangs, NumWorkers, Present, Private, Tile, UseDevice, Reduction, Self,
-      VectorLength, Wait> u;
+      Copyin, Copyout, Create, Default, DefaultAsync, Delete, Detach, Device,
+      DeviceNum, DeviceResident, DevicePtr, DeviceType, Host, If, Link,
+      FirstPrivate, NoCreate, NumGangs, NumWorkers, Present, Private, Tile,
+      UseDevice, Reduction, Self, VectorLength, Wait> u;
 };
 
 struct AccClauseList {

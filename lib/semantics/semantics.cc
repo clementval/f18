@@ -10,6 +10,7 @@
 #include "assignment.h"
 #include "canonicalize-do.h"
 #include "canonicalize-omp.h"
+#include "check-acc-structure.h"
 #include "check-allocate.h"
 #include "check-arithmeticif.h"
 #include "check-coarray.h"
@@ -110,8 +111,8 @@ private:
 };
 
 using StatementSemanticsPass1 = ExprChecker;
-using StatementSemanticsPass2 = SemanticsVisitor<AllocateChecker,
-    ArithmeticIfStmtChecker, AssignmentChecker, CoarrayChecker,
+using StatementSemanticsPass2 = SemanticsVisitor<AccStructureChecker,
+    AllocateChecker, ArithmeticIfStmtChecker, AssignmentChecker, CoarrayChecker,
     DeallocateChecker, DoChecker, IfStmtChecker, IoChecker, NullifyChecker,
     OmpStructureChecker, PurityChecker, ReturnStmtChecker, StopChecker>;
 

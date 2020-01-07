@@ -1882,6 +1882,11 @@ public:
     Walk(x.v);
     Put(")");
   }
+  void Unparse(const AccClause::DefaultAsync &x) {
+    Word("DEFAULT_ASYNC(");
+    Walk(x.v);
+    Put(")");
+  }
   void Unparse(const AccClause::Delete &x) {
     Word("DELETE(");
     Walk(x.v);
