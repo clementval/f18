@@ -82,9 +82,9 @@ TYPE_PARSER(
         construct<AccClause::DeviceResident>(
             parenthesized(Parser<AccObjectList>{}))) ||
     "DEVICE_TYPE" >> construct<AccClause>(construct<AccClause::DeviceType>(
-        parenthesized("*" >> maybe(nonemptyList(name))))) ||
+        parenthesized("*" >> construct<std::optional<std::list<Name>>>()))) ||
     "DTYPE" >> construct<AccClause>(construct<AccClause::DeviceType>(
-        parenthesized("*" >> maybe(nonemptyList(name))))) ||
+        parenthesized("*" >> construct<std::optional<std::list<Name>>>()))) ||
     "DEVICE_TYPE" >> construct<AccClause>(construct<AccClause::DeviceType>(
         parenthesized(maybe(nonemptyList(name))))) ||
     "DTYPE" >> construct<AccClause>(construct<AccClause::DeviceType>(
