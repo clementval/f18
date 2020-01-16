@@ -90,28 +90,24 @@ void AccStructureChecker::Leave(const parser::OpenACCBlockConstruct &x) {
   const auto &beginBlockDir{std::get<parser::AccBeginBlockDirective>(x.t)};
   const auto &beginDir{std::get<parser::AccBlockDirective>(beginBlockDir.t)};
   switch (beginDir.v) {
-    case parser::AccBlockDirective::Directive::Parallel: {
-      // 843-844
+    case parser::AccBlockDirective::Directive::Kernels:  // 880-881
+    case parser::AccBlockDirective::Directive::Parallel:  // 843-844
+    {
       CheckOnlyAllowedAfter(AccClause::DEVICE_TYPE, {AccClause::ASYNC,
                                                      AccClause::WAIT,
                                                      AccClause::NUM_GANGS,
                                                      AccClause::NUM_WORKERS,
                                                      AccClause::VECTOR_LENGTH});
     } break;
+    case parser::AccBlockDirective::Directive::Serial: { // 919
+      CheckOnlyAllowedAfter(AccClause::DEVICE_TYPE, {AccClause::ASYNC,
+                                                     AccClause::WAIT});
+    } break;
+    case parser::AccBlockDirective::Directive::HostData:
     case parser::AccBlockDirective::Directive::Data: {
-
-    } break;
-    case parser::AccBlockDirective::Directive::Kernels: {
-
-    } break;
-    case parser::AccBlockDirective::Directive::Serial: {
-
-    } break;
-    case parser::AccBlockDirective::Directive::HostData: {
-
+      // Any additional check on leave
     } break;
   }
-
   accContext_.pop_back();
 }
 
