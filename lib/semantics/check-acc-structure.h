@@ -302,6 +302,7 @@ private:
     return nullptr;
   }
 
+
   void PushContextAndClause(const parser::CharBlock &source, AccDirective dir);
 
   void SayNotMatching(const parser::CharBlock &, const parser::CharBlock &);
@@ -318,10 +319,9 @@ private:
 
   // Check that only clauses in set are after the specific clauses.
   void CheckOnlyAllowedAfter(AccClause clause, AccClauseSet set);
-
   void CheckAllowed(AccClause);
-
   void CheckRequired(AccClause);
+  std::string ContextDirectiveAsFortran();
 
   void RequiresConstantPositiveParameter(
       const AccClause &clause, const parser::ScalarIntConstantExpr &i);

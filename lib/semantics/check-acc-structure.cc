@@ -144,8 +144,31 @@ void AccStructureChecker::Enter(const parser::OpenACCCombinedConstruct &x) {
   }
 }
 
-void AccStructureChecker::Leave(const parser::OpenACCCombinedConstruct &) {
+void AccStructureChecker::Leave(const parser::OpenACCCombinedConstruct &x) {
+  const auto &beginBlockDir{std::get<parser::AccBeginCombinedDirective>(x.t)};
+  const auto &beginDir{std::get<parser::AccCombinedDirective>(beginBlockDir.t)};
+  switch (beginDir.v) {
+    case parser::AccCombinedDirective::Directive::KernelsLoop:  // 1962 (880-881)
+    case parser::AccCombinedDirective::Directive::ParallelLoop:  // 1962 (843-844)
+    {
+      CheckOnlyAllowedAfter(AccClause::DEVICE_TYPE, {AccClause::ASYNC,
+                                                     AccClause::WAIT,
+                                                     AccClause::NUM_GANGS,
+                                                     AccClause::NUM_WORKERS,
+                                                     AccClause::VECTOR_LENGTH});
+    } break;
+    case parser::AccCombinedDirective::Directive::SerialLoop: { // 1962 (919)
+      CheckOnlyAllowedAfter(AccClause::DEVICE_TYPE, {AccClause::ASYNC,
+                                                     AccClause::WAIT});
+    } break;
+  }
   accContext_.pop_back();
+}
+
+std::string AccStructureChecker::ContextDirectiveAsFortran() {
+  auto dir{EnumToString(GetContext().directive)};
+  std::replace(dir.begin(), dir.end(), '_', ' ');
+  return dir;
 }
 
 void AccStructureChecker::Enter(const parser::OpenACCStandaloneConstruct &x) {
@@ -327,7 +350,7 @@ void AccStructureChecker::CheckOnlyAllowedAfter(AccClause clause,
       context_.Say(parserClause->second->source,
           "Clause %s is not allowed after clause %s on the %s directive"_err_en_US,
           EnumToString(cl), EnumToString(clause),
-          EnumToString(GetContext().directive));
+          ContextDirectiveAsFortran());
     }
   }
 }

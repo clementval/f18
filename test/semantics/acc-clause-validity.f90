@@ -29,6 +29,13 @@ program openacc_clause_validity
   end do
   !$acc end parallel
 
+  !ERROR: Clause IF is not allowed after clause DEVICE_TYPE on the PARALLEL LOOP directive
+  !$acc parallel loop device_type(*) if(.TRUE.)
+  do i = 1, N
+    a(i) = 3.14
+  end do
+  !$acc end parallel loop
+
   !$acc kernels device_type(*) async
   do i = 1, N
     a(i) = 3.14
@@ -42,6 +49,13 @@ program openacc_clause_validity
   end do
   !$acc end kernels
 
+  !ERROR: Clause IF is not allowed after clause DEVICE_TYPE on the KERNELS LOOP directive
+  !$acc kernels loop device_type(*) if(.TRUE.)
+  do i = 1, N
+    a(i) = 3.14
+  end do
+  !$acc end kernels loop
+
   !$acc serial device_type(*) async
   do i = 1, N
     a(i) = 3.14
@@ -54,5 +68,12 @@ program openacc_clause_validity
     a(i) = 3.14
   end do
   !$acc end serial
+
+  !ERROR: Clause IF is not allowed after clause DEVICE_TYPE on the SERIAL LOOP directive
+  !$acc serial loop device_type(*) if(.TRUE.)
+  do i = 1, N
+    a(i) = 3.14
+  end do
+  !$acc end serial loop
 
 end program openacc_clause_validity
