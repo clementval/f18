@@ -42,4 +42,17 @@ program openacc_clause_validity
   end do
   !$acc end kernels
 
+  !$acc serial device_type(*) async
+  do i = 1, N
+    a(i) = 3.14
+  end do
+  !$acc end serial
+
+  !ERROR: Clause IF is not allowed after clause DEVICE_TYPE on the SERIAL directive
+  !$acc serial device_type(*) if(.TRUE.)
+  do i = 1, N
+    a(i) = 3.14
+  end do
+  !$acc end serial
+
 end program openacc_clause_validity
