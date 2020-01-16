@@ -316,7 +316,7 @@ void AccStructureChecker::CheckAllowed(AccClause type) {
     }
   }
   SetContextClauseInfo(type);
-
+  AddClauseToCrtContext(type);
 }
 
 void AccStructureChecker::CheckOnlyAllowedAfter(AccClause clause,
@@ -327,7 +327,8 @@ void AccStructureChecker::CheckOnlyAllowedAfter(AccClause clause,
       enforceCheck = true;
       continue;
     } else if(enforceCheck && !set.test(cl)) {
-      context_.Say(GetContext().directiveSource,
+      auto parserClause = GetContext().clauseInfo.find(cl);
+      context_.Say(parserClause->second->source,
           "Clause %s is not allowed after clause %s on the %s directive"_err_en_US,
           EnumToString(cl), EnumToString(clause),
           EnumToString(GetContext().directive));
