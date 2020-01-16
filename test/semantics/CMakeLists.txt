@@ -202,6 +202,7 @@ set(ERROR_TESTS
   critical03.f90
   block-data01.f90
   acc-clause-validity.f90
+  acc-branch.f90
 )
 
 # These test files have expected symbols in the source

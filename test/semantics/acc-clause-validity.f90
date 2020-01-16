@@ -2,9 +2,7 @@
 
 ! Check OpenACC clause validity for the following directives:
 !
-!    2.5 PARALLEL construct
-!    2.7.1 Loop construct
-!    ...
+!
 
 program openacc_clause_validity
 

@@ -31,6 +31,46 @@ void AccStructureChecker::Enter(const parser::AccClause::X &c) { \
 namespace Fortran::semantics {
 
 
+class ParallelNoExitEnforce {
+public:
+  ParallelNoExitEnforce(
+      SemanticsContext &context, parser::CharBlock criticalSourcePosition)
+      : context_{context}, criticalSourcePosition_{criticalSourcePosition} {}
+  std::set<parser::Label> labels() { return labels_; }
+  template<typename T> bool Pre(const T &) { return true; }
+  template<typename T> void Post(const T &) {}
+
+  template<typename T> bool Pre(const parser::Statement<T> &statement) {
+    currentStatementSourcePosition_ = statement.source;
+    if (statement.label.has_value()) {
+      labels_.insert(*statement.label);
+    }
+    return true;
+  }
+
+  // 840
+  void Post(const parser::ReturnStmt &) {
+    context_.Say(currentStatementSourcePosition_,
+        "RETURN statement is not allowed in a PARALLEL construct"_err_en_US)
+        .Attach(criticalSourcePosition_, GetEnclosingMsg());
+  }
+  void Post(const parser::ExitStmt &) {
+    context_.Say(currentStatementSourcePosition_,
+         "EXIT statement is not allowed in a PARALLEL construct"_err_en_US)
+        .Attach(criticalSourcePosition_, GetEnclosingMsg());
+  }
+
+private:
+  parser::MessageFixedText GetEnclosingMsg() {
+    return "Enclosing PARALLEL construct"_en_US;
+  }
+
+  SemanticsContext &context_;
+  std::set<parser::Label> labels_;
+  parser::CharBlock currentStatementSourcePosition_;
+  parser::CharBlock criticalSourcePosition_;
+};
+
 void AccStructureChecker::PushContextAndClause(const parser::CharBlock &source,
                                                AccDirective dir)
 {
@@ -98,6 +138,9 @@ void AccStructureChecker::Leave(const parser::OpenACCBlockConstruct &x) {
                                                      AccClause::NUM_GANGS,
                                                      AccClause::NUM_WORKERS,
                                                      AccClause::VECTOR_LENGTH});
+      const parser::Block &block{std::get<parser::Block>(x.t)};
+      ParallelNoExitEnforce parallelNoExitEnforce{context_, beginDir.source};
+      parser::Walk(block, parallelNoExitEnforce);
     } break;
     case parser::AccBlockDirective::Directive::Serial: { // 919
       CheckOnlyAllowedAfter(AccClause::DEVICE_TYPE, {AccClause::ASYNC,
