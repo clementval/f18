@@ -31,44 +31,40 @@ void AccStructureChecker::Enter(const parser::AccClause::X &c) { \
 namespace Fortran::semantics {
 
 
-class ParallelNoExitEnforce {
+class NoBranchingEnforce {
 public:
-  ParallelNoExitEnforce(
-      SemanticsContext &context, parser::CharBlock criticalSourcePosition)
-      : context_{context}, criticalSourcePosition_{criticalSourcePosition} {}
-  std::set<parser::Label> labels() { return labels_; }
+  NoBranchingEnforce(SemanticsContext &context,
+      parser::CharBlock sourcePosition, AccDirective directive)
+      : context_{context}, sourcePosition_{sourcePosition},
+      currentDirective_{directive} {}
   template<typename T> bool Pre(const T &) { return true; }
   template<typename T> void Post(const T &) {}
 
   template<typename T> bool Pre(const parser::Statement<T> &statement) {
     currentStatementSourcePosition_ = statement.source;
-    if (statement.label.has_value()) {
-      labels_.insert(*statement.label);
-    }
     return true;
   }
 
-  // 840
-  void Post(const parser::ReturnStmt &) {
-    context_.Say(currentStatementSourcePosition_,
-        "RETURN statement is not allowed in a PARALLEL construct"_err_en_US)
-        .Attach(criticalSourcePosition_, GetEnclosingMsg());
-  }
-  void Post(const parser::ExitStmt &) {
-    context_.Say(currentStatementSourcePosition_,
-         "EXIT statement is not allowed in a PARALLEL construct"_err_en_US)
-        .Attach(criticalSourcePosition_, GetEnclosingMsg());
-  }
+  void Post(const parser::ReturnStmt &) { emitBranchOutError("RETURN"); }
+  void Post(const parser::ExitStmt &) { emitBranchOutError("EXIT"); }
+  void Post(const parser::StopStmt &) { emitBranchOutError("STOP"); }
 
 private:
   parser::MessageFixedText GetEnclosingMsg() {
-    return "Enclosing PARALLEL construct"_en_US;
+    return "Enclosing block construct"_en_US;
+  }
+
+  void emitBranchOutError(const char* stmt) {
+    context_.Say(currentStatementSourcePosition_,
+        "%s statement is not allowed in a %s construct"_err_en_US, stmt,
+        EnumToString(currentDirective_))
+        .Attach(sourcePosition_, GetEnclosingMsg());
   }
 
   SemanticsContext &context_;
-  std::set<parser::Label> labels_;
   parser::CharBlock currentStatementSourcePosition_;
-  parser::CharBlock criticalSourcePosition_;
+  parser::CharBlock sourcePosition_;
+  AccDirective currentDirective_;
 };
 
 void AccStructureChecker::PushContextAndClause(const parser::CharBlock &source,
@@ -129,22 +125,27 @@ void AccStructureChecker::Enter(const parser::OpenACCBlockConstruct &x) {
 void AccStructureChecker::Leave(const parser::OpenACCBlockConstruct &x) {
   const auto &beginBlockDir{std::get<parser::AccBeginBlockDirective>(x.t)};
   const auto &beginDir{std::get<parser::AccBlockDirective>(beginBlockDir.t)};
+  const parser::Block &block{std::get<parser::Block>(x.t)};
   switch (beginDir.v) {
-    case parser::AccBlockDirective::Directive::Kernels:  // 880-881
-    case parser::AccBlockDirective::Directive::Parallel:  // 843-844
-    {
+    case parser::AccBlockDirective::Directive::Kernels:
+    case parser::AccBlockDirective::Directive::Parallel: {
+      // Restriction - 880-881 (KERNELS)
+      // Restriction - 843-844 (PARALLEL)
       CheckOnlyAllowedAfter(AccClause::DEVICE_TYPE, {AccClause::ASYNC,
                                                      AccClause::WAIT,
                                                      AccClause::NUM_GANGS,
                                                      AccClause::NUM_WORKERS,
                                                      AccClause::VECTOR_LENGTH});
-      const parser::Block &block{std::get<parser::Block>(x.t)};
-      ParallelNoExitEnforce parallelNoExitEnforce{context_, beginDir.source};
-      parser::Walk(block, parallelNoExitEnforce);
+      // Restriction - 877 (KERNELS)
+      // Restriction - 840 (PARALLEL)
+      CheckNoBranching(block, GetContext().directive, beginDir.source);
     } break;
-    case parser::AccBlockDirective::Directive::Serial: { // 919
+    case parser::AccBlockDirective::Directive::Serial: {
+      // Restriction - 919
       CheckOnlyAllowedAfter(AccClause::DEVICE_TYPE, {AccClause::ASYNC,
                                                      AccClause::WAIT});
+      // Restriction - 916
+      CheckNoBranching(block, AccDirective::SERIAL, beginDir.source);
     } break;
     case parser::AccBlockDirective::Directive::HostData:
     case parser::AccBlockDirective::Directive::Data: {
@@ -152,6 +153,13 @@ void AccStructureChecker::Leave(const parser::OpenACCBlockConstruct &x) {
     } break;
   }
   accContext_.pop_back();
+}
+
+void AccStructureChecker::CheckNoBranching(const parser::Block &block,
+                      const AccDirective directive,
+                      const parser::CharBlock &directiveSource) const {
+  NoBranchingEnforce noBranchingEnforce{context_, directiveSource, directive};
+  parser::Walk(block, noBranchingEnforce);
 }
 
 void AccStructureChecker::Enter(
@@ -191,8 +199,8 @@ void AccStructureChecker::Leave(const parser::OpenACCCombinedConstruct &x) {
   const auto &beginBlockDir{std::get<parser::AccBeginCombinedDirective>(x.t)};
   const auto &beginDir{std::get<parser::AccCombinedDirective>(beginBlockDir.t)};
   switch (beginDir.v) {
-    case parser::AccCombinedDirective::Directive::KernelsLoop:  // 1962 (880-881)
-    case parser::AccCombinedDirective::Directive::ParallelLoop:  // 1962 (843-844)
+    case parser::AccCombinedDirective::Directive::KernelsLoop: // 1962 (880-881)
+    case parser::AccCombinedDirective::Directive::ParallelLoop: // 1962 (843-844)
     {
       CheckOnlyAllowedAfter(AccClause::DEVICE_TYPE, {AccClause::ASYNC,
                                                      AccClause::WAIT,

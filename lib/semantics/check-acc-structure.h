@@ -323,6 +323,10 @@ private:
   void CheckRequired(AccClause);
   std::string ContextDirectiveAsFortran();
 
+  void CheckNoBranching(const parser::Block &block,
+      const AccDirective directive,
+      const parser::CharBlock &directiveSource) const;
+
   void RequiresConstantPositiveParameter(
       const AccClause &clause, const parser::ScalarIntConstantExpr &i);
   void OptionalConstantPositiveParameter(

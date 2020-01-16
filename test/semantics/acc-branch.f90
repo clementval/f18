@@ -11,7 +11,7 @@ program openacc_clause_validity
     integer :: N = 256
     real(8) :: a(256)
 
-    !$acc parallel device_type(*) num_gangs(2)
+    !$acc parallel
     !$acc loop
     do i = 1, N
         a(i) = 3.14
@@ -20,15 +20,82 @@ program openacc_clause_validity
     end do
     !$acc end parallel
 
-    !$acc parallel device_type(*) num_gangs(2)
+    !$acc parallel
     !$acc loop
     do i = 1, N
         a(i) = 3.14
         if(i == N-1) THEN
-            !ERROR: EXIT statement is not allowed in a PARALLEL construct
-            exit
+          !ERROR: EXIT statement is not allowed in a PARALLEL construct
+          exit
         end if
     end do
     !$acc end parallel
 
+    !$acc parallel
+    !$acc loop
+    do i = 1, N
+        a(i) = 3.14
+        if(i == N-1) THEN
+            !ERROR: STOP statement is not allowed in a PARALLEL construct
+            stop 999
+        end if
+    end do
+    !$acc end parallel
+
+    !$acc kernels
+    do i = 1, N
+        a(i) = 3.14
+        !ERROR: RETURN statement is not allowed in a KERNELS construct
+        return
+    end do
+    !$acc end kernels
+
+    !$acc kernels
+    do i = 1, N
+        a(i) = 3.14
+        if(i == N-1) THEN
+        !ERROR: EXIT statement is not allowed in a KERNELS construct
+        exit
+      end if
+    end do
+    !$acc end kernels
+
+    !$acc kernels
+    do i = 1, N
+        a(i) = 3.14
+        if(i == N-1) THEN
+            !ERROR: STOP statement is not allowed in a KERNELS construct
+            stop 999
+        end if
+    end do
+    !$acc end kernels
+
+    !$acc serial
+    do i = 1, N
+        a(i) = 3.14
+        !ERROR: RETURN statement is not allowed in a SERIAL construct
+        return
+    end do
+    !$acc end serial
+
+    !$acc serial
+    do i = 1, N
+        a(i) = 3.14
+        if(i == N-1) THEN
+            !ERROR: EXIT statement is not allowed in a SERIAL construct
+            exit
+        end if
+    end do
+    !$acc end serial
+
+    !$acc serial
+    do i = 1, N
+        a(i) = 3.14
+        if(i == N-1) THEN
+            !ERROR: STOP statement is not allowed in a SERIAL construct
+            stop 999
+        end if
+    end do
+    !$acc end serial
+    
 end program openacc_clause_validity
