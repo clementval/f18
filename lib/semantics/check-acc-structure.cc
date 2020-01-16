@@ -83,13 +83,35 @@ void AccStructureChecker::Enter(const parser::OpenACCBlockConstruct &x) {
     case parser::AccBlockDirective::Directive::HostData: {
       PushContextAndClause(beginDir.source, AccDirective::HOST_DATA);
     } break;
-    default:
-      // TODO others
-      break;
   }
 }
 
-void AccStructureChecker::Leave(const parser::OpenACCBlockConstruct &) {
+void AccStructureChecker::Leave(const parser::OpenACCBlockConstruct &x) {
+  const auto &beginBlockDir{std::get<parser::AccBeginBlockDirective>(x.t)};
+  const auto &beginDir{std::get<parser::AccBlockDirective>(beginBlockDir.t)};
+  switch (beginDir.v) {
+    case parser::AccBlockDirective::Directive::Parallel: {
+      // 843-844
+      CheckOnlyAllowedAfter(AccClause::DEVICE_TYPE, {AccClause::ASYNC,
+                                                     AccClause::WAIT,
+                                                     AccClause::NUM_GANGS,
+                                                     AccClause::NUM_WORKERS,
+                                                     AccClause::VECTOR_LENGTH});
+    } break;
+    case parser::AccBlockDirective::Directive::Data: {
+
+    } break;
+    case parser::AccBlockDirective::Directive::Kernels: {
+
+    } break;
+    case parser::AccBlockDirective::Directive::Serial: {
+
+    } break;
+    case parser::AccBlockDirective::Directive::HostData: {
+
+    } break;
+  }
+
   accContext_.pop_back();
 }
 
@@ -129,7 +151,6 @@ void AccStructureChecker::Enter(const parser::OpenACCCombinedConstruct &x) {
 void AccStructureChecker::Leave(const parser::OpenACCCombinedConstruct &) {
   accContext_.pop_back();
 }
-
 
 void AccStructureChecker::Enter(const parser::OpenACCStandaloneConstruct &x) {
   const auto &dir{std::get<parser::AccStandaloneDirective>(x.t)};
@@ -295,6 +316,23 @@ void AccStructureChecker::CheckAllowed(AccClause type) {
     }
   }
   SetContextClauseInfo(type);
+
+}
+
+void AccStructureChecker::CheckOnlyAllowedAfter(AccClause clause,
+    AccClauseSet set) {
+  bool enforceCheck = false;
+  for (auto cl : GetContext().actualClauses) {
+    if(cl == clause) {
+      enforceCheck = true;
+      continue;
+    } else if(enforceCheck && !set.test(cl)) {
+      context_.Say(GetContext().directiveSource,
+          "Clause %s is not allowed after clause %s on the %s directive"_err_en_US,
+          EnumToString(cl), EnumToString(clause),
+          EnumToString(GetContext().directive));
+    }
+  }
 }
 
 void AccStructureChecker::CheckRequired(AccClause type) {

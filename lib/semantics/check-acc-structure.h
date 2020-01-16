@@ -272,6 +272,7 @@ private:
 
     const parser::AccClause *clause{nullptr};
     std::multimap<AccClause, const parser::AccClause *> clauseInfo;
+    std::list<AccClause> actualClauses;
   };
 
   // back() is the top of the stack
@@ -287,6 +288,10 @@ private:
 
   void SetContextClauseInfo(AccClause type) {
     GetContext().clauseInfo.emplace(type, GetContext().clause);
+  }
+
+  void AddClauseToCrtContext(AccClause type) {
+    GetContext().actualClauses.push_back(type);
   }
 
   const parser::AccClause *FindClause(AccClause type) {
@@ -310,6 +315,9 @@ private:
     }
     return begin;
   }
+
+  // Check that only clauses in set are after the specific clauses.
+  void CheckOnlyAllowedAfter(AccClause clause, AccClauseSet set);
 
   void CheckAllowed(AccClause);
 
