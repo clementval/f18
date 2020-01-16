@@ -97,5 +97,5 @@ program openacc_clause_validity
         end if
     end do
     !$acc end serial
-    
+
 end program openacc_clause_validity

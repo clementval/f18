@@ -1,8 +1,11 @@
 ! OPTIONS: -fopenacc
 
-! Check OpenACC clause validity for the following directives:
-!
-!
+! Check OpenACC clause validity for the following construct and directive:
+!   2.6.5 Data
+!   2.5.1 Parallel
+!   2.5.2 Kernels
+!   2.5.3 Serial
+!   2.15.1 Routine
 
 program openacc_clause_validity
 
@@ -11,6 +14,10 @@ program openacc_clause_validity
   integer :: i
   integer :: N = 256
   real(8) :: a(256)
+
+  !ERROR: At least one of ATTACH, COPY, COPYIN, COPYOUT, DEFAULT, CREATE, DEVICEPTR, NO_CREATE, PRESENT clause must appear on the DATA directive
+  !$acc data
+  !$acc end data
 
   !$acc parallel device_type(*) num_gangs(2)
   !$acc loop
@@ -73,5 +80,13 @@ program openacc_clause_validity
     a(i) = 3.14
   end do
   !$acc end serial loop
+
+contains
+
+  subroutine sub1(a)
+    real :: a(:)
+    !ERROR: At least one of GANG, SEQ, VECTOR, WORKER clause must appear on the ROUTINE directive
+    !$acc routine
+  end subroutine sub1
 
 end program openacc_clause_validity

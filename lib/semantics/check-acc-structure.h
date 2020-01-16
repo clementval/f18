@@ -49,14 +49,16 @@ public:
   AccStructureChecker(SemanticsContext &context) : context_{context} {}
 
   // Construct and directives
-  void Enter(const parser::OpenACCConstruct &);
-  void Enter(const parser::OpenACCDeclarativeConstruct &);
-  void Enter(const parser::OpenACCStandaloneConstruct &);
-  void Leave(const parser::OpenACCStandaloneConstruct &);
   void Enter(const parser::OpenACCBlockConstruct &);
   void Leave(const parser::OpenACCBlockConstruct &);
+  void Enter(const parser::OpenACCConstruct &);
   void Enter(const parser::OpenACCCombinedConstruct &);
   void Leave(const parser::OpenACCCombinedConstruct &);
+  void Enter(const parser::OpenACCDeclarativeConstruct &);
+  void Enter(const parser::OpenACCRoutineConstruct &);
+  void Leave(const parser::OpenACCRoutineConstruct &);
+  void Enter(const parser::OpenACCStandaloneConstruct &);
+  void Leave(const parser::OpenACCStandaloneConstruct &);
   void Enter(const parser::OpenACCStandaloneDeclarativeConstruct &);
   void Leave(const parser::OpenACCStandaloneDeclarativeConstruct &);
 
@@ -319,6 +321,7 @@ private:
 
   // Check that only clauses in set are after the specific clauses.
   void CheckOnlyAllowedAfter(AccClause clause, AccClauseSet set);
+  void CheckAtLeastOneOf(const AccClauseSet set);
   void CheckAllowed(AccClause);
   void CheckRequired(AccClause);
   std::string ContextDirectiveAsFortran();
@@ -334,6 +337,8 @@ private:
 
   SemanticsContext &context_;
   std::vector<AccContext> accContext_;  // used as a stack
+
+  std::string ClauseSetToString(const AccClauseSet set);
 };
 
 }

@@ -30,7 +30,6 @@ void AccStructureChecker::Enter(const parser::AccClause::X &c) { \
 
 namespace Fortran::semantics {
 
-
 class NoBranchingEnforce {
 public:
   NoBranchingEnforce(SemanticsContext &context,
@@ -147,10 +146,15 @@ void AccStructureChecker::Leave(const parser::OpenACCBlockConstruct &x) {
       // Restriction - 916
       CheckNoBranching(block, AccDirective::SERIAL, beginDir.source);
     } break;
-    case parser::AccBlockDirective::Directive::HostData:
     case parser::AccBlockDirective::Directive::Data: {
-      // Any additional check on leave
+      // Restriction - 1117-1118
+      CheckAtLeastOneOf({AccClause::ATTACH, AccClause::COPY, AccClause::COPYIN,
+                         AccClause::COPYOUT, AccClause::CREATE,
+                         AccClause::DEFAULT, AccClause::DEVICEPTR,
+                         AccClause::NO_CREATE, AccClause::PRESENT});
     } break;
+    case parser::AccBlockDirective::Directive::HostData:
+    {} break;
   }
   accContext_.pop_back();
 }
@@ -253,6 +257,16 @@ void AccStructureChecker::Enter(const parser::OpenACCStandaloneConstruct &x) {
 }
 
 void AccStructureChecker::Leave(const parser::OpenACCStandaloneConstruct &) {
+  accContext_.pop_back();
+}
+
+void AccStructureChecker::Enter(const parser::OpenACCRoutineConstruct &x) {
+  PushContextAndClause(x.source, AccDirective::ROUTINE);
+}
+void AccStructureChecker::Leave(const parser::OpenACCRoutineConstruct &) {
+  // Restriction - 2409
+  CheckAtLeastOneOf({AccClause::GANG, AccClause::SEQ, AccClause::VECTOR,
+                     AccClause::WORKER});
   accContext_.pop_back();
 }
 
@@ -406,6 +420,18 @@ void AccStructureChecker::CheckOnlyAllowedAfter(AccClause clause,
   }
 }
 
+void AccStructureChecker::CheckAtLeastOneOf(const AccClauseSet set) {
+  for (auto cl : GetContext().actualClauses) {
+    if(set.test(cl))
+      return;
+  }
+  // No clause matched in the actual clauses list
+  context_.Say(GetContext().directiveSource,
+      "At least one of %s clause must appear on the %s directive"_err_en_US,
+      ClauseSetToString(set),
+      ContextDirectiveAsFortran());
+}
+
 void AccStructureChecker::CheckRequired(AccClause type) {
   if (!FindClause(type)) {
     context_.Say(GetContext().directiveSource,
@@ -434,6 +460,16 @@ void AccStructureChecker::OptionalConstantPositiveParameter(
   if(o != std::nullopt) {
     RequiresConstantPositiveParameter(clause, o.value());
   }
+}
+
+std::string AccStructureChecker::ClauseSetToString(const AccClauseSet set) {
+  std::string list;
+  set.IterateOverMembers([&](AccClause o) {
+      if(!list.empty())
+        list.append(", ");
+      list.append(EnumToString(o));
+  });
+  return list;
 }
 
 void AccStructureChecker::SayNotMatching(
