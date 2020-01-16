@@ -15,6 +15,9 @@ program openacc_clause_validity
   integer :: N = 256
   real(8) :: a(256)
 
+  !ERROR: At least one of ATTACH, COPY, COPYIN, COPYOUT, DEFAULT, CREATE, DEVICEPTR, NO_CREATE, PRESENT clause must appear on the ENTER DATA directive
+  !$acc enter data
+
   !ERROR: At least one of ATTACH, COPY, COPYIN, COPYOUT, DEFAULT, CREATE, DEVICEPTR, NO_CREATE, PRESENT clause must appear on the DATA directive
   !$acc data
   !$acc end data

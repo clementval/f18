@@ -256,7 +256,19 @@ void AccStructureChecker::Enter(const parser::OpenACCStandaloneConstruct &x) {
   }
 }
 
-void AccStructureChecker::Leave(const parser::OpenACCStandaloneConstruct &) {
+void AccStructureChecker::Leave(const parser::OpenACCStandaloneConstruct &x) {
+  const auto &dir{std::get<parser::AccStandaloneDirective>(x.t)};
+  switch (dir.v) {
+    case parser::AccStandaloneDirective::Directive::EnterData: {
+      // Restriction - 1117-1118
+      CheckAtLeastOneOf({AccClause::ATTACH, AccClause::COPY, AccClause::COPYIN,
+                         AccClause::COPYOUT, AccClause::CREATE,
+                         AccClause::DEFAULT, AccClause::DEVICEPTR,
+                         AccClause::NO_CREATE, AccClause::PRESENT});
+    } break;
+    default: {}
+      break;
+  }
   accContext_.pop_back();
 }
 
