@@ -17,6 +17,8 @@
 #include "../parser/parse-tree.h"
 #include <unordered_map>
 
+
+
 #define CHECK_SIMPLE_CLAUSE(X, Y) \
 void AccStructureChecker::Enter(const parser::AccClause::X &) { \
   CheckAllowed(AccClause::Y); \
@@ -29,6 +31,14 @@ void AccStructureChecker::Enter(const parser::AccClause::X &c) { \
 }
 
 namespace Fortran::semantics {
+
+static constexpr inline AccClauseSet dataAtLeastOneOfClauses{AccClause::ATTACH,
+    AccClause::COPY, AccClause::COPYIN, AccClause::COPYOUT, AccClause::CREATE,
+    AccClause::DEFAULT, AccClause::DEVICEPTR, AccClause::NO_CREATE,
+    AccClause::PRESENT};
+
+static constexpr inline AccClauseSet routineAtLeastOneOfClauses{AccClause::GANG,
+    AccClause::SEQ, AccClause::VECTOR, AccClause::WORKER}
 
 class NoBranchingEnforce {
 public:
@@ -148,10 +158,7 @@ void AccStructureChecker::Leave(const parser::OpenACCBlockConstruct &x) {
     } break;
     case parser::AccBlockDirective::Directive::Data: {
       // Restriction - 1117-1118
-      CheckAtLeastOneOf({AccClause::ATTACH, AccClause::COPY, AccClause::COPYIN,
-                         AccClause::COPYOUT, AccClause::CREATE,
-                         AccClause::DEFAULT, AccClause::DEVICEPTR,
-                         AccClause::NO_CREATE, AccClause::PRESENT});
+      CheckAtLeastOneOf(dataAtLeastOneOfClauses);
     } break;
     case parser::AccBlockDirective::Directive::HostData:
     {} break;
@@ -261,10 +268,7 @@ void AccStructureChecker::Leave(const parser::OpenACCStandaloneConstruct &x) {
   switch (dir.v) {
     case parser::AccStandaloneDirective::Directive::EnterData: {
       // Restriction - 1117-1118
-      CheckAtLeastOneOf({AccClause::ATTACH, AccClause::COPY, AccClause::COPYIN,
-                         AccClause::COPYOUT, AccClause::CREATE,
-                         AccClause::DEFAULT, AccClause::DEVICEPTR,
-                         AccClause::NO_CREATE, AccClause::PRESENT});
+      CheckAtLeastOneOf(dataAtLeastOneOfClauses);
     } break;
     default: {}
       break;
@@ -277,8 +281,7 @@ void AccStructureChecker::Enter(const parser::OpenACCRoutineConstruct &x) {
 }
 void AccStructureChecker::Leave(const parser::OpenACCRoutineConstruct &) {
   // Restriction - 2409
-  CheckAtLeastOneOf({AccClause::GANG, AccClause::SEQ, AccClause::VECTOR,
-                     AccClause::WORKER});
+  CheckAtLeastOneOf(routineAtLeastOneOfClauses);
   accContext_.pop_back();
 }
 
