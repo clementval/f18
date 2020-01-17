@@ -13,10 +13,19 @@ program openacc_clause_validity
 
   integer :: i
   integer :: N = 256
+  !ERROR: At least one clause is required on the DECLARE directive
+  !$acc declare
   real(8) :: a(256)
 
-  !ERROR: At least one of ATTACH, COPY, COPYIN, COPYOUT, DEFAULT, CREATE, DEVICEPTR, NO_CREATE, PRESENT clause must appear on the ENTER DATA directive
+  !ERROR: At least one of ATTACH, COPYIN, CREATE clause must appear on the ENTER DATA directive
   !$acc enter data
+
+  !ERROR: At least one of USE_DEVICE clause must appear on the HOST_DATA directive
+  !$acc host_data
+  !$acc end host_data
+
+  !ERROR: At least one of DEFAULT_ASYNC, DEVICE_NUM, DEVICE_TYPE clause must appear on the SET directive
+  !$acc set
 
   !ERROR: At least one of ATTACH, COPY, COPYIN, COPYOUT, DEFAULT, CREATE, DEVICEPTR, NO_CREATE, PRESENT clause must appear on the DATA directive
   !$acc data

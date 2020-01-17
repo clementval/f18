@@ -126,12 +126,12 @@ private:
       {AccDirective::CACHE, { // 2.10
         {},{},{},{}}},
       {AccDirective::DATA, { // 2.6.5
-        {AccClause::ATTACH, AccClause::COPY, AccClause::COPYIN,
-         AccClause::COPYOUT, AccClause::CREATE, AccClause::DEVICEPTR,
-         AccClause::NO_CREATE, AccClause::PRESENT},
-        {AccClause::DEFAULT, AccClause::IF},
         {},
-        {}}},
+        {AccClause::IF},
+        {},
+        {AccClause::ATTACH, AccClause::COPY, AccClause::COPYIN,
+         AccClause::COPYOUT, AccClause::CREATE, AccClause::DEFAULT,
+         AccClause::DEVICEPTR, AccClause::NO_CREATE, AccClause::PRESENT}}},
       {AccDirective::DECLARE, { // 2.13
         {AccClause::COPY, AccClause::COPYIN, AccClause::COPYOUT,
          AccClause::CREATE, AccClause::PRESENT, AccClause::DEVICEPTR,
@@ -213,9 +213,9 @@ private:
       {AccDirective::ROUTINE, { // 2.15.1
         {},
         {AccClause::BIND, AccClause::DEVICE_TYPE, AccClause::NOHOST},
+        {},
         {AccClause::GANG, AccClause::SEQ, AccClause::VECTOR,
-         AccClause::WORKER},
-        {}}},
+         AccClause::WORKER}}},
       {AccDirective::SERIAL, { // 2.5.3
         {AccClause::ATTACH, AccClause::COPY, AccClause::COPYIN,
          AccClause::COPYOUT, AccClause::CREATE, AccClause::DEVICEPTR,
@@ -239,10 +239,10 @@ private:
         {}}},
       {AccDirective::SET, { // 2.14.3
         {},
-        {AccClause::DEFAULT_ASYNC, AccClause::DEVICE_NUM,
-         AccClause::DEVICE_TYPE, AccClause::IF},
+        {AccClause::IF},
         {},
-        {}}},
+        {AccClause::DEFAULT_ASYNC, AccClause::DEVICE_NUM,
+         AccClause::DEVICE_TYPE}}},
       {AccDirective::SHUTDOWN, { // 2.14.2
         {},
         {AccClause::DEVICE_NUM, AccClause::DEVICE_TYPE, AccClause::IF},
@@ -270,7 +270,7 @@ private:
     AccClauseSet allowedClauses{};
     AccClauseSet allowedOnceClauses{};
     AccClauseSet allowedExclusiveClauses{};
-    AccClauseSet requiredClauses{};
+    AccClauseSet requiredOneOfClauses{};
 
     const parser::AccClause *clause{nullptr};
     std::multimap<AccClause, const parser::AccClause *> clauseInfo;
@@ -321,9 +321,9 @@ private:
 
   // Check that only clauses in set are after the specific clauses.
   void CheckOnlyAllowedAfter(AccClause clause, AccClauseSet set);
-  void CheckAtLeastOneOf(const AccClauseSet set);
+  void CheckRequireAtLeastOneOf();
   void CheckAllowed(AccClause);
-  void CheckRequired(AccClause);
+  void CheckAtLeastOneClause();
   std::string ContextDirectiveAsFortran();
 
   void CheckNoBranching(const parser::Block &block,
