@@ -54,6 +54,10 @@ program openacc_clause_validity
   !$acc data
   !$acc end data
 
+  !$acc data copyin(i)
+  !ERROR: Unmatched END PARALLEL directive
+  !$acc end parallel
+
   !$acc update device(i) device_type(*) async
 
   !ERROR: Clause IF is not allowed after clause DEVICE_TYPE on the UPDATE directive
