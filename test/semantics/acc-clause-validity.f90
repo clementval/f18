@@ -125,4 +125,10 @@ contains
     !$acc routine
   end subroutine sub1
 
+  subroutine sub2(a)
+    real :: a(:)
+    !ERROR: Clause NOHOST is not allowed after clause DEVICE_TYPE on the ROUTINE directive
+    !$acc routine seq device_type(*) nohost
+  end subroutine sub2
+
 end program openacc_clause_validity

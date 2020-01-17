@@ -41,11 +41,15 @@ static constexpr inline AccClauseSet serialOnlyAllowedAfterDeviceTypeClauses{
     AccClause::ASYNC, AccClause::WAIT};
 
 static constexpr inline AccClauseSet loopOnlyAllowedAfterDeviceTypeClauses{
-  AccClause::AUTO, AccClause::COLLAPSE, AccClause::INDEPENDENT, AccClause::GANG,
-  AccClause::SEQ, AccClause::TILE, AccClause::VECTOR, AccClause::WORKER};
+    AccClause::AUTO, AccClause::COLLAPSE, AccClause::INDEPENDENT,
+    AccClause::GANG, AccClause::SEQ, AccClause::TILE, AccClause::VECTOR,
+    AccClause::WORKER};
 
 static constexpr inline AccClauseSet updateOnlyAllowedAfterDeviceTypeClauses{
     AccClause::ASYNC, AccClause::WAIT};
+
+static constexpr inline AccClauseSet routineOnlyAllowedAfterDeviceTypeClauses{
+    AccClause::BIND, AccClause::GANG, AccClause::VECTOR, AccClause::WORKER};
 
 class NoBranchingEnforce {
 public:
@@ -307,6 +311,9 @@ void AccStructureChecker::Enter(const parser::OpenACCRoutineConstruct &x) {
 void AccStructureChecker::Leave(const parser::OpenACCRoutineConstruct &) {
   // Restriction - 2409
   CheckRequireAtLeastOneOf();
+  // Restriction - 2407-2408
+  CheckOnlyAllowedAfter(AccClause::DEVICE_TYPE,
+      routineOnlyAllowedAfterDeviceTypeClauses);
   accContext_.pop_back();
 }
 
