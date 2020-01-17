@@ -34,6 +34,11 @@ program openacc_clause_validity
   !$acc data
   !$acc end data
 
+  !$acc update device(i) device_type(*) async
+
+  !ERROR: Clause IF is not allowed after clause DEVICE_TYPE on the UPDATE directive
+  !$acc update device(i) device_type(*) if(.TRUE.)
+
   !$acc parallel device_type(*) num_gangs(2)
   !$acc loop
   do i = 1, N
