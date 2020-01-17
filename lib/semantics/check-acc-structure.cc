@@ -40,6 +40,10 @@ static constexpr inline AccClauseSet
 static constexpr inline AccClauseSet serialOnlyAllowedAfterDeviceTypeClauses{
     AccClause::ASYNC, AccClause::WAIT};
 
+static constexpr inline AccClauseSet loopOnlyAllowedAfterDeviceTypeClauses{
+  AccClause::AUTO, AccClause::COLLAPSE, AccClause::INDEPENDENT, AccClause::GANG,
+  AccClause::SEQ, AccClause::TILE, AccClause::VECTOR, AccClause::WORKER};
+
 class NoBranchingEnforce {
 public:
   NoBranchingEnforce(SemanticsContext &context,
@@ -274,6 +278,10 @@ void AccStructureChecker::Leave(const parser::OpenACCStandaloneConstruct &x) {
     // Restriction - 2254
     case parser::AccStandaloneDirective::Directive::Set: {
       CheckRequireAtLeastOneOf();
+    } break;
+    case parser::AccStandaloneDirective::Directive::Loop: {
+      CheckOnlyAllowedAfter(AccClause::DEVICE_TYPE,
+          loopOnlyAllowedAfterDeviceTypeClauses);
     } break;
     default: {}
       break;

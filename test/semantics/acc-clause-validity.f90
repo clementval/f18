@@ -41,6 +41,14 @@ program openacc_clause_validity
   end do
   !$acc end parallel
 
+  !$acc parallel
+  !ERROR: Clause PRIVATE is not allowed after clause DEVICE_TYPE on the LOOP directive
+  !$acc loop device_type(*) private(i)
+  do i = 1, N
+    a(i) = 3.14
+  end do
+  !$acc end parallel
+
   !ERROR: Clause IF is not allowed after clause DEVICE_TYPE on the PARALLEL directive
   !$acc parallel device_type(*) if(.TRUE.)
   !$acc loop
