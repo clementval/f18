@@ -20,6 +20,9 @@ program openacc_clause_validity
   !ERROR: At least one of ATTACH, COPYIN, CREATE clause must appear on the ENTER DATA directive
   !$acc enter data
 
+  !ERROR: At least one of COPYOUT, DELETE, DETACH clause must appear on the EXIT DATA directive
+  !$acc exit data
+
   !ERROR: At least one of USE_DEVICE clause must appear on the HOST_DATA directive
   !$acc host_data
   !$acc end host_data

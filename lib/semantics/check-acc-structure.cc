@@ -269,6 +269,8 @@ void AccStructureChecker::Leave(const parser::OpenACCStandaloneConstruct &x) {
   switch (dir.v) {
     // Restriction - 1117-1118
     case parser::AccStandaloneDirective::Directive::EnterData:
+    // Restriction - 1161-1162
+    case parser::AccStandaloneDirective::Directive::ExitData:
     // Restriction - 2254
     case parser::AccStandaloneDirective::Directive::Set: {
       CheckRequireAtLeastOneOf();
