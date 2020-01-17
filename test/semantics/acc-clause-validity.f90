@@ -6,12 +6,15 @@
 !   2.5.2 Kernels
 !   2.5.3 Serial
 !   2.15.1 Routine
+!   2.11 Parallel Loop
+!   2.11 Kernels Loop
+!   2.11 Serial Loop
 
 program openacc_clause_validity
 
   implicit none
 
-  integer :: i
+  integer :: i, j
   integer :: N = 256
   !ERROR: At least one clause is required on the DECLARE directive
   !$acc declare
@@ -19,6 +22,23 @@ program openacc_clause_validity
 
   !ERROR: At least one of ATTACH, COPYIN, CREATE clause must appear on the ENTER DATA directive
   !$acc enter data
+
+  !ERROR: Only the READONLY modifier is allowed for the COPYIN clause on the ENTER DATA directive
+  !$acc enter data copyin(zero: i)
+
+  !ERROR: Only the ZERO modifier is allowed for the CREATE clause on the ENTER DATA directive
+  !$acc enter data create(readonly: i)
+
+  !ERROR: Only the ZERO modifier is allowed for the COPYOUT clause on the DATA directive
+  !$acc data copyout(readonly: i)
+  !$acc end data
+
+  !ERROR: COPYOUT clause is not allowed on the ENTER DATA directive
+  !$acc enter data copyin(i) copyout(i)
+
+  !ERROR: At most one IF clause can appear on the DATA directive
+  !$acc data copy(i) if(.true.) if(.true.)
+  !$acc end data
 
   !ERROR: At least one of COPYOUT, DELETE, DETACH clause must appear on the EXIT DATA directive
   !$acc exit data
@@ -39,10 +59,28 @@ program openacc_clause_validity
   !ERROR: Clause IF is not allowed after clause DEVICE_TYPE on the UPDATE directive
   !$acc update device(i) device_type(*) if(.TRUE.)
 
+  !$acc parallel
+  !ERROR: INDEPENDENT and SEQ clauses are mutually exclusive and may not appear on the same LOOP directive
+  !$acc loop seq independent
+  do i = 1, N
+    a(i) = 3.14
+  end do
+  !$acc end parallel
+
   !$acc parallel device_type(*) num_gangs(2)
   !$acc loop
   do i = 1, N
     a(i) = 3.14
+  end do
+  !$acc end parallel
+
+  !$acc parallel
+  !ERROR: The parameter of the COLLAPSE clause on the LOOP directive must be a constant positive integer expression
+  !$acc loop collapse(-1)
+  do i = 1, N
+    do j = 1, N
+      a(i) = 3.14 + j
+    end do
   end do
   !$acc end parallel
 
@@ -116,6 +154,8 @@ program openacc_clause_validity
     a(i) = 3.14
   end do
   !$acc end serial loop
+
+
 
 contains
 

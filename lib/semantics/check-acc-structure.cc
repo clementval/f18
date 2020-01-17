@@ -102,12 +102,10 @@ void AccStructureChecker::PushContextAndClause(const parser::CharBlock &source,
 
 void AccStructureChecker::Enter(const parser::OpenACCConstruct &) {
   return;
-  // TODO
 }
 
 void AccStructureChecker::Enter(const parser::OpenACCDeclarativeConstruct &) {
   return;
-  // TODO
 }
 
 void AccStructureChecker::Enter(const parser::AccClause &x) {
@@ -196,7 +194,8 @@ void AccStructureChecker::Enter(
 void AccStructureChecker::Leave(
     const parser::OpenACCStandaloneDeclarativeConstruct &)
 {
-  CheckAtLeastOneClause(); // Restriction - 2075
+  // Restriction - 2075
+  CheckAtLeastOneClause();
   accContext_.pop_back();
 }
 
@@ -220,16 +219,18 @@ void AccStructureChecker::Leave(const parser::OpenACCCombinedConstruct &x) {
   const auto &beginBlockDir{std::get<parser::AccBeginCombinedDirective>(x.t)};
   const auto &beginDir{std::get<parser::AccCombinedDirective>(beginBlockDir.t)};
   switch (beginDir.v) {
-    case parser::AccCombinedDirective::Directive::KernelsLoop: // 1962 (880-881)
-    case parser::AccCombinedDirective::Directive::ParallelLoop: // 1962 (843-844)
-    {
+    case parser::AccCombinedDirective::Directive::KernelsLoop:
+    case parser::AccCombinedDirective::Directive::ParallelLoop: {
+      // Restriction - 1962 -> (880-881) (KERNELS LOOP)
+      // Restriction - 1962 -> (843-844) (PARALLEL LOOP)
       CheckOnlyAllowedAfter(AccClause::DEVICE_TYPE, {AccClause::ASYNC,
                                                      AccClause::WAIT,
                                                      AccClause::NUM_GANGS,
                                                      AccClause::NUM_WORKERS,
                                                      AccClause::VECTOR_LENGTH});
     } break;
-    case parser::AccCombinedDirective::Directive::SerialLoop: { // 1962 (919)
+    case parser::AccCombinedDirective::Directive::SerialLoop: {
+      // Restriction - 1962 -> (919) (SERIAL LOOP)
       CheckOnlyAllowedAfter(AccClause::DEVICE_TYPE, {AccClause::ASYNC,
                                                      AccClause::WAIT});
     } break;
@@ -278,12 +279,12 @@ void AccStructureChecker::Enter(const parser::OpenACCStandaloneConstruct &x) {
 void AccStructureChecker::Leave(const parser::OpenACCStandaloneConstruct &x) {
   const auto &dir{std::get<parser::AccStandaloneDirective>(x.t)};
   switch (dir.v) {
-    // Restriction - 1117-1118
     case parser::AccStandaloneDirective::Directive::EnterData:
-    // Restriction - 1161-1162
     case parser::AccStandaloneDirective::Directive::ExitData:
-    // Restriction - 2254
     case parser::AccStandaloneDirective::Directive::Set: {
+      // Restriction - 1117-1118 (ENTER DATA)
+      // Restriction - 1161-1162 (EXIT DATA)
+      // Restriction - 2254 (SET)
       CheckRequireAtLeastOneOf();
     } break;
     case parser::AccStandaloneDirective::Directive::Loop: {
@@ -369,9 +370,9 @@ void AccStructureChecker::Enter(const parser::AccClause::Create &c) {
   {
     if(modifier->v != parser::AccDataModifier::Modifier::Zero) {
       context_.Say(GetContext().clauseSource,
-          "Only the ZERO modifier is permitted for the CREATE clause "
-          "on the %s directive "_err_en_US,
-          EnumToString(GetContext().directive));
+          "Only the ZERO modifier is allowed for the %s clause "
+          "on the %s directive"_err_en_US, EnumToString(AccClause::CREATE),
+          ContextDirectiveAsFortran());
     }
   }
 }
@@ -385,9 +386,8 @@ void AccStructureChecker::Enter(const parser::AccClause::Copyin &c) {
     if(modifier->v != parser::AccDataModifier::Modifier::ReadOnly) {
       context_.Say(GetContext().clauseSource,
           "Only the READONLY modifier is allowed for the %s clause "
-          "on the %s directive"_err_en_US,
-          EnumToString(AccClause::COPYIN),
-          EnumToString(GetContext().directive));
+          "on the %s directive"_err_en_US, EnumToString(AccClause::COPYIN),
+          ContextDirectiveAsFortran());
     }
   }
 }
@@ -400,9 +400,9 @@ void AccStructureChecker::Enter(const parser::AccClause::Copyout &c) {
   {
     if(modifier->v != parser::AccDataModifier::Modifier::Zero) {
       context_.Say(GetContext().clauseSource,
-          "Only the ZERO modifier is allowed for the COPYOUT clause "
-          "on the %s directive"_err_en_US,
-          EnumToString(GetContext().directive));
+          "Only the ZERO modifier is allowed for the %s clause "
+          "on the %s directive"_err_en_US, EnumToString(AccClause::COPYOUT),
+          ContextDirectiveAsFortran());
     }
   }
 }
@@ -438,7 +438,7 @@ void AccStructureChecker::CheckAllowed(AccClause type) {
     });
     for (const auto &e : others) {
       context_.Say(GetContext().clauseSource,
-          "%s and %s are mutually exclusive and may not appear on the "
+          "%s and %s clauses are mutually exclusive and may not appear on the "
           "same %s directive"_err_en_US, EnumToString(type), EnumToString(e),
           parser::ToUpperCaseLetters(GetContext().directiveSource.ToString()));
     }
@@ -460,7 +460,8 @@ void AccStructureChecker::CheckOnlyAllowedAfter(AccClause clause,
     } else if(enforceCheck && !set.test(cl)) {
       auto parserClause = GetContext().clauseInfo.find(cl);
       context_.Say(parserClause->second->source,
-          "Clause %s is not allowed after clause %s on the %s directive"_err_en_US,
+          "Clause %s is not allowed after clause %s on the %s "
+          "directive"_err_en_US,
           EnumToString(cl), EnumToString(clause),
           ContextDirectiveAsFortran());
     }
@@ -516,9 +517,9 @@ void AccStructureChecker::RequiresConstantPositiveParameter(
   if (const auto v{GetIntValue(i)}) {
     if (*v <= 0) {
       context_.Say(GetContext().clauseSource,
-          "The parameter of the %s clause must be "
+          "The parameter of the %s clause on the %s directive must be "
           "a constant positive integer expression"_err_en_US,
-          EnumToString(clause));
+          EnumToString(clause), ContextDirectiveAsFortran());
     }
   }
 }
