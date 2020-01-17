@@ -280,8 +280,12 @@ void AccStructureChecker::Leave(const parser::OpenACCStandaloneConstruct &x) {
       CheckRequireAtLeastOneOf();
     } break;
     case parser::AccStandaloneDirective::Directive::Loop: {
+      // Restriction - 1615-1616
       CheckOnlyAllowedAfter(AccClause::DEVICE_TYPE,
           loopOnlyAllowedAfterDeviceTypeClauses);
+      // Restriction - 1622
+      CheckNotAllowedIfClause(AccClause::SEQ, {AccClause::GANG,
+          AccClause::VECTOR, AccClause::WORKER});if
     } break;
     default: {}
       break;
@@ -465,6 +469,28 @@ void AccStructureChecker::CheckAtLeastOneClause() {
     context_.Say(GetContext().directiveSource,
         "At least one clause is required on the %s directive"_err_en_US,
         ContextDirectiveAsFortran());
+  }
+}
+
+/**
+ * Enforce restriction where clauses in the given set are not allowed if the
+ * given clause appears.
+ */
+void AccStructureChecker::CheckNotAllowedIfClause(AccClause clause,
+    AccClauseSet set) {
+  if(std::find(GetContext().actualClauses.begin(),
+      GetContext().actualClauses.end(), clause) ==
+      GetContext().actualClauses.end()) {
+    return; // Clause is not present
+  }
+
+  for (auto cl : GetContext().actualClauses) {
+    if(set.test(cl)) {
+      context_.Say(GetContext().directiveSource,
+          "Clause %s is not allowed if clause %s appears on the %s directive"_err_en_US,
+          EnumToString(cl), EnumToString(clause),
+          ContextDirectiveAsFortran());
+    }
   }
 }
 

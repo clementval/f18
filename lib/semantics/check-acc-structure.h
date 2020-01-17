@@ -324,6 +324,7 @@ private:
   void CheckRequireAtLeastOneOf();
   void CheckAllowed(AccClause);
   void CheckAtLeastOneClause();
+  void CheckNotAllowedIfClause(AccClause clause, AccClauseSet set);
   std::string ContextDirectiveAsFortran();
 
   void CheckNoBranching(const parser::Block &block,

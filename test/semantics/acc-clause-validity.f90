@@ -49,6 +49,14 @@ program openacc_clause_validity
   end do
   !$acc end parallel
 
+  !$acc parallel
+  !ERROR: Clause GANG is not allowed if clause SEQ appears on the LOOP directive
+  !$acc loop gang seq
+  do i = 1, N
+    a(i) = 3.14
+  end do
+  !$acc end parallel
+
   !ERROR: Clause IF is not allowed after clause DEVICE_TYPE on the PARALLEL directive
   !$acc parallel device_type(*) if(.TRUE.)
   !$acc loop
