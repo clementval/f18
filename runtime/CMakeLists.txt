@@ -4,16 +4,33 @@
 # See https://llvm.org/LICENSE.txt for license information.
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
-#------------------------------------------------------------------------------#
+#===------------------------------------------------------------------------===#
 
 add_library(FortranRuntime
-  ISO_Fortran_binding.cc
-  derived-type.cc
-  descriptor.cc
-  transformational.cc
-  type-code.cc
+  ISO_Fortran_binding.cpp
+  buffer.cpp
+  connection.cpp
+  derived-type.cpp
+  descriptor.cpp
+  environment.cpp
+  file.cpp
+  format.cpp
+  internal-unit.cpp
+  io-api.cpp
+  io-error.cpp
+  io-stmt.cpp
+  main.cpp
+  memory.cpp
+  numeric-output.cpp
+  stop.cpp
+  terminator.cpp
+  tools.cpp
+  transformational.cpp
+  type-code.cpp
+  unit.cpp
 )
 
 target_link_libraries(FortranRuntime
-  FortranEvaluate
+  FortranCommon
+  FortranDecimal
 )

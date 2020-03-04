@@ -4,7 +4,7 @@
 // See https://llvm.org/LICENSE.txt for license information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-//----------------------------------------------------------------------------//
+//===----------------------------------------------------------------------===//
 
 #ifndef FORTRAN_RUNTIME_DESCRIPTOR_H_
 #define FORTRAN_RUNTIME_DESCRIPTOR_H_
@@ -20,7 +20,7 @@
 
 #include "derived-type.h"
 #include "type-code.h"
-#include "../include/flang/ISO_Fortran_binding.h"
+#include "flang/ISO_Fortran_binding.h"
 #include <cassert>
 #include <cinttypes>
 #include <cstddef>
@@ -125,6 +125,7 @@ public:
     raw_.base_addr = nullptr;
     raw_.f18Addendum = false;
   }
+  Descriptor(const Descriptor &);
 
   ~Descriptor();
 

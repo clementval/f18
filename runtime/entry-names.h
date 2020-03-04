@@ -4,7 +4,7 @@
 // See https://llvm.org/LICENSE.txt for license information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-//----------------------------------------------------------------------------//
+//===----------------------------------------------------------------------===//
 
 // Defines the macro RTNAME(n) which decorates the external name of a runtime
 // library function or object with extra characters so that it
@@ -16,7 +16,7 @@
 // runtime library must change in some way that breaks backward compatibility.
 
 #ifndef RTNAME
-#define PREFIX _Fortran
-#define REVISION A
-#define RTNAME(name) PREFIX##REVISION##name
+#define NAME_WITH_PREFIX_AND_REVISION(prefix, revision, name) \
+  prefix##revision##name
+#define RTNAME(name) NAME_WITH_PREFIX_AND_REVISION(_Fortran, A, name)
 #endif

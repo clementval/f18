@@ -4,7 +4,7 @@
  * See https://llvm.org/LICENSE.txt for license information.
  * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
  *
- * -----------------------------------------------------------------------------
+ * ===-----------------------------------------------------------------------===
  */
 
 #ifndef CFI_ISO_FORTRAN_BINDING_H_
@@ -30,8 +30,9 @@ inline namespace Fortran_2018 {
 #define CFI_MAX_RANK 15
 typedef unsigned char CFI_rank_t;
 
-// This type is probably larger than a default Fortran INTEGER
-// and should be used for all array indexing and loop bound calculations.
+/* This type is probably larger than a default Fortran INTEGER
+ * and should be used for all array indexing and loop bound calculations.
+ */
 typedef ptrdiff_t CFI_index_t;
 
 typedef unsigned char CFI_attribute_t;

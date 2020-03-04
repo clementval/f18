@@ -4,8 +4,9 @@
 # See https://llvm.org/LICENSE.txt for license information.
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
-#------------------------------------------------------------------------------#
+#===------------------------------------------------------------------------===#
 
-add_subdirectory(decimal)
-add_subdirectory(evaluate)
-add_subdirectory(semantics)
+add_subdirectory(Decimal)
+add_subdirectory(Evaluate)
+add_subdirectory(Runtime)
+add_subdirectory(Semantics)

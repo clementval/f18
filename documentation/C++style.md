@@ -36,7 +36,7 @@ unless they introduce ambiguity.
 
 ### Files
 1. File names should use dashes, not underscores.  C++ sources have the
-extension ".cc", not ".C" or ".cpp" or ".cxx".  Don't create needless
+extension ".cpp", not ".C" or ".cc" or ".cxx".  Don't create needless
 source directory hierarchies.
 1. Header files should be idempotent.  Use the usual technique:
 ```
@@ -46,11 +46,11 @@ source directory hierarchies.
 #endif  // FORTRAN_header_H_
 ```
 1. `#include` every header defining an entity that your project header or source
-file actually uses directly.  (Exception: when foo.cc starts, as it should,
+file actually uses directly.  (Exception: when foo.cpp starts, as it should,
 with `#include "foo.h"`, and foo.h includes bar.h in order to define the
 interface to the module foo, you don't have to redundantly `#include "bar.h"`
-in foo.cc.)
-1. In the source file "foo.cc", put its corresponding `#include "foo.h"`
+in foo.cpp.)
+1. In the source file "foo.cpp", put its corresponding `#include "foo.h"`
 first in the sequence of inclusions.
 Then `#include` other project headers in alphabetic order; then C++ standard
 headers, also alphabetically; then C and system headers.
@@ -219,7 +219,7 @@ or assignments should exist for a class, explicitly `=delete` all of them.
 There are many -- perhaps too many -- means of indirect addressing
 data in this project.
 Some of these are standard C++ language and library features,
-while others are local inventions in `lib/common`:
+while others are local inventions in `lib/Common`:
 * Bare pointers (`Foo *p`): these are obviously nullable, non-owning,
 undefined when uninitialized, shallowly copyable, reassignable, and often
 not the right abstraction to use in this project.

@@ -4,7 +4,7 @@
 // See https://llvm.org/LICENSE.txt for license information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-//----------------------------------------------------------------------------//
+//===----------------------------------------------------------------------===//
 
 // Defines API between compiled code and I/O runtime library.
 
@@ -19,7 +19,7 @@
 namespace Fortran::runtime {
 class Descriptor;
 class NamelistGroup;
-};
+}
 
 namespace Fortran::runtime::io {
 
@@ -51,8 +51,7 @@ constexpr std::size_t RecommendedInternalIoScratchAreaBytes(
 }
 
 // Internal I/O to/from character arrays &/or non-default-kind character
-// requires a descriptor, which must remain unchanged until the I/O
-// statement is complete.
+// requires a descriptor, which is copied.
 Cookie IONAME(BeginInternalArrayListOutput)(const Descriptor &,
     void **scratchArea = nullptr, std::size_t scratchBytes = 0,
     const char *sourceFile = nullptr, int sourceLine = 0);
@@ -60,30 +59,32 @@ Cookie IONAME(BeginInternalArrayListInput)(const Descriptor &,
     void **scratchArea = nullptr, std::size_t scratchBytes = 0,
     const char *sourceFile = nullptr, int sourceLine = 0);
 Cookie IONAME(BeginInternalArrayFormattedOutput)(const Descriptor &,
-    const char *format, std::size_t formatBytes, void **scratchArea = nullptr,
+    const char *format, std::size_t formatLength, void **scratchArea = nullptr,
     std::size_t scratchBytes = 0, const char *sourceFile = nullptr,
     int sourceLine = 0);
 Cookie IONAME(BeginInternalArrayFormattedInput)(const Descriptor &,
-    const char *format, std::size_t formatBytes, void **scratchArea = nullptr,
+    const char *format, std::size_t formatLength, void **scratchArea = nullptr,
     std::size_t scratchBytes = 0, const char *sourceFile = nullptr,
     int sourceLine = 0);
 
 // Internal I/O to/from a default-kind character scalar can avoid a
 // descriptor.
-Cookie IONAME(BeginInternalListOutput)(char *internal, std::size_t bytes,
-    void **scratchArea = nullptr, std::size_t scratchBytes = 0,
-    const char *sourceFile = nullptr, int sourceLine = 0);
-Cookie IONAME(BeginInternalListInput)(char *internal, std::size_t bytes,
-    void **scratchArea = nullptr, std::size_t scratchBytes = 0,
-    const char *sourceFile = nullptr, int sourceLine = 0);
-Cookie IONAME(BeginInternalFormattedOutput)(char *internal, std::size_t bytes,
-    const char *format, std::size_t formatBytes, void **scratchArea = nullptr,
+Cookie IONAME(BeginInternalListOutput)(char *internal,
+    std::size_t internalLength, void **scratchArea = nullptr,
     std::size_t scratchBytes = 0, const char *sourceFile = nullptr,
     int sourceLine = 0);
-Cookie IONAME(BeginInternalFormattedInput)(char *internal, std::size_t bytes,
-    const char *format, std::size_t formatBytes, void **scratchArea = nullptr,
+Cookie IONAME(BeginInternalListInput)(char *internal,
+    std::size_t internalLength, void **scratchArea = nullptr,
     std::size_t scratchBytes = 0, const char *sourceFile = nullptr,
     int sourceLine = 0);
+Cookie IONAME(BeginInternalFormattedOutput)(char *internal,
+    std::size_t internalLength, const char *format, std::size_t formatLength,
+    void **scratchArea = nullptr, std::size_t scratchBytes = 0,
+    const char *sourceFile = nullptr, int sourceLine = 0);
+Cookie IONAME(BeginInternalFormattedInput)(char *internal,
+    std::size_t internalLength, const char *format, std::size_t formatLength,
+    void **scratchArea = nullptr, std::size_t scratchBytes = 0,
+    const char *sourceFile = nullptr, int sourceLine = 0);
 
 // Internal namelist I/O
 Cookie IONAME(BeginInternalNamelistOutput)(const Descriptor &,
@@ -110,10 +111,10 @@ Cookie IONAME(BeginUnformattedOutput)(ExternalUnit = DefaultUnit,
     const char *sourceFile = nullptr, int sourceLine = 0);
 Cookie IONAME(BeginUnformattedInput)(ExternalUnit = DefaultUnit,
     const char *sourceFile = nullptr, int sourceLine = 0);
-Cookie IONAME(BeginNamelistOutput)(const NamelistGroup &,
+Cookie IONAME(BeginExternalNamelistOutput)(const NamelistGroup &,
     ExternalUnit = DefaultUnit, const char *sourceFile = nullptr,
     int sourceLine = 0);
-Cookie IONAME(BeginNamelistInput)(const NamelistGroup &,
+Cookie IONAME(BeginExternalNamelistInput)(const NamelistGroup &,
     ExternalUnit = DefaultUnit, const char *sourceFile = nullptr,
     int sourceLine = 0);
 
@@ -125,6 +126,7 @@ AsynchronousId IONAME(BeginAsynchronousOutput)(ExternalUnit, std::int64_t REC,
 AsynchronousId IONAME(BeginAsynchronousInput)(ExternalUnit, std::int64_t REC,
     char *, std::size_t, const char *sourceFile = nullptr, int sourceLine = 0);
 Cookie IONAME(BeginWait)(ExternalUnit, AsynchronousId);
+Cookie IONAME(BeginWaitAll)(ExternalUnit);
 
 // Other I/O statements
 Cookie IONAME(BeginClose)(
@@ -150,7 +152,8 @@ Cookie IONAME(BeginInquireUnit)(
     ExternalUnit, const char *sourceFile = nullptr, int sourceLine = 0);
 Cookie IONAME(BeginInquireFile)(const char *, std::size_t, int kind = 1,
     const char *sourceFile = nullptr, int sourceLine = 0);
-Cookie IONAME(BeginInquireIoLength(const char *sourceFile = nullptr, int sourceLine = 0);
+Cookie IONAME(BeginInquireIoLength)(
+    const char *sourceFile = nullptr, int sourceLine = 0);
 
 // If an I/O statement has any IOSTAT=, ERR=, END=, or EOR= specifiers,
 // call EnableHandlers() immediately after the Begin...() call.
@@ -168,8 +171,8 @@ Cookie IONAME(BeginInquireIoLength(const char *sourceFile = nullptr, int sourceL
 //     }
 //   }
 //   if (EndIoStatement(cookie) == FORTRAN_RUTIME_IOSTAT_END) goto label666;
-void IONAME(EnableHandlers)(Cookie, bool HasIostat = false, bool HasErr = false,
-    bool HasEnd = false, bool HasEor = false);
+void IONAME(EnableHandlers)(Cookie, bool hasIoStat = false, bool hasErr = false,
+    bool hasEnd = false, bool hasEor = false);
 
 // Control list options.  These return false on a error that the
 // Begin...() call has specified will be handled by the caller.
@@ -228,33 +231,31 @@ bool IONAME(InputLogical)(Cookie, bool &);
 // SetDelim(), GetIoMsg(), SetPad(), SetRound(), & SetSign()
 // are also acceptable for OPEN.
 // ACCESS=SEQUENTIAL, DIRECT, STREAM
-bool IONAME(SetAccess, Cookie, const char *, std::size_t);
+bool IONAME(SetAccess)(Cookie, const char *, std::size_t);
 // ACTION=READ, WRITE, or READWRITE
-bool IONAME(SetAction, Cookie, const char *, std::size_t);
+bool IONAME(SetAction)(Cookie, const char *, std::size_t);
 // ASYNCHRONOUS=YES, NO
-bool IONAME(SetAsynchronous, Cookie, const char *, std::size_t);
+bool IONAME(SetAsynchronous)(Cookie, const char *, std::size_t);
 // ENCODING=UTF-8, DEFAULT
-bool IONAME(SetEncoding, Cookie, const char *, std::size_t);
+bool IONAME(SetEncoding)(Cookie, const char *, std::size_t);
 // FORM=FORMATTED, UNFORMATTED
-bool IONAME(SetForm, Cookie, const char *, std::size_t);
+bool IONAME(SetForm)(Cookie, const char *, std::size_t);
 // POSITION=ASIS, REWIND, APPEND
-bool IONAME(SetPosition, Cookie, const char *, std::size_t);
-bool IONAME(SetRecl, Cookie, std::size_t);  // RECL=
+bool IONAME(SetPosition)(Cookie, const char *, std::size_t);
+bool IONAME(SetRecl)(Cookie, std::size_t);  // RECL=
 
 // STATUS can be set during an OPEN or CLOSE statement.
 // For OPEN: STATUS=OLD, NEW, SCRATCH, REPLACE, UNKNOWN
 // For CLOSE: STATUS=KEEP, DELETE
-bool IONAME(SetStatus, Cookie, const char *, std::size_t);
+bool IONAME(SetStatus)(Cookie, const char *, std::size_t);
 
 // SetFile() may pass a CHARACTER argument of non-default kind,
 // and such filenames are converted to UTF-8 before being
 // presented to the filesystem.
-bool IONAME(SetFile, Cookie, const char *, std::size_t, int kind = 1);
+bool IONAME(SetFile)(Cookie, const char *, std::size_t chars, int kind = 1);
 
-// GetNewUnit() must not be called until after all Set...()
-// connection list specifiers have been called after
-// BeginOpenNewUnit().
-bool IONAME(GetNewUnit)(Cookie, int &, int kind = 4);  // NEWUNIT=
+// Acquires the runtime-created unit number for OPEN(NEWUNIT=)
+bool IONAME(GetNewUnit)(Cookie, int &, int kind = 4);
 
 // READ(SIZE=), after all input items
 bool IONAME(GetSize)(Cookie, std::int64_t, int kind = 8);
@@ -271,13 +272,15 @@ void IONAME(GetIoMsg)(Cookie, char *, std::size_t);  // IOMSG=
 // ACCESS, ACTION, ASYNCHRONOUS, BLANK, DECIMAL, DELIM, DIRECT, ENCODING,
 // FORM, FORMATTED, NAME, PAD, POSITION, READ, READWRITE, ROUND,
 // SEQUENTIAL, SIGN, STREAM, UNFORMATTED, WRITE:
-bool IONAME(InquireCharacter)(Cookie, const char *specifier, char *, std::size_t);
+bool IONAME(InquireCharacter)(
+    Cookie, const char *specifier, char *, std::size_t);
 // EXIST, NAMED, OPENED, and PENDING (without ID):
 bool IONAME(InquireLogical)(Cookie, const char *specifier, bool &);
 // PENDING with ID
 bool IONAME(InquirePendingId)(Cookie, std::int64_t, bool &);
 // NEXTREC, NUMBER, POS, RECL, SIZE
-bool IONAME(InquireInteger64)(Cookie, const char *specifier, std::int64_t &, int kind = 8);
+bool IONAME(InquireInteger64)(
+    Cookie, const char *specifier, std::int64_t &, int kind = 8);
 
 // The value of IOSTAT= is zero when no error, end-of-record,
 // or end-of-file condition has arisen; errors are positive values.
@@ -307,6 +310,6 @@ enum Iostat {
 // rather than by terminating the image.
 enum Iostat IONAME(EndIoStatement)(Cookie);
 
-};  // extern "C"
+}  // extern "C"
 }
 #endif

@@ -4,7 +4,7 @@
 ! See https://llvm.org/LICENSE.txt for license information.
 ! SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 !
-!------------------------------------------------------------------------------!
+!===------------------------------------------------------------------------===!
 
 ! See Fortran 2018, clause 16.10.2
 ! TODO: These are placeholder values so that some tests can be run.
@@ -12,6 +12,11 @@
 include '../runtime/magic-numbers.h' ! for IOSTAT= error/end code values
 
 module iso_fortran_env
+
+  use __Fortran_builtins, only: &
+    event_type => __builtin_event_type, &
+    lock_type => __builtin_lock_type, &
+    team_type => __builtin_team_type
 
   implicit none
 
@@ -123,7 +128,8 @@ module iso_fortran_env
 
   integer, parameter :: current_team = -1, initial_team = -2, parent_team = -3
 
-  integer, parameter :: input_unit = 5, output_unit = 6, error_unit = 0
+  integer, parameter :: input_unit = 5, output_unit = 6
+  integer, parameter :: error_unit = output_unit
   integer, parameter :: iostat_end = -1, iostat_eor = -2
   integer, parameter :: iostat_inquire_internal_unit = -1
 
@@ -137,21 +143,6 @@ module iso_fortran_env
   integer, parameter :: stat_stopped_image = FORTRAN_RUNTIME_STAT_STOPPED_IMAGE
   integer, parameter :: stat_unlocked = FORTRAN_RUNTIME_STAT_UNLOCKED
   integer, parameter :: stat_unlocked_failed_image = FORTRAN_RUNTIME_STAT_UNLOCKED_FAILED_IMAGE
-
-  type :: event_type
-    private
-    integer(kind=atomic_int_kind) :: count = 0
-  end type event_type
-
-  type :: lock_type
-    private
-    integer(kind=atomic_int_kind) :: count = 0
-  end type lock_type
-
-  type :: team_type
-    private
-    integer(kind=int64) :: id = 0
-  end type team_type
 
  contains
 
