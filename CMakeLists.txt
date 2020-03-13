@@ -49,6 +49,10 @@ message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}" )
 
 find_package(LLVM REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION} in ${LLVM_DIR}")
+# If LLVM links to zlib we need the imported targets so we can too.
+if(LLVM_ENABLE_ZLIB)
+  find_package(ZLIB REQUIRED)
+endif()
 
 list(APPEND CMAKE_MODULE_PATH ${LLVM_DIR})
 
@@ -70,13 +74,29 @@ include(AddLLVM)
 #  https://stackoverflow.com/questions/41924375/llvm-how-to-specify-all-link-libraries-as-input-to-llvm-map-components-to-libna
 #  https://stackoverflow.com/questions/33948633/how-do-i-link-when-building-with-llvm-libraries
 
-include_directories(${LLVM_INCLUDE_DIRS})
+# Add LLVM include files as if they were SYSTEM because there are complex unused
+# parameter issues that may or may not appear depending on the environments and
+# compilers (ifdefs are involved). This allows warnings from LLVM headers to be
+# ignored while keeping -Wunused-parameter a fatal error inside f18 code base.
+# This may have to be fine-tuned if flang headers are consider part of this
+# LLVM_INCLUDE_DIRS when merging in the monorepo (Warning from flang headers
+# should not be suppressed).
+include_directories(SYSTEM ${LLVM_INCLUDE_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
 
 # LLVM_LIT_EXTERNAL store in cache so it could be used by AddLLVM.cmake
 set(LLVM_EXTERNAL_LIT ${LLVM_TOOLS_BINARY_DIR}/llvm-lit CACHE STRING "Command used to spawn lit")
 
 if(LINK_WITH_FIR)
+  include(TableGen)
+  include(AddMLIR)
+  find_program(MLIR_TABLEGEN_EXE "mlir-tblgen" ${LLVM_TOOLS_BINARY_DIR}
+  NO_DEFAULT_PATH)
+  # tco tool and FIR lib output directories
+  set(LLVM_RUNTIME_OUTPUT_INTDIR ${CMAKE_BINARY_DIR}/bin)
+  set(LLVM_LIBRARY_OUTPUT_INTDIR ${CMAKE_BINARY_DIR}/lib)
+  # Always build tco tool
+  set(LLVM_BUILD_TOOLS ON)
   message(STATUS "Linking driver with FIR and LLVM")
   llvm_map_components_to_libnames(LLVM_COMMON_LIBS support)
   message(STATUS "LLVM libraries: ${LLVM_COMMON_LIBS}")

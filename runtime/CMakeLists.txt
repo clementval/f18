@@ -8,10 +8,17 @@
 
 add_library(FortranRuntime
   ISO_Fortran_binding.cpp
+  buffer.cpp
+  connection.cpp
   derived-type.cpp
   descriptor.cpp
+  edit-input.cpp
+  edit-output.cpp
+  environment.cpp
   file.cpp
   format.cpp
+  internal-unit.cpp
+  iostat.cpp
   io-api.cpp
   io-error.cpp
   io-stmt.cpp
@@ -22,9 +29,10 @@ add_library(FortranRuntime
   tools.cpp
   transformational.cpp
   type-code.cpp
+  unit.cpp
+  unit-map.cpp
 )
 
 target_link_libraries(FortranRuntime
-  FortranCommon
   FortranDecimal
 )

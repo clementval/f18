@@ -8,12 +8,18 @@
 
 #ifndef FORTRAN_RUNTIME_TOOLS_H_
 #define FORTRAN_RUNTIME_TOOLS_H_
+
 #include "memory.h"
+#include <functional>
+#include <map>
+#include <type_traits>
+
 namespace Fortran::runtime {
 
 class Terminator;
 
-OwningPtr<char> SaveDefaultCharacter(const char *, std::size_t, Terminator &);
+OwningPtr<char> SaveDefaultCharacter(
+    const char *, std::size_t, const Terminator &);
 
 // For validating and recognizing default CHARACTER values in a
 // case-insensitive manner.  Returns the zero-based index into the
@@ -21,5 +27,9 @@ OwningPtr<char> SaveDefaultCharacter(const char *, std::size_t, Terminator &);
 // or -1 when it has no match.
 int IdentifyValue(
     const char *value, std::size_t length, const char *possibilities[]);
+
+// Truncates or pads as necessary
+void ToFortranDefaultCharacter(
+    char *to, std::size_t toLength, const char *from);
 }
 #endif  // FORTRAN_RUNTIME_TOOLS_H_

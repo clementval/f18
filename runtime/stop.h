@@ -13,7 +13,7 @@
 #include "entry-names.h"
 #include <stdlib.h>
 
-EXTERN_C_BEGIN
+FORTRAN_EXTERN_C_BEGIN
 
 // Program-initiated image stop
 NORETURN void RTNAME(StopStatement)(int code DEFAULT_VALUE(EXIT_SUCCESS),
@@ -21,7 +21,8 @@ NORETURN void RTNAME(StopStatement)(int code DEFAULT_VALUE(EXIT_SUCCESS),
 NORETURN void RTNAME(StopStatementText)(const char *,
     bool isErrorStop DEFAULT_VALUE(false), bool quiet DEFAULT_VALUE(false));
 NORETURN void RTNAME(FailImageStatement)(NO_ARGUMENTS);
+NORETURN void RTNAME(ProgramEndStatement)(NO_ARGUMENTS);
 
-EXTERN_C_END
+FORTRAN_EXTERN_C_END
 
 #endif  // FORTRAN_RUNTIME_STOP_H_
