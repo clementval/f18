@@ -1,3 +1,4 @@
+! RUN: %S/test_errors.sh %s %flang %t
 ! OPTIONS: -fopenacc
 
 ! Check OpenACC restruction in branch in and out of some construct

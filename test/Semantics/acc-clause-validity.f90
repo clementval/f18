@@ -1,3 +1,4 @@
+! RUN: %S/test_errors.sh %s %flang %t
 ! OPTIONS: -fopenacc
 
 ! Check OpenACC clause validity for the following construct and directive:
