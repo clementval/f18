@@ -20,9 +20,9 @@
 #ifndef FORTRAN_SEMANTICS_CHECK_ACC_STRUCTURE_H_
 #define FORTRAN_SEMANTICS_CHECK_ACC_STRUCTURE_H_
 
-#include "flang/common/enum-set.h"
-#include "flang/parser/parse-tree.h"
-#include "flang/semantics/semantics.h"
+#include "flang/Common/enum-set.h"
+#include "flang/Parser/parse-tree.h"
+#include "flang/Semantics/semantics.h"
 #include <unordered_map>
 
 namespace Fortran::semantics {

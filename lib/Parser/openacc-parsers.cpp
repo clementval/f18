@@ -18,7 +18,7 @@
 #include "stmt-parser.h"
 #include "token-parsers.h"
 #include "type-parser-implementation.h"
-#include "flang/parser/parse-tree.h"
+#include "flang/Parser/parse-tree.h"
 
 // OpenACC Directives and Clauses
 namespace Fortran::parser {
