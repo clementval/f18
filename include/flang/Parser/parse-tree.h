@@ -3962,6 +3962,7 @@ struct OpenACCWaitConstruct {
 
 struct AccBeginBlockDirective {
   TUPLE_CLASS_BOILERPLATE(AccBeginBlockDirective);
+  CharBlock source;
   std::tuple<AccBlockDirective, AccClauseList> t;
 };
 

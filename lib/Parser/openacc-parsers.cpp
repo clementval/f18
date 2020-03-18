@@ -260,8 +260,8 @@ TYPE_PARSER(sourced(construct<OpenACCWaitConstruct>(
     maybe(parenthesized(Parser<AccWaitArgument>{})), Parser<AccClauseList>{})))
 
 // Block Constructs
-TYPE_PARSER(construct<AccBeginBlockDirective>(
-    sourced(Parser<AccBlockDirective>{}), Parser<AccClauseList>{}))
+TYPE_PARSER(sourced(construct<AccBeginBlockDirective>(
+    sourced(Parser<AccBlockDirective>{}), Parser<AccClauseList>{})))
 
 TYPE_PARSER(startAccLine >> construct<AccEndBlockDirective>(
     sourced("END"_tok >> Parser<AccBlockDirective>{})))

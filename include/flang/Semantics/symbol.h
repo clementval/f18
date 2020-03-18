@@ -457,6 +457,12 @@ public:
       LocalityShared,  // named in SHARED locality-spec
       InDataStmt,  // initialized in a DATA statement
 
+      // OpenACC data-sharing attribute
+      AccShared, AccPrivate, AccFirstPrivate,
+      // OpenACC miscellaneous flags
+      AccCommonBlock, AccThreadPrivate, AccReduction, AccNone,
+
+
       // OpenMP data-sharing attribute
       OmpShared, OmpPrivate, OmpLinear, OmpFirstPrivate, OmpLastPrivate,
       // OpenMP data-mapping attribute
