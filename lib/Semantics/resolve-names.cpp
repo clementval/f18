@@ -1088,9 +1088,9 @@ public:
   bool Pre(const parser::OpenACCCombinedConstruct &);
   void Post(const parser::OpenACCCombinedConstruct &) { PopContext(); }
 
-  // void Post(const parser::OmpBeginBlockDirective &) {
-  //   GetContext().withinConstruct = true;
-  // }
+  void Post(const parser::AccBeginBlockDirective &) {
+    GetContext().withinConstruct = true;
+  }
 
   // bool Pre(const parser::OpenMPLoopConstruct &);
   // void Post(const parser::OpenMPLoopConstruct &) { PopContext(); }
@@ -1114,10 +1114,10 @@ public:
     ResolveAccObjectList(x.v, Symbol::Flag::AccPrivate);
     return false;
   }
-  // bool Pre(const parser::OmpClause::Firstprivate &x) {
-  //   ResolveOmpObjectList(x.v, Symbol::Flag::OmpFirstPrivate);
-  //   return false;
-  // }
+  bool Pre(const parser::AccClause::FirstPrivate &x) {
+    ResolveAccObjectList(x.v, Symbol::Flag::AccFirstPrivate);
+    return false;
+  }
 
   void Post(const parser::Name &);    
 
@@ -6149,7 +6149,6 @@ private:
   bool pushedScope_{false};
 };
 
-
 bool AccAttributeVisitor::Pre(const parser::OpenACCBlockConstruct &x) {
   const auto &beginBlockDir{std::get<parser::AccBeginBlockDirective>(x.t)};
   const auto &beginDir{std::get<parser::AccBlockDirective>(beginBlockDir.t)};
@@ -6239,10 +6238,11 @@ Symbol *AccAttributeVisitor::ResolveAccCommonBlockName(
   } else {
     return nullptr;
   }
+  return nullptr;
 }
 
 void AccAttributeVisitor::ResolveAccObjectList(
-    const parser::AccObjectList &accObjectList, Symbol::Flag accFlag) {
+    const parser::AccObjectList &accObjectList, Symbol::Flag accFlag) {      
   for (const auto &accObject : accObjectList.v) {
     ResolveAccObject(accObject, accFlag);
   }
@@ -6307,7 +6307,6 @@ void AccAttributeVisitor::ResolveAccObject(
       accObject.u);
 }
 
-
 Symbol *AccAttributeVisitor::ResolveAcc(
     const parser::Name &name, Symbol::Flag accFlag, Scope &scope) {
   if (accFlagsRequireNewSymbol.test(accFlag)) {
@@ -6318,7 +6317,7 @@ Symbol *AccAttributeVisitor::ResolveAcc(
 }
 
 Symbol *AccAttributeVisitor::ResolveAcc(
-    Symbol &symbol, Symbol::Flag accFlag, Scope &scope) {
+    Symbol &symbol, Symbol::Flag accFlag, Scope &scope) {      
   if (accFlagsRequireNewSymbol.test(accFlag)) {
     return DeclarePrivateAccessEntity(symbol, accFlag, scope);
   } else {
@@ -6359,7 +6358,7 @@ Symbol *AccAttributeVisitor::DeclareOrMarkOtherAccessEntity(
 }
 
 Symbol *AccAttributeVisitor::DeclareOrMarkOtherAccessEntity(
-    Symbol &object, Symbol::Flag accFlag) {
+    Symbol &object, Symbol::Flag accFlag) {      
   if (accFlagsRequireMark.test(accFlag)) {
     object.set(accFlag);
   }

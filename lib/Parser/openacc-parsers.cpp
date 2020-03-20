@@ -263,8 +263,8 @@ TYPE_PARSER(sourced(construct<OpenACCWaitConstruct>(
 TYPE_PARSER(sourced(construct<AccBeginBlockDirective>(
     sourced(Parser<AccBlockDirective>{}), Parser<AccClauseList>{})))
 
-TYPE_PARSER(startAccLine >> construct<AccEndBlockDirective>(
-    sourced("END"_tok >> Parser<AccBlockDirective>{})))
+TYPE_PARSER(startAccLine >> sourced(construct<AccEndBlockDirective>(
+    "END"_tok >> sourced(Parser<AccBlockDirective>{}))))
 
 TYPE_PARSER(construct<OpenACCBlockConstruct>(
     Parser<AccBeginBlockDirective>{} / endAccLine, block,
