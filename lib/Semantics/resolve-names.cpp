@@ -1084,12 +1084,13 @@ public:
   template<typename A> void Post(const A &) {}
 
   bool Pre(const parser::OpenACCBlockConstruct &);
-  void Post(const parser::OpenACCBlockConstruct &) { PopContext(); }
+  void Post(const parser::OpenACCBlockConstruct &) { /*PopContext();*/ }
   bool Pre(const parser::OpenACCCombinedConstruct &);
-  void Post(const parser::OpenACCCombinedConstruct &) { PopContext(); }
+  void Post(const parser::OpenACCCombinedConstruct &) { /*PopContext();*/ }
 
   void Post(const parser::AccBeginBlockDirective &) {
-    GetContext().withinConstruct = true;
+    printf("POST parser::AccBeginBlockDirective\n");
+    //GetContext().withinConstruct = true;
   }
 
   // bool Pre(const parser::OpenMPLoopConstruct &);
@@ -1110,16 +1111,16 @@ public:
   //   ResolveOmpObjectList(x.v, Symbol::Flag::OmpShared);
   //   return false;
   // }
-  bool Pre(const parser::AccClause::Private &x) {
-    ResolveAccObjectList(x.v, Symbol::Flag::AccPrivate);
+  /*bool Pre(const parser::AccClause::Private &x) {
+    //ResolveAccObjectList(x.v, Symbol::Flag::AccPrivate);
     return false;
-  }
-  bool Pre(const parser::AccClause::FirstPrivate &x) {
-    ResolveAccObjectList(x.v, Symbol::Flag::AccFirstPrivate);
+  }*/
+  /*bool Pre(const parser::AccClause::FirstPrivate &x) {
+    //ResolveAccObjectList(x.v, Symbol::Flag::AccFirstPrivate);
     return false;
-  }
+  }*/
 
-  void Post(const parser::Name &);    
+  //void Post(const parser::Name &);    
 
 private:
   struct AccContext {
@@ -1406,8 +1407,9 @@ private:
       const Symbol &symbol, Symbol::Flag flag, OmpContext &context) {
     context.objectWithDSA.emplace(&symbol, flag);
   }
-  void AddToContextObjectWithDSA(const Symbol &symbol, Symbol::Flag flag) {
-    AddToContextObjectWithDSA(symbol, flag, GetContext());
+  void AddToContextObjectWithDSA(const Symbol &, Symbol::Flag) {
+  //void AddToContextObjectWithDSA(const Symbol &symbol, Symbol::Flag flag) {    
+    // AddToContextObjectWithDSA(symbol, flag, GetContext());
   }
   bool IsObjectWithDSA(const Symbol &symbol) {
     auto it{GetContext().objectWithDSA.find(&symbol)};
@@ -5962,7 +5964,7 @@ bool ResolveNamesVisitor::Pre(const parser::ProgramUnit &x) {
   ResolveSpecificationParts(root);
   FinishSpecificationParts(root);
   ResolveExecutionParts(root);
-  ResolveOmpParts(x);
+  // ResolveOmpParts(x);
   ResolveAccParts(x);
   return false;
 }
@@ -6150,29 +6152,30 @@ private:
 };
 
 bool AccAttributeVisitor::Pre(const parser::OpenACCBlockConstruct &x) {
+  printf("Pre(const parser::OpenACCBlockConstruct\n");
   const auto &beginBlockDir{std::get<parser::AccBeginBlockDirective>(x.t)};
   const auto &beginDir{std::get<parser::AccBlockDirective>(beginBlockDir.t)};
   switch (beginDir.v) {
   case parser::AccBlockDirective::Directive::Data:
-    PushContext(beginDir.source, AccDirective::DATA);
+    // PushContext(beginDir.source, AccDirective::DATA);
     break;
   case parser::AccBlockDirective::Directive::HostData:
-    PushContext(beginDir.source, AccDirective::HOST_DATA);
+    // PushContext(beginDir.source, AccDirective::HOST_DATA);
     break;
   case parser::AccBlockDirective::Directive::Kernels:
-    PushContext(beginDir.source, AccDirective::KERNELS);
+    // PushContext(beginDir.source, AccDirective::KERNELS);
     break;
   case parser::AccBlockDirective::Directive::Parallel:
-    PushContext(beginDir.source, AccDirective::PARALLEL);
+    // PushContext(beginDir.source, AccDirective::PARALLEL);
     break;
   case parser::AccBlockDirective::Directive::Serial:
-    PushContext(beginDir.source, AccDirective::SERIAL);
+    // PushContext(beginDir.source, AccDirective::SERIAL);
     break;
   default:
     // TODO others
     break;
   }
-  ClearDataSharingAttributeObjects();
+  // ClearDataSharingAttributeObjects();
   return true;
 }
 
@@ -6181,45 +6184,45 @@ bool AccAttributeVisitor::Pre(const parser::OpenACCCombinedConstruct &x) {
   const auto &beginDir{std::get<parser::AccCombinedDirective>(beginBlockDir.t)};
   switch (beginDir.v) {
   case parser::AccCombinedDirective::Directive::KernelsLoop:
-    PushContext(beginDir.source, AccDirective::KERNELS_LOOP);
+    // PushContext(beginDir.source, AccDirective::KERNELS_LOOP);
     break;
   case parser::AccCombinedDirective::Directive::ParallelLoop:
-    PushContext(beginDir.source, AccDirective::PARALLEL_LOOP);
+    // PushContext(beginDir.source, AccDirective::PARALLEL_LOOP);
     break;
   case parser::AccCombinedDirective::Directive::SerialLoop:
-    PushContext(beginDir.source, AccDirective::SERIAL_LOOP);
+    // PushContext(beginDir.source, AccDirective::SERIAL_LOOP);
     break;
   default:
     // TODO others
     break;
   }
-  ClearDataSharingAttributeObjects();
+  // ClearDataSharingAttributeObjects();
   return true;
 }
 
 // For OpenACC constructs, check all the data-refs within the constructs
 // and adjust the symbol for each Name if necessary
-void AccAttributeVisitor::Post(const parser::Name &name) {
-  auto *symbol{name.symbol};
-  if (symbol && !accContext_.empty() && GetContext().withinConstruct) {
-    if (!symbol->owner().IsDerivedType() && !symbol->has<ProcEntityDetails>() &&
-        !IsObjectWithDSA(*symbol)) {
-      // TODO: create a separate function to go through the rules for
-      //       predetermined, explicitly determined, and implicitly
-      //       determined data-sharing attributes (2.15.1.1).
-      if (Symbol * found{currScope().FindSymbol(name.source)}) {
-        if (symbol != found) {
-          name.symbol = found;  // adjust the symbol within region
-        } else if (GetContext().defaultDSA == Symbol::Flag::AccNone) {
-          context_.Say(name.source,
-              "The DEFAULT(NONE) clause requires that '%s' must be listed in "
-              "a data-sharing attribute clause"_err_en_US,
-              symbol->name());
-        }
-      }
-    }
-  }  // within OpenACC construct
-}
+// void AccAttributeVisitor::Post(const parser::Name &name) {
+//   auto *symbol{name.symbol};
+//   if (symbol && !accContext_.empty() && GetContext().withinConstruct) {
+//     if (!symbol->owner().IsDerivedType() && !symbol->has<ProcEntityDetails>() &&
+//         !IsObjectWithDSA(*symbol)) {
+//       // TODO: create a separate function to go through the rules for
+//       //       predetermined, explicitly determined, and implicitly
+//       //       determined data-sharing attributes (2.15.1.1).
+//       if (Symbol * found{currScope().FindSymbol(name.source)}) {
+//         if (symbol != found) {
+//           name.symbol = found;  // adjust the symbol within region
+//         } else if (GetContext().defaultDSA == Symbol::Flag::AccNone) {
+//           context_.Say(name.source,
+//               "The DEFAULT(NONE) clause requires that '%s' must be listed in "
+//               "a data-sharing attribute clause"_err_en_US,
+//               symbol->name());
+//         }
+//       }
+//     }
+//   } // within OpenACC construct
+// }
 
 
 bool AccAttributeVisitor::HasDataSharingAttributeObject(const Symbol &object) {
@@ -6249,8 +6252,9 @@ void AccAttributeVisitor::ResolveAccObjectList(
 }
 
 void AccAttributeVisitor::ResolveAccObject(
-    const parser::AccObject &accObject, Symbol::Flag accFlag) {
-  std::visit(
+    // const parser::AccObject &accObject, Symbol::Flag accFlag) {
+    const parser::AccObject &, Symbol::Flag) {
+  /*std::visit(
       common::visitors{
           [&](const parser::Designator &designator) {
             if (const auto *name{GetDesignatorNameIfDataRef(designator)}) {
@@ -6282,7 +6286,8 @@ void AccAttributeVisitor::ResolveAccObject(
               }
             }
           },
-          [&](const parser::Name &name) {  // common block
+          // [&](const parser::Name &name) {  // common block
+          [&](const parser::Name &) {  // common block
             if (auto *symbol{ResolveAccCommonBlockName(&name)}) {
               CheckMultipleAppearances(
                   name, *symbol, Symbol::Flag::AccCommonBlock);
@@ -6304,24 +6309,26 @@ void AccAttributeVisitor::ResolveAccObject(
             }
           },
       },
-      accObject.u);
+      accObject.u);*/
 }
 
 Symbol *AccAttributeVisitor::ResolveAcc(
-    const parser::Name &name, Symbol::Flag accFlag, Scope &scope) {
+  // const parser::Name &name, Symbol::Flag accFlag, Scope &scope) {
+    const parser::Name &, Symbol::Flag accFlag, Scope &) {
   if (accFlagsRequireNewSymbol.test(accFlag)) {
-    return DeclarePrivateAccessEntity(name, accFlag, scope);
+    return nullptr; //return DeclarePrivateAccessEntity(name, accFlag, scope);
   } else {
-    return DeclareOrMarkOtherAccessEntity(name, accFlag);
+    return nullptr; //return DeclareOrMarkOtherAccessEntity(name, accFlag);
   }
 }
 
 Symbol *AccAttributeVisitor::ResolveAcc(
-    Symbol &symbol, Symbol::Flag accFlag, Scope &scope) {      
+    // Symbol &symbol, Symbol::Flag accFlag, Scope &scope) {      
+      Symbol &, Symbol::Flag accFlag, Scope &) {      
   if (accFlagsRequireNewSymbol.test(accFlag)) {
-    return DeclarePrivateAccessEntity(symbol, accFlag, scope);
+    return nullptr; //return DeclarePrivateAccessEntity(symbol, accFlag, scope);
   } else {
-    return DeclareOrMarkOtherAccessEntity(symbol, accFlag);
+    return nullptr; //return DeclareOrMarkOtherAccessEntity(symbol, accFlag);
   }
 }
 
@@ -6946,8 +6953,7 @@ void ResolveNamesVisitor::ResolveOmpParts(const parser::ProgramUnit &node) {
   }
 }
 
-
-void ResolveNamesVisitor::ResolveAccParts(const parser::ProgramUnit &node) {
+void ResolveNamesVisitor::ResolveAccParts(const parser::ProgramUnit &node) {  
   AccAttributeVisitor{context(), *this}.Walk(node);
   if (!context().AnyFatalError()) {
     // The data-sharing attribute of the loop iteration variable for a
