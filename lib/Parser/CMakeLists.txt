@@ -35,6 +35,7 @@ add_library(FortranParser
 
 target_link_libraries(FortranParser
   FortranCommon
+  LLVMSupport
 )
 
 install (TARGETS FortranParser
