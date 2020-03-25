@@ -113,12 +113,25 @@ private:
   SemanticsContext &context_;
 };
 
+class EntryChecker : public virtual BaseChecker {
+public:
+  explicit EntryChecker(SemanticsContext &context) : context_{context} {}
+  void Leave(const parser::EntryStmt &) {
+    if (!context_.constructStack().empty()) {  // C1571
+      context_.Say("ENTRY may not appear in an executable construct"_err_en_US);
+    }
+  }
+
+private:
+  SemanticsContext &context_;
+};
+
 using StatementSemanticsPass1 = ExprChecker;
-using StatementSemanticsPass2 = SemanticsVisitor<AccStructureChecker,
-    AllocateChecker, ArithmeticIfStmtChecker, AssignmentChecker, CoarrayChecker,
-    DataChecker, DeallocateChecker, DoForallChecker, IfStmtChecker, IoChecker,
-    NamelistChecker, NullifyChecker, OmpStructureChecker, PurityChecker,
-    ReturnStmtChecker, StopChecker>;
+using StatementSemanticsPass2 = SemanticsVisitor<AccStructureChecker. 
+    AllocateChecker, ArithmeticIfStmtChecker, AssignmentChecker, CoarrayChecker, 
+    DataChecker, DeallocateChecker, DoForallChecker, EntryChecker, 
+    IfStmtChecker, IoChecker, NamelistChecker, NullifyChecker, 
+    OmpStructureChecker, PurityChecker, ReturnStmtChecker, StopChecker>;
 
 static bool PerformStatementSemantics(
     SemanticsContext &context, parser::Program &program) {

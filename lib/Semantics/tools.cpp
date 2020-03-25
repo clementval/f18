@@ -674,6 +674,31 @@ bool IsInitialized(const Symbol &symbol) {
   return false;
 }
 
+bool HasIntrinsicTypeName(const Symbol &symbol) {
+  std::string name{symbol.name().ToString()};
+  if (name == "doubleprecision") {
+    return true;
+  } else if (name == "derived") {
+    return false;
+  } else {
+    for (int i{0}; i != common::TypeCategory_enumSize; ++i) {
+      if (name == parser::ToLowerCaseLetters(EnumToString(TypeCategory{i}))) {
+        return true;
+      }
+    }
+    return false;
+  }
+}
+
+bool IsSeparateModuleProcedureInterface(const Symbol *symbol) {
+  if (symbol && symbol->attrs().test(Attr::MODULE)) {
+    if (auto *details{symbol->detailsIf<SubprogramDetails>()}) {
+      return details->isInterface();
+    }
+  }
+  return false;
+}
+
 bool IsFinalizable(const Symbol &symbol) {
   if (const DeclTypeSpec * type{symbol.GetType()}) {
     if (const DerivedTypeSpec * derived{type->AsDerived()}) {
@@ -713,11 +738,9 @@ bool IsAssumedLengthCharacter(const Symbol &symbol) {
 
 // C722 and C723:  For a function to be assumed length, it must be external and
 // of CHARACTER type
-bool IsAssumedLengthExternalCharacterFunction(const Symbol &symbol) {
-  return IsAssumedLengthCharacter(symbol) &&
-      ((symbol.has<SubprogramDetails>() && symbol.owner().IsGlobal()) ||
-          (symbol.test(Symbol::Flag::Function) &&
-              symbol.attrs().test(Attr::EXTERNAL)));
+bool IsExternal(const Symbol &symbol) {
+  return (symbol.has<SubprogramDetails>() && symbol.owner().IsGlobal()) ||
+      symbol.attrs().test(Attr::EXTERNAL);
 }
 
 const Symbol *IsExternalInPureContext(
@@ -1004,6 +1027,22 @@ const DeclTypeSpec &FindOrInstantiateDerivedType(Scope &scope,
   DeclTypeSpec &type{scope.MakeDerivedType(category, std::move(spec))};
   type.derivedTypeSpec().Instantiate(scope, semanticsContext);
   return type;
+}
+
+const Symbol *FindSeparateModuleSubprogramInterface(const Symbol *proc) {
+  if (proc) {
+    if (const Symbol * submodule{proc->owner().symbol()}) {
+      if (const auto *details{submodule->detailsIf<ModuleDetails>()}) {
+        if (const Scope * ancestor{details->ancestor()}) {
+          const Symbol *iface{ancestor->FindSymbol(proc->name())};
+          if (IsSeparateModuleProcedureInterface(iface)) {
+            return iface;
+          }
+        }
+      }
+    }
+  }
+  return nullptr;
 }
 
 // ComponentIterator implementation
