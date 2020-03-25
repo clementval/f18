@@ -10,9 +10,9 @@ subroutine default_none()
   A = 1
   B = 2
   !$acc parallel default(none) private(c)
-  !ERROR: The DEFAULT(NONE) clause requires that 'a' must be listed in a data-sharing attribute clause
+  !ERROR: The DEFAULT(NONE) clause requires that 'a' must be listed in a data-sharing clause
   A(1:2) = 3
-  !ERROR: The DEFAULT(NONE) clause requires that 'b' must be listed in a data-sharing attribute clause
+  !ERROR: The DEFAULT(NONE) clause requires that 'b' must be listed in a data-sharing clause
   B = 4
   C = 5
   !$acc end parallel
