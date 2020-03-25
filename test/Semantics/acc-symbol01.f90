@@ -13,7 +13,7 @@ program mm
  integer b(10), i
 
  b = 2
- !$acc parallel
+ !$acc parallel private(b)
  do i=1,10
  end do
  !$acc end parallel

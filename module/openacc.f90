@@ -49,7 +49,8 @@ module openacc
                 acc_copyin_l_4d_p1, &
                 acc_copyin_c_1d_p1, acc_copyin_c_2d_p1, acc_copyin_c_3d_p1, &
                 acc_copyin_c_4d_p1, &
-                acc_copyin_i_l_p2, acc_copyin_r_l_p2, acc_copyin_l_l_p2, acc_copyin_c_l_p2
+                acc_copyin_i_l_p2, acc_copyin_r_l_p2, acc_copyin_l_l_p2, &
+                acc_copyin_c_l_p2
     end interface
 
     ! Signatures for acc_copyin_async
