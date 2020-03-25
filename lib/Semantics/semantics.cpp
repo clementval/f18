@@ -127,7 +127,7 @@ private:
 };
 
 using StatementSemanticsPass1 = ExprChecker;
-using StatementSemanticsPass2 = SemanticsVisitor<AccStructureChecker. 
+using StatementSemanticsPass2 = SemanticsVisitor<AccStructureChecker, 
     AllocateChecker, ArithmeticIfStmtChecker, AssignmentChecker, CoarrayChecker, 
     DataChecker, DeallocateChecker, DoForallChecker, EntryChecker, 
     IfStmtChecker, IoChecker, NamelistChecker, NullifyChecker, 
