@@ -476,9 +476,9 @@ public:
       InDataStmt,  // initialized in a DATA statement
 
       // OpenACC data-sharing attribute
-      AccShared, AccPrivate, AccFirstPrivate,
+      AccPresent, AccPrivate, AccFirstPrivate, AccShared,
       // OpenACC miscellaneous flags
-      AccCommonBlock, AccThreadPrivate, AccReduction, AccNone, AccPresent,
+      AccCommonBlock, AccThreadPrivate, AccReduction, AccNone,
 
 
       // OpenMP data-sharing attribute

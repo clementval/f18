@@ -10,11 +10,13 @@
 program mm
 
  real x, y
- integer b(10), i
-
+ integer a(10), b(10), c(10), i
+ 
  b = 2
- !$acc parallel private(b)
+ !$acc parallel present(c) firstprivate(b) private(a)
+ !$acc loop 
  do i=1,10
+  a(i) = b(i)
  end do
  !$acc end parallel
 end program

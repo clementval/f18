@@ -34,7 +34,7 @@ add_lit_testsuite(check-flang "Running the Flang regression tests"
   )
 set_target_properties(check-flang PROPERTIES FOLDER "Tests")
 
-add_lit_testsuites(FLANG ${CMAKE_CURRENT_SOURCE_DIR}
-  PARAMS ${FLANG_TEST_PARAMS}
-  DEPENDS ${FLANG_TEST_DEPENDS})
+# add_lit_testsuites(FLANG ${CMAKE_CURRENT_SOURCE_DIR}
+#   PARAMS ${FLANG_TEST_PARAMS}
+#   DEPENDS ${FLANG_TEST_DEPENDS})
 

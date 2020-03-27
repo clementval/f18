@@ -1118,11 +1118,11 @@ public:
     GetContext().withinConstruct = true;
   }
 
-  // bool Pre(const parser::OpenMPLoopConstruct &);
-  // void Post(const parser::OpenMPLoopConstruct &) { PopContext(); }
-  // void Post(const parser::OmpBeginLoopDirective &) {
-  //   GetContext().withinConstruct = true;
-  // }
+  bool Pre(const parser::OpenACCStandaloneConstruct &);
+  void Post(const parser::OpenACCStandaloneConstruct &) { PopContext(); }
+  void Post(const parser::AccStandaloneDirective &) {
+    GetContext().withinConstruct = true;
+  }
 
   // bool Pre(const parser::OpenMPSectionsConstruct &);
   // void Post(const parser::OpenMPSectionsConstruct &) { PopContext(); }
@@ -1133,10 +1133,10 @@ public:
   
   void Post(const parser::AccDefaultClause &);
 
-  // bool Pre(const parser::OmpClause::Shared &x) {
-  //   ResolveOmpObjectList(x.v, Symbol::Flag::OmpShared);
-  //   return false;
-  // }
+  bool Pre(const parser::AccClause::Present &x) {
+    ResolveAccObjectList(x.v, Symbol::Flag::AccPresent);
+    return false;
+  }
   bool Pre(const parser::AccClause::Private &x) {
     ResolveAccObjectList(x.v, Symbol::Flag::AccPrivate);
     return false;
@@ -1210,7 +1210,7 @@ private:
   }
 
   static constexpr Symbol::Flags dataSharingAttributeFlags{
-    Symbol::Flag::AccShared, Symbol::Flag::AccPrivate,
+    Symbol::Flag::AccShared, Symbol::Flag::AccPrivate, Symbol::Flag::AccPresent,
     Symbol::Flag::AccFirstPrivate, Symbol::Flag::AccReduction};
   static constexpr Symbol::Flags accFlagsRequireNewSymbol{
       Symbol::Flag::AccPrivate, Symbol::Flag::AccFirstPrivate,
@@ -1226,6 +1226,10 @@ private:
 
   bool HasDataSharingAttributeObject(const Symbol &);
 
+  void PrivatizeAssociatedLoopIndex(const parser::OpenACCStandaloneConstruct &);
+  const parser::Name &GetLoopIndex(const parser::DoConstruct &);
+  const parser::DoConstruct *GetDoConstructIf(
+      const parser::ExecutionPartConstruct &);
   void ResolveAccObjectList(const parser::AccObjectList &, Symbol::Flag);
   void ResolveAccObject(const parser::AccObject &, Symbol::Flag);
   Symbol *ResolveAcc(const parser::Name &, Symbol::Flag, Scope &);
@@ -6446,6 +6450,36 @@ bool AccAttributeVisitor::Pre(const parser::OpenACCBlockConstruct &x) {
   return true;
 }
 
+bool AccAttributeVisitor::Pre(const parser::OpenACCStandaloneConstruct &x) {
+  const auto &beginDir{std::get<parser::AccStandaloneDirective>(x.t)};
+  switch (beginDir.v) {
+  case parser::AccStandaloneDirective::Directive::Cache:
+    PushContext(beginDir.source, AccDirective::CACHE);
+    break;
+  case parser::AccStandaloneDirective::Directive::EnterData:
+    PushContext(beginDir.source, AccDirective::ENTER_DATA);
+    break;
+  case parser::AccStandaloneDirective::Directive::ExitData:
+    PushContext(beginDir.source, AccDirective::EXIT_DATA);
+    break;
+  case parser::AccStandaloneDirective::Directive::Init:
+    PushContext(beginDir.source, AccDirective::INIT);
+    break;
+  case parser::AccStandaloneDirective::Directive::Loop:  
+    PushContext(beginDir.source, AccDirective::LOOP);
+    break;
+  case parser::AccStandaloneDirective::Directive::Set:
+    PushContext(beginDir.source, AccDirective::SET);
+    break;    
+  default:
+    // TODO others
+    break;
+  }
+  ClearDataSharingAttributeObjects();
+  return true;
+}
+
+
 bool AccAttributeVisitor::Pre(const parser::OpenACCCombinedConstruct &x) {
   const auto &beginBlockDir{std::get<parser::AccBeginCombinedDirective>(x.t)};
   const auto &beginDir{std::get<parser::AccCombinedDirective>(beginBlockDir.t)};
@@ -6465,6 +6499,53 @@ bool AccAttributeVisitor::Pre(const parser::OpenACCCombinedConstruct &x) {
   }
   ClearDataSharingAttributeObjects();
   return true;
+}
+
+const parser::Name &AccAttributeVisitor::GetLoopIndex(
+    const parser::DoConstruct &x) {
+  auto &loopControl{x.GetLoopControl().value()};
+  using Bounds = parser::LoopControl::Bounds;
+  const Bounds &bounds{std::get<Bounds>(loopControl.u)};
+  return bounds.name.thing;
+}
+
+const parser::DoConstruct *AccAttributeVisitor::GetDoConstructIf(
+    const parser::ExecutionPartConstruct &x) {
+  if (auto *y{std::get_if<parser::ExecutableConstruct>(&x.u)}) {
+    if (auto *z{std::get_if<Indirection<parser::DoConstruct>>(&y->u)}) {
+      return &z->value();
+    }
+  }
+  return nullptr;
+}
+
+void AccAttributeVisitor::PrivatizeAssociatedLoopIndex(
+    const parser::OpenACCStandaloneConstruct &x) {
+  std::size_t level{GetContext().associatedLoopLevel};
+  // Symbol::Flag ivDSA{Symbol::Flag::AccPrivate};
+  // if (simdSet.test(GetContext().directive)) {
+  //   if (level == 1) {
+  //     ivDSA = Symbol::Flag::OmpLinear;
+  //   } else {
+  //     ivDSA = Symbol::Flag::OmpLastPrivate;
+  //   }
+  // }
+
+  // auto &outer{std::get<std::optional<parser::DoConstruct>>(x.t)};
+  // for (const parser::DoConstruct *loop{&*outer}; loop && level > 0; --level) {
+  //   // go through all the nested do-loops and resolve index variables
+  //   const parser::Name &iv{GetLoopIndex(*loop)};
+  //   if (auto *symbol{ResolveAcc(iv, ivDSA, currScope())}) {
+  //     symbol->set(Symbol::Flag::OmpPreDetermined);
+  //     iv.symbol = symbol; // adjust the symbol within region
+  //     AddToContextObjectWithDSA(*symbol, ivDSA);
+  //   }
+
+  //   const auto &block{std::get<parser::Block>(loop->t)};
+  //   const auto it{block.begin()};
+  //   loop = it != block.end() ? GetDoConstructIf(*it) : nullptr;
+  // }
+  CHECK(level == 0);
 }
 
 void AccAttributeVisitor::Post(const parser::AccDefaultClause &x) {
@@ -6533,61 +6614,61 @@ void AccAttributeVisitor::ResolveAccObjectList(
 
 void AccAttributeVisitor::ResolveAccObject(
     const parser::AccObject &accObject, Symbol::Flag accFlag) {
-    std::visit(
-      common::visitors{
-          [&](const parser::Designator &designator) {
-            if (const auto *name{GetDesignatorNameIfDataRef(designator)}) {
-              if (auto *symbol{ResolveAcc(*name, accFlag, currScope())}) {
-                AddToContextObjectWithDSA(*symbol, accFlag);
-                if (dataSharingAttributeFlags.test(accFlag)) {
-                  CheckMultipleAppearances(*name, *symbol, accFlag);
-                }
-              }
-            } else if (const auto *designatorName{
-                           resolver_.ResolveDesignator(designator)};
-                       designatorName->symbol) {
-              // Array sections to be changed to substrings as needed
-              if (AnalyzeExpr(context_, designator)) {
-                if (std::holds_alternative<parser::Substring>(designator.u)) {
-                  context_.Say(designator.source,
-                      "Substrings are not allowed on OpenACC "
-                      "directives or clauses"_err_en_US);
-                }
-              }
-              // other checks, more TBD
-              if (const auto *details{designatorName->symbol
-                                          ->detailsIf<ObjectEntityDetails>()}) {
-                if (details->IsArray()) {
-                  // TODO: check Array Sections
-                } else if (designatorName->symbol->owner().IsDerivedType()) {
-                  // TODO: check Structure Component
-                }
+std::visit(
+    common::visitors{
+        [&](const parser::Designator &designator) {
+          if (const auto *name{GetDesignatorNameIfDataRef(designator)}) {
+            if (auto *symbol{ResolveAcc(*name, accFlag, currScope())}) {
+              AddToContextObjectWithDSA(*symbol, accFlag);
+              if (dataSharingAttributeFlags.test(accFlag)) {
+                CheckMultipleAppearances(*name, *symbol, accFlag);
               }
             }
-          },
-          [&](const parser::Name &name) {  // common block
-            if (auto *symbol{ResolveAccCommonBlockName(&name)}) {
-              CheckMultipleAppearances(
-                  name, *symbol, Symbol::Flag::AccCommonBlock);
-              // 2.15.3 When a named common block appears in a list, it has the
-              // same meaning as if every explicit member of the common block
-              // appeared in the list
-              for (const Symbol &object :
-                  symbol->get<CommonBlockDetails>().objects()) {
-                Symbol &mutableObject{const_cast<Symbol &>(object)};
-                if (auto *resolvedObject{
-                        ResolveAcc(mutableObject, accFlag, currScope())}) {
-                  AddToContextObjectWithDSA(*resolvedObject, accFlag);
-                }
+          } else if (const auto *designatorName{
+              resolver_.ResolveDesignator(designator)};
+              designatorName->symbol) {
+            // Array sections to be changed to substrings as needed
+            if (AnalyzeExpr(context_, designator)) {
+              if (std::holds_alternative<parser::Substring>(designator.u)) {
+                context_.Say(designator.source,
+                    "Substrings are not allowed on OpenACC "
+                    "directives or clauses"_err_en_US);
               }
-            } else {
-              context_.Say(name.source,  // 2.15.3
-                  "COMMON block must be declared in the same scoping unit "
-                  "in which the OpenACC directive or clause appears"_err_en_US);
             }
-          },
-      },
-      accObject.u);
+            // other checks, more TBD
+            if (const auto *details{designatorName->symbol
+                ->detailsIf<ObjectEntityDetails>()}) {
+              if (details->IsArray()) {
+                // TODO: check Array Sections
+              } else if (designatorName->symbol->owner().IsDerivedType()) {
+                // TODO: check Structure Component
+              }
+            }
+          }
+        },
+        [&](const parser::Name &name) {  // common block
+          if (auto *symbol{ResolveAccCommonBlockName(&name)}) {
+            CheckMultipleAppearances(
+                name, *symbol, Symbol::Flag::AccCommonBlock);
+            // 2.15.3 When a named common block appears in a list, it has the
+            // same meaning as if every explicit member of the common block
+            // appeared in the list
+            for (const Symbol &object :
+                symbol->get<CommonBlockDetails>().objects()) {
+              Symbol &mutableObject{const_cast<Symbol &>(object)};
+              if (auto *resolvedObject{
+                  ResolveAcc(mutableObject, accFlag, currScope())}) {
+                AddToContextObjectWithDSA(*resolvedObject, accFlag);
+              }
+            }
+          } else {
+            context_.Say(name.source,  // 2.15.3
+                "COMMON block must be declared in the same scoping unit "
+                "in which the OpenACC directive or clause appears"_err_en_US);
+          }
+        },
+    },
+    accObject.u);
 }
 
 Symbol *AccAttributeVisitor::ResolveAcc(
