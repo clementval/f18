@@ -8,6 +8,7 @@ add_library(FortranSemantics
   check-allocate.cpp
   check-arithmeticif.cpp
   check-call.cpp
+  check-case.cpp
   check-coarray.cpp
   check-data.cpp
   check-deallocate.cpp
