@@ -3,6 +3,7 @@ add_library(FortranSemantics
   assignment.cpp
   attr.cpp
   canonicalize-do.cpp
+  canonicalize-acc.cpp
   canonicalize-omp.cpp
   check-acc-structure.cpp
   check-allocate.cpp

@@ -1118,6 +1118,8 @@ public:
     GetContext().withinConstruct = true;
   }
 
+  bool Pre(const parser::OpenACCLoopConstruct &);
+  void Post(const parser::OpenACCLoopConstruct &) { PopContext(); }
   bool Pre(const parser::OpenACCStandaloneConstruct &);
   void Post(const parser::OpenACCStandaloneConstruct &) { PopContext(); }
   void Post(const parser::AccStandaloneDirective &) {
@@ -1225,8 +1227,7 @@ private:
   }
 
   bool HasDataSharingAttributeObject(const Symbol &);
-
-  void PrivatizeAssociatedLoopIndex(const parser::OpenACCStandaloneConstruct &);
+  void PrivatizeAssociatedLoopIndex(const parser::OpenACCLoopConstruct &);
   const parser::Name &GetLoopIndex(const parser::DoConstruct &);
   const parser::DoConstruct *GetDoConstructIf(
       const parser::ExecutionPartConstruct &);
@@ -6442,6 +6443,24 @@ bool AccAttributeVisitor::Pre(const parser::OpenACCBlockConstruct &x) {
   return true;
 }
 
+bool AccAttributeVisitor::Pre(const parser::OpenACCLoopConstruct &x) {
+  const auto &beginDir{std::get<parser::AccBeginLoopDirective>(x.t)};
+  const auto &dir{std::get<parser::AccLoopDirective>(beginDir.t)};
+  const auto &clauseList{std::get<parser::AccClauseList>(beginDir.t)};
+  switch (dir.v) {
+  case parser::AccLoopDirective::Directive::Loop:
+    PushContext(beginDir.source, AccDirective::LOOP);
+    break;
+  default:
+    // TODO others
+    break;
+  }
+  ClearDataSharingAttributeObjects();
+  SetContextAssociatedLoopLevel(GetAssociatedLoopLevelFromClauses(clauseList));
+  PrivatizeAssociatedLoopIndex(x);
+  return true;
+}
+
 bool AccAttributeVisitor::Pre(const parser::OpenACCStandaloneConstruct &x) {
   const auto &beginDir{std::get<parser::AccStandaloneDirective>(x.t)};
   switch (beginDir.v) {
@@ -6456,9 +6475,6 @@ bool AccAttributeVisitor::Pre(const parser::OpenACCStandaloneConstruct &x) {
     break;
   case parser::AccStandaloneDirective::Directive::Init:
     PushContext(beginDir.source, AccDirective::INIT);
-    break;
-  case parser::AccStandaloneDirective::Directive::Loop:  
-    PushContext(beginDir.source, AccDirective::LOOP);
     break;
   case parser::AccStandaloneDirective::Directive::Set:
     PushContext(beginDir.source, AccDirective::SET);
@@ -6511,10 +6527,29 @@ const parser::DoConstruct *AccAttributeVisitor::GetDoConstructIf(
   return nullptr;
 }
 
+std::size_t AccAttributeVisitor::GetAssociatedLoopLevelFromClauses(
+    const parser::AccClauseList &x) {
+  std::size_t collapseLevel{0};
+  for (const auto &clause : x.v) {
+    if (const auto *collapseClause{
+            std::get_if<parser::AccClause::Collapse>(&clause.u)}) {
+      if (const auto v{evaluate::ToInt64(
+              resolver_.EvaluateIntExpr(collapseClause->v))}) {
+        collapseLevel = *v;
+      }
+    }
+  }
+
+  if(collapseLevel) {
+    return collapseLevel;
+  }
+  return 1; // default is outermost loop
+}
+
 void AccAttributeVisitor::PrivatizeAssociatedLoopIndex(
-    const parser::OpenACCStandaloneConstruct &x) {
+    const parser::OpenACCLoopConstruct &x) {
   std::size_t level{GetContext().associatedLoopLevel};
-  // Symbol::Flag ivDSA{Symbol::Flag::AccPrivate};
+  Symbol::Flag ivDSA{Symbol::Flag::AccPrivate};
   // if (simdSet.test(GetContext().directive)) {
   //   if (level == 1) {
   //     ivDSA = Symbol::Flag::OmpLinear;
@@ -6523,20 +6558,20 @@ void AccAttributeVisitor::PrivatizeAssociatedLoopIndex(
   //   }
   // }
 
-  // auto &outer{std::get<std::optional<parser::DoConstruct>>(x.t)};
-  // for (const parser::DoConstruct *loop{&*outer}; loop && level > 0; --level) {
-  //   // go through all the nested do-loops and resolve index variables
-  //   const parser::Name &iv{GetLoopIndex(*loop)};
-  //   if (auto *symbol{ResolveAcc(iv, ivDSA, currScope())}) {
-  //     symbol->set(Symbol::Flag::OmpPreDetermined);
-  //     iv.symbol = symbol; // adjust the symbol within region
-  //     AddToContextObjectWithDSA(*symbol, ivDSA);
-  //   }
+  auto &outer{std::get<std::optional<parser::DoConstruct>>(x.t)};
+  for (const parser::DoConstruct *loop{&*outer}; loop && level > 0; --level) {
+    // go through all the nested do-loops and resolve index variables
+    const parser::Name &iv{GetLoopIndex(*loop)};
+    if (auto *symbol{ResolveAcc(iv, ivDSA, currScope())}) {
+      symbol->set(Symbol::Flag::AccPreDetermined);
+      iv.symbol = symbol; // adjust the symbol within region
+      AddToContextObjectWithDSA(*symbol, ivDSA);
+    }
 
-  //   const auto &block{std::get<parser::Block>(loop->t)};
-  //   const auto it{block.begin()};
-  //   loop = it != block.end() ? GetDoConstructIf(*it) : nullptr;
-  // }
+    const auto &block{std::get<parser::Block>(loop->t)};
+    const auto it{block.begin()};
+    loop = it != block.end() ? GetDoConstructIf(*it) : nullptr;
+  }
   CHECK(level == 0);
 }
 

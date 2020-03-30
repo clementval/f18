@@ -246,6 +246,35 @@ std::string AccStructureChecker::ContextDirectiveAsFortran() {
   return dir;
 }
 
+void AccStructureChecker::Enter(const parser::OpenACCLoopConstruct &x) {
+  const auto &beginDir{std::get<parser::AccBeginLoopDirective>(x.t)};
+  const auto &dir{std::get<parser::AccLoopDirective>(beginDir.t)};
+  switch (dir.v) {
+    case parser::AccLoopDirective::Directive::Loop: {
+      PushContextAndClause(dir.source, AccDirective::LOOP);
+    } break;
+  }
+}
+
+void AccStructureChecker::Leave(const parser::OpenACCLoopConstruct &x) {
+  const auto &beginDir{std::get<parser::AccBeginLoopDirective>(x.t)};
+  const auto &dir{std::get<parser::AccLoopDirective>(beginDir.t)};
+  switch (dir.v) {
+    case parser::AccLoopDirective::Directive::Loop: {
+      // Restriction - 1615-1616
+      CheckOnlyAllowedAfter(AccClause::DEVICE_TYPE,
+          loopOnlyAllowedAfterDeviceTypeClauses);
+      // Restriction - 1622
+      CheckNotAllowedIfClause(AccClause::SEQ, {AccClause::GANG,
+          AccClause::VECTOR, AccClause::WORKER});
+    } break;
+    default: {}
+      break;
+  }
+  accContext_.pop_back();
+}
+
+
 void AccStructureChecker::Enter(const parser::OpenACCStandaloneConstruct &x) {
   const auto &dir{std::get<parser::AccStandaloneDirective>(x.t)};
   switch (dir.v) {
@@ -254,9 +283,6 @@ void AccStructureChecker::Enter(const parser::OpenACCStandaloneConstruct &x) {
     } break;
     case parser::AccStandaloneDirective::Directive::Cache: {
       PushContextAndClause(dir.source, AccDirective::CACHE);
-    } break;
-    case parser::AccStandaloneDirective::Directive::Loop: {
-      PushContextAndClause(dir.source, AccDirective::LOOP);
     } break;
     case parser::AccStandaloneDirective::Directive::EnterData: {
       PushContextAndClause(dir.source, AccDirective::ENTER_DATA);
@@ -286,14 +312,6 @@ void AccStructureChecker::Leave(const parser::OpenACCStandaloneConstruct &x) {
       // Restriction - 1161-1162 (EXIT DATA)
       // Restriction - 2254 (SET)
       CheckRequireAtLeastOneOf();
-    } break;
-    case parser::AccStandaloneDirective::Directive::Loop: {
-      // Restriction - 1615-1616
-      CheckOnlyAllowedAfter(AccClause::DEVICE_TYPE,
-          loopOnlyAllowedAfterDeviceTypeClauses);
-      // Restriction - 1622
-      CheckNotAllowedIfClause(AccClause::SEQ, {AccClause::GANG,
-          AccClause::VECTOR, AccClause::WORKER});
     } break;
     case parser::AccStandaloneDirective::Directive::Update: {
       // Restriction - 2301

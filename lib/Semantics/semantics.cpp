@@ -9,6 +9,7 @@
 #include "flang/Semantics/semantics.h"
 #include "assignment.h"
 #include "canonicalize-do.h"
+#include "canonicalize-acc.h"
 #include "canonicalize-omp.h"
 #include "check-acc-structure.h"
 #include "check-allocate.h"
@@ -294,6 +295,7 @@ bool Semantics::Perform() {
   return ValidateLabels(context_, program_) &&
       parser::CanonicalizeDo(program_) && // force line break
       CanonicalizeOmp(context_.messages(), program_) &&
+      CanonicalizeAcc(context_.messages(), program_) &&
       PerformStatementSemantics(context_, program_) &&
       ModFileWriter{context_}.WriteAll();
 }

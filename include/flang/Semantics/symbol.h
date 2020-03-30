@@ -480,7 +480,7 @@ public:
       // OpenACC data-sharing attribute
       AccPresent, AccPrivate, AccFirstPrivate, AccShared,
       // OpenACC miscellaneous flags
-      AccCommonBlock, AccThreadPrivate, AccReduction, AccNone,
+      AccCommonBlock, AccThreadPrivate, AccReduction, AccNone, AccPreDetermined,
 
 
       // OpenMP data-sharing attribute

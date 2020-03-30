@@ -3808,8 +3808,14 @@ struct AccBlockDirective {
   CharBlock source;
 };
 
+struct AccLoopDirective {
+  ENUM_CLASS(Directive, Loop);
+  WRAPPER_CLASS_BOILERPLATE(AccLoopDirective, Directive);
+  CharBlock source;
+};
+
 struct AccStandaloneDirective {
-  ENUM_CLASS(Directive, Cache, EnterData, ExitData, Init, Loop, Set,
+  ENUM_CLASS(Directive, Cache, EnterData, ExitData, Init, Set,
              Shutdown, Update);
   WRAPPER_CLASS_BOILERPLATE(AccStandaloneDirective, Directive);
   CharBlock source;
@@ -3959,6 +3965,12 @@ struct OpenACCWaitConstruct {
   std::tuple<Verbatim, std::optional<AccWaitArgument>, AccClauseList> t;
 };
 
+struct AccBeginLoopDirective {
+  TUPLE_CLASS_BOILERPLATE(AccBeginLoopDirective);
+  std::tuple<AccLoopDirective, AccClauseList> t;
+  CharBlock source;
+};
+
 struct AccBeginBlockDirective {
   TUPLE_CLASS_BOILERPLATE(AccBeginBlockDirective);
   CharBlock source;
@@ -4042,6 +4054,14 @@ struct OpenACCDeclarativeConstruct {
   std::variant<OpenACCStandaloneDeclarativeConstruct> u;
 };
 
+// OpenACC directives enclosing do loop
+struct OpenACCLoopConstruct {
+  TUPLE_CLASS_BOILERPLATE(OpenACCLoopConstruct);
+  OpenACCLoopConstruct(AccBeginLoopDirective &&a) 
+      : t({std::move(a), std::nullopt}) {}
+  std::tuple<AccBeginLoopDirective, std::optional<DoConstruct>> t;
+};
+
 struct OpenACCStandaloneConstruct {
   TUPLE_CLASS_BOILERPLATE(OpenACCStandaloneConstruct);
   CharBlock source;
@@ -4051,8 +4071,8 @@ struct OpenACCStandaloneConstruct {
 struct OpenACCConstruct {
   UNION_CLASS_BOILERPLATE(OpenACCConstruct);
   std::variant<OpenACCBlockConstruct, OpenACCCombinedConstruct,
-      OpenACCStandaloneConstruct, OpenACCRoutineConstruct,
-      OpenACCCacheConstruct, OpenACCWaitConstruct,
+      OpenACCLoopConstruct, OpenACCStandaloneConstruct, 
+      OpenACCRoutineConstruct, OpenACCCacheConstruct, OpenACCWaitConstruct,
       OpenACCAtomicConstruct> u;
 };
 

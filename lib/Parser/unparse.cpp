@@ -2053,6 +2053,23 @@ public:
     Put("\n");
     EndOpenACC();
   }
+  void Unparse(const OpenACCLoopConstruct &x) {
+    BeginOpenACC();
+    Word("!$ACC ");
+    Walk(std::get<AccBeginLoopDirective>(x.t));
+    Put("\n");
+    EndOpenACC();
+    Walk(std::get<std::optional<DoConstruct>>(x.t));
+  }
+  void Unparse(const AccBeginLoopDirective &x) {
+    Walk(std::get<AccLoopDirective>(x.t));
+    Walk(std::get<AccClauseList>(x.t));
+  }
+  void Unparse(const AccLoopDirective &x) {
+    switch (x.v) {
+      case AccLoopDirective::Directive::Loop: Word("LOOP"); break;
+    }
+  }
   void Unparse(const OpenACCStandaloneConstruct &x) {
     BeginOpenACC();
     Word("!$ACC ");
@@ -2076,7 +2093,6 @@ public:
         Word("ENTER DATA"); break;
       case AccStandaloneDirective::Directive::ExitData: Word("EXIT DATA"); break;
       case AccStandaloneDirective::Directive::Init: Word("INIT"); break;
-      case AccStandaloneDirective::Directive::Loop: Word("LOOP"); break;
       case AccStandaloneDirective::Directive::Set: Word("SET"); break;
       case AccStandaloneDirective::Directive::Shutdown: Word("SHUTDOWN"); break;
       case AccStandaloneDirective::Directive::Update: Word("UPDATE"); break;

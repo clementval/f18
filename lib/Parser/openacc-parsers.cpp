@@ -191,15 +191,25 @@ TYPE_PARSER(construct<AccBlockDirective>(first(
     "PARALLEL" >> pure(AccBlockDirective::Directive::Parallel),
     "SERIAL" >> pure(AccBlockDirective::Directive::Serial))))
 
+
 // Standalone directives
 TYPE_PARSER(construct<AccStandaloneDirective>(first(
     "ENTER DATA" >> pure(AccStandaloneDirective::Directive::EnterData),
     "EXIT DATA" >> pure(AccStandaloneDirective::Directive::ExitData),
     "INIT" >> pure(AccStandaloneDirective::Directive::Init),
-    "LOOP" >> pure(AccStandaloneDirective::Directive::Loop),
     "SHUTDOWN" >> pure(AccStandaloneDirective::Directive::Shutdown),
     "SET" >> pure(AccStandaloneDirective::Directive::Set),
     "UPDATE" >> pure(AccStandaloneDirective::Directive::Update))))
+
+// Loop directives
+TYPE_PARSER(construct<AccLoopDirective>(first(
+   "LOOP" >> pure(AccLoopDirective::Directive::Loop))))
+
+TYPE_PARSER(construct<AccBeginLoopDirective>(
+    sourced(Parser<AccLoopDirective>{}), Parser<AccClauseList>{}))
+
+TYPE_PARSER(construct<OpenACCLoopConstruct>(
+    sourced(Parser<AccBeginLoopDirective>{})))
 
 // 2.15.1 Routine directive
 TYPE_PARSER(sourced(construct<OpenACCRoutineConstruct>(verbatim("ROUTINE"_tok),
@@ -286,6 +296,7 @@ TYPE_PARSER(startAccLine >> sourced(construct<OpenACCDeclarativeConstruct>(
 TYPE_CONTEXT_PARSER("OpenACC construct"_en_US, startAccLine >>
     first(construct<OpenACCConstruct>(Parser<OpenACCBlockConstruct>{}),
         construct<OpenACCConstruct>(Parser<OpenACCCombinedConstruct>{}),
+        construct<OpenACCConstruct>(Parser<OpenACCLoopConstruct>{}),
         construct<OpenACCConstruct>(Parser<OpenACCStandaloneConstruct>{}),
         construct<OpenACCConstruct>(Parser<OpenACCRoutineConstruct>{}),
         construct<OpenACCConstruct>(Parser<OpenACCCacheConstruct>{}),

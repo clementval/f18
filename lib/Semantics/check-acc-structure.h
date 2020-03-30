@@ -55,6 +55,8 @@ public:
   void Enter(const parser::OpenACCCombinedConstruct &);
   void Leave(const parser::OpenACCCombinedConstruct &);
   void Enter(const parser::OpenACCDeclarativeConstruct &);
+  void Enter(const parser::OpenACCLoopConstruct &);
+  void Leave(const parser::OpenACCLoopConstruct &);
   void Enter(const parser::OpenACCRoutineConstruct &);
   void Leave(const parser::OpenACCRoutineConstruct &);
   void Enter(const parser::OpenACCStandaloneConstruct &);
