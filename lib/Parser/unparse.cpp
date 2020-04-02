@@ -2034,12 +2034,10 @@ public:
     }
   }
   void Unparse(const AccClauseList &x) { Walk(" ", x.v, " "); }
-
-  //void Unparse(const AccGangArgument &x) {
-    // TODO
-//    Walk("NUM:", std::get<std::optional<ScalarIntExpr>>(x.t));
-//    Walk(", STATIC:", std::get<std::optional<AccSizeExpr>>(x.t));
-  //}
+  void Unparse(const AccGangArgument &x) {
+   Walk("NUM:", std::get<std::optional<ScalarIntExpr>>(x.t));
+   Walk(", STATIC:", std::get<std::optional<AccSizeExpr>>(x.t));
+  }
   void Unparse(const OpenACCBlockConstruct &x) {
     BeginOpenACC();
     Word("!$ACC ");

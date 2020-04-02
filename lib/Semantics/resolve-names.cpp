@@ -1119,7 +1119,13 @@ public:
   }
 
   bool Pre(const parser::OpenACCLoopConstruct &);
-  void Post(const parser::OpenACCLoopConstruct &) { PopContext(); }
+  void Post(const parser::OpenACCLoopConstruct &) { 
+    PopContext();
+  }
+  void Post(const parser::AccLoopDirective &) {
+    GetContext().withinConstruct = true;
+  }
+
   bool Pre(const parser::OpenACCStandaloneConstruct &);
   void Post(const parser::OpenACCStandaloneConstruct &) { PopContext(); }
   void Post(const parser::AccStandaloneDirective &) {
@@ -1160,7 +1166,7 @@ private:
     Symbol::Flag defaultDSA{Symbol::Flag::AccShared};
     std::map<const Symbol *, Symbol::Flag> objectWithDSA;
     bool withinConstruct{false};  
-    std::size_t associatedLoopLevel{0};
+    int64_t associatedLoopLevel{0};
   };
   // back() is the top of the stack
   AccContext &GetContext() {
@@ -1192,10 +1198,10 @@ private:
     auto it{GetContext().objectWithDSA.find(&symbol)};
     return it != GetContext().objectWithDSA.end();
   }
-  void SetContextAssociatedLoopLevel(std::size_t level) {
+  void SetContextAssociatedLoopLevel(int64_t level) {
     GetContext().associatedLoopLevel = level;
   }
-  std::size_t GetAssociatedLoopLevelFromClauses(const parser::AccClauseList &);
+  int64_t GetAssociatedLoopLevelFromClauses(const parser::AccClauseList &);
 
   Symbol &MakeAssocSymbol(const SourceName &name, Symbol &prev, Scope &scope) {
     const auto pair{scope.try_emplace(name, Attrs{}, HostAssocDetails{prev})};
@@ -6478,7 +6484,13 @@ bool AccAttributeVisitor::Pre(const parser::OpenACCStandaloneConstruct &x) {
     break;
   case parser::AccStandaloneDirective::Directive::Set:
     PushContext(beginDir.source, AccDirective::SET);
-    break;    
+    break;
+  case parser::AccStandaloneDirective::Directive::Shutdown:
+    PushContext(beginDir.source, AccDirective::SHUTDOWN);
+    break;
+  case parser::AccStandaloneDirective::Directive::Update:
+    PushContext(beginDir.source, AccDirective::UPDATE);
+    break;
   default:
     // TODO others
     break;
@@ -6527,9 +6539,9 @@ const parser::DoConstruct *AccAttributeVisitor::GetDoConstructIf(
   return nullptr;
 }
 
-std::size_t AccAttributeVisitor::GetAssociatedLoopLevelFromClauses(
+int64_t AccAttributeVisitor::GetAssociatedLoopLevelFromClauses(
     const parser::AccClauseList &x) {
-  std::size_t collapseLevel{0};
+  int64_t collapseLevel{0};
   for (const auto &clause : x.v) {
     if (const auto *collapseClause{
             std::get_if<parser::AccClause::Collapse>(&clause.u)}) {
@@ -6548,15 +6560,12 @@ std::size_t AccAttributeVisitor::GetAssociatedLoopLevelFromClauses(
 
 void AccAttributeVisitor::PrivatizeAssociatedLoopIndex(
     const parser::OpenACCLoopConstruct &x) {
-  std::size_t level{GetContext().associatedLoopLevel};
+  int64_t level{GetContext().associatedLoopLevel};
+  if(level <= 0) { // collpase value was negative or 0
+    return;
+  }
   Symbol::Flag ivDSA{Symbol::Flag::AccPrivate};
-  // if (simdSet.test(GetContext().directive)) {
-  //   if (level == 1) {
-  //     ivDSA = Symbol::Flag::OmpLinear;
-  //   } else {
-  //     ivDSA = Symbol::Flag::OmpLastPrivate;
-  //   }
-  // }
+
 
   auto &outer{std::get<std::optional<parser::DoConstruct>>(x.t)};
   for (const parser::DoConstruct *loop{&*outer}; loop && level > 0; --level) {

@@ -1,4 +1,4 @@
-! RUN: %S/test_errors.sh %s %flang %t
+! RUN: %B/test/Semantics/test_errors.sh %s %flang %t
 ! OPTIONS: -fopenacc
 
 ! Check OpenACC clause validity for the following construct and directive:
@@ -56,13 +56,15 @@ program openacc_clause_validity
   !$acc end data
 
   !$acc data copyin(i)
-  !ERROR: Unmatched END PARALLEL directive
-  !$acc end parallel
+  !$acc end data
+  
+  !!ERROR: Unmatched END PARALLEL directive
+  !!$acc end parallel
 
-  !$acc update device(i) device_type(*) async
+  !acc update device(i) device_type(*) async
 
-  !ERROR: Clause IF is not allowed after clause DEVICE_TYPE on the UPDATE directive
-  !$acc update device(i) device_type(*) if(.TRUE.)
+  !!ERROR: Clause IF is not allowed after clause DEVICE_TYPE on the UPDATE directive
+  !!$acc update device(i) device_type(*) if(.TRUE.)
 
   !$acc parallel
   !ERROR: INDEPENDENT and SEQ clauses are mutually exclusive and may not appear on the same LOOP directive
