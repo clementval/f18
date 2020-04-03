@@ -1134,6 +1134,12 @@ public:
   
   void Post(const parser::AccDefaultClause &);
 
+  bool Pre(const parser::AccClause::Copy &x) {
+    ResolveAccObjectList(x.v, Symbol::Flag::AccCopyIn);
+    ResolveAccObjectList(x.v, Symbol::Flag::AccCopyOut);
+    return false;
+  }
+
   bool Pre(const parser::AccClause::Create &x) {
     const auto &objectList{std::get<parser::AccObjectList>(x.v.t)};
     ResolveAccObjectList(objectList, Symbol::Flag::AccCreate);
@@ -1231,11 +1237,18 @@ private:
   static constexpr Symbol::Flags dataSharingAttributeFlags{
     Symbol::Flag::AccShared, Symbol::Flag::AccPrivate, Symbol::Flag::AccPresent,
     Symbol::Flag::AccFirstPrivate, Symbol::Flag::AccReduction};
+
+  static constexpr Symbol::Flags dataMappingAttributeFlags{
+    Symbol::Flag::AccCreate, Symbol::Flag::AccCopyIn, Symbol::Flag::AccCopyOut,
+    Symbol::Flag::AccDelete};
+
   static constexpr Symbol::Flags accFlagsRequireNewSymbol{
       Symbol::Flag::AccPrivate, Symbol::Flag::AccFirstPrivate,
       Symbol::Flag::AccReduction};
+
   static constexpr Symbol::Flags accFlagsRequireMark{
       Symbol::Flag::AccThreadPrivate};
+
   void AddDataSharingAttributeObject(SymbolRef object) {
     dataSharingAttributeObjects_.insert(object);
   }
@@ -6695,6 +6708,9 @@ std::visit(
               AddToContextObjectWithDSA(*symbol, accFlag);
               if (dataSharingAttributeFlags.test(accFlag)) {
                 CheckMultipleAppearances(*name, *symbol, accFlag);
+              }
+              if(dataMappingAttributeFlags.test(accFlag)) {
+                printf("dataMappingAttr\n");
               }
             }
           } else if (const auto *designatorName{
