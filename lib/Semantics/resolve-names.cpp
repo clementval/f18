@@ -1131,15 +1131,26 @@ public:
   void Post(const parser::AccStandaloneDirective &) {
     GetContext().withinConstruct = true;
   }
-
-  // bool Pre(const parser::OpenMPSectionsConstruct &);
-  // void Post(const parser::OpenMPSectionsConstruct &) { PopContext(); }
-
-  // bool Pre(const parser::OpenMPThreadprivate &);
-  // void Post(const parser::OpenMPThreadprivate &) { PopContext(); }
-
   
   void Post(const parser::AccDefaultClause &);
+
+  bool Pre(const parser::AccClause::Create &x) {
+    const auto &objectList{std::get<parser::AccObjectList>(x.v.t)};
+    ResolveAccObjectList(objectList, Symbol::Flag::AccCreate);
+    return false;
+  }
+
+  bool Pre(const parser::AccClause::Copyin &x) {
+    const auto &objectList{std::get<parser::AccObjectList>(x.v.t)};
+    ResolveAccObjectList(objectList, Symbol::Flag::AccCopyIn);
+    return false;
+  }
+
+  bool Pre(const parser::AccClause::Copyout &x) {
+    const auto &objectList{std::get<parser::AccObjectList>(x.v.t)};
+    ResolveAccObjectList(objectList, Symbol::Flag::AccCopyOut);
+    return false;
+  }
 
   bool Pre(const parser::AccClause::Present &x) {
     ResolveAccObjectList(x.v, Symbol::Flag::AccPresent);
